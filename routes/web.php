@@ -13,6 +13,7 @@ use App\Http\Controllers\Users\AdminController;
 use App\Http\Controllers\Rooms\RoomTypeController;
 use App\Http\Controllers\Rooms\BedTypeController;
 use App\Http\Controllers\Reservations\ReservationController;
+use App\Http\Controllers\Rooms\RoomStatusController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -27,7 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
      * room routes
      * `/kamar`
      */
-    Route::get("/kamar/tambah", [RoomController::class, "create"])->name("room.create");
+    Route::get("kamar/tambah", [RoomController::class, "create"])->name("room.create");
     Route::resource("/kamar", RoomController::class)
         ->except(["create"])
         ->parameters(["kamar" => "id"])
@@ -40,6 +41,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             "destroy" => "room.destroy",
         ]);
 
+    /**
+     * room status routes
+     * `/status/kamar`
+     */
+    Route::resource("status/kamar", RoomStatusController::class)
+        ->except(["create", "store", "show", "destroy"])
+        ->parameters(["status/kamar" => "id"])
+        ->names([
+            "index" => "roomstatus.index",
+            "edit" => "roomstatus.edit",
+            "update" => "roomstatus.update",
+        ]);
+
     Route::prefix("tipe")->group(function () {
         /**
          * room type routes
@@ -47,12 +61,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
          */
         Route::get("kamar/tambah", [RoomTypeController::class, "create"])->name("roomtype.create");
         Route::resource("kamar", RoomTypeController::class)
-            ->except(["create"])
+            ->except(["create", "show"])
             ->parameters(["kamar" => "id"])
             ->names([
                 "index" => "roomtype.index",
                 "store" => "roomtype.store",
-                "show" => "roomtype.show",
                 "edit" => "roomtype.edit",
                 "update" => "roomtype.update",
                 "destroy" => "roomtype.destroy",
@@ -64,12 +77,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
          */
         Route::get("kasur/tambah", [BedTypeController::class, "create"])->name("bedtype.create");
         Route::resource("kasur", BedTypeController::class)
-            ->except(["create"])
+            ->except(["create", "show"])
             ->parameters(["kasur" => "id"])
             ->names([
                 "index" => "bedtype.index",
                 "store" => "bedtype.store",
-                "show" => "bedtype.show",
                 "edit" => "bedtype.edit",
                 "update" => "bedtype.update",
                 "destroy" => "bedtype.destroy",
@@ -81,12 +93,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
      */
     Route::get("user/tambah", [UserController::class, "create"])->name("user.create");
     Route::resource("user", UserController::class)
-        ->except(["create"])
+        ->except(["create", "show"])
         ->parameters(["user" => "id"])
         ->names([
             "index" => "user.index",
             "store" => "user.store",
-            "show" => "user.show",
             "edit" => "user.edit",
             "update" => "user.update",
             "destroy" => "user.destroy",
@@ -102,7 +113,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->names([
             "index" => "role.index",
             "store" => "role.store",
-            "show" => "role.show",
             "edit" => "role.edit",
             "update" => "role.update",
             "destroy" => "role.destroy",
@@ -113,12 +123,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
      */
     Route::get("manager/tambah", [ManagerController::class, "create"])->name("manager.create");
     Route::resource("manager", ManagerController::class)
-        ->except(["create"])
+        ->except(["create", "show"])
         ->parameters(["manager" => "id"])
         ->names([
             "index" => "manager.index",
             "store" => "manager.store",
-            "show" => "manager.show",
             "edit" => "manager.edit",
             "update" => "manager.update",
             "destroy" => "manager.destroy",
@@ -145,12 +154,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
      */
     Route::get("departemen/tambah", [DepartmentController::class, "create"])->name("department.create");
     Route::resource("departemen", DepartmentController::class)
-        ->except(["create"])
+        ->except(["create", "show"])
         ->parameters(["department" => "id"])
         ->names([
             "index" => "department.index",
             "store" => "department.store",
-            "show" => "department.show",
             "edit" => "department.edit",
             "update" => "department.update",
             "destroy" => "department.destroy",
@@ -177,12 +185,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
      */
     Route::get("admin/tambah", [AdminController::class, "create"])->name("admin.create");
     Route::resource("admin", AdminController::class)
-        ->except(["create"])
+        ->except(["create", "show"])
         ->parameters(["admin" => "id"])
         ->names([
             "index" => "admin.index",
             "store" => "admin.store",
-            "show" => "admin.show",
             "edit" => "admin.edit",
             "update" => "admin.update",
             "destroy" => "admin.destroy",

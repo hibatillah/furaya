@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\AdminRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Admin;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -17,6 +18,7 @@ class AdminController extends Controller
     public function index()
     {
         $admins = Admin::with('user')->orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('admin/index', [
             'admins' => $admins,
         ]);
@@ -35,26 +37,21 @@ class AdminController extends Controller
      */
     public function store(AdminRequest $request)
     {
-        Admin::create($request->validated());
+        $admin = Admin::create($request->validated());
+
+        Log::channel('project')->info('Admin created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'admins',
+            'record_id' => $admin->id,
+        ]);
+
         return redirect()->route('admin.index')->with('success', 'Admin berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $admin = Admin::with('user')->findOrFail($id);
-            return Inertia::render('admin/show', [
-                'admin' => $admin,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Admin tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -63,11 +60,12 @@ class AdminController extends Controller
     {
         try {
             $admin = Admin::with('user')->findOrFail($id);
+
             return Inertia::render('admin/edit', [
                 'admin' => $admin,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Admin tidak ditemukan');
+            return back()->with('warning', 'Admin tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +79,16 @@ class AdminController extends Controller
         try {
             $admin = Admin::findOrFail($id);
             $admin->update($request->validated());
-            return redirect()->route('admin.show', ['id' => $id])
-                ->with('success', 'Admin berhasil diperbarui');
+
+            Log::channel('project')->info('Admin updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'admins',
+                'record_id' => $admin->id,
+            ]);
+
+            return redirect()->route('admin.index')->with('success', 'Admin berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Admin tidak ditemukan');
+            return back()->with('warning', 'Admin tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,8 +101,16 @@ class AdminController extends Controller
     {
         try {
             $admin = Admin::findOrFail($id);
+
+            Log::channel('project')->info('Admin deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'admins',
+                'record_id' => $admin->id,
+            ]);
+
             $admin->delete();
-            return redirect()->back()->with('success', 'Admin berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Admin tidak ditemukan');
         } catch (\Exception $e) {

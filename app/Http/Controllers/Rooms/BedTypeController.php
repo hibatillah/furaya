@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Rooms;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rooms\BedTypeRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\BedType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class BedTypeController extends Controller
 {
@@ -17,6 +18,7 @@ class BedTypeController extends Controller
     public function index()
     {
         $bedTypes = BedType::orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('bedtype/index', [
             'bedTypes' => $bedTypes,
         ]);
@@ -35,26 +37,21 @@ class BedTypeController extends Controller
      */
     public function store(BedTypeRequest $request)
     {
-        BedType::create($request->validated());
-        return redirect()->route('bedtype.index')->with('success', 'Tipe tempat tidur berhasil ditambahkan');
+        $bedType = BedType::create($request->validated());
+
+        Log::channel('project')->info('BedType created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'bed_types',
+            'record_id' => $bedType->id,
+        ]);
+
+        return redirect()->route('bedtype.index')->with('success', 'Tipe kasur berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $bedType = BedType::findOrFail($id);
-            return Inertia::render('bedtype/show', [
-                'bedType' => $bedType,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Tipe tempat tidur tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -63,11 +60,12 @@ class BedTypeController extends Controller
     {
         try {
             $bedType = BedType::findOrFail($id);
+
             return Inertia::render('bedtype/edit', [
                 'bedType' => $bedType,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Tipe tempat tidur tidak ditemukan');
+            return back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +79,16 @@ class BedTypeController extends Controller
         try {
             $bedType = BedType::findOrFail($id);
             $bedType->update($request->validated());
-            return redirect()->route('bedtype.show', ['id' => $id])
-                ->with('success', 'Tipe tempat tidur berhasil diperbarui');
+
+            Log::channel('project')->info('BedType updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'bed_types',
+                'record_id' => $bedType->id,
+            ]);
+
+            return redirect()->route('bedtype.index')->with('success', 'Tipe kasur berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Tipe tempat tidur tidak ditemukan');
+            return back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,10 +101,18 @@ class BedTypeController extends Controller
     {
         try {
             $bedType = BedType::findOrFail($id);
+
+            Log::channel('project')->info('BedType deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'bed_types',
+                'record_id' => $bedType->id,
+            ]);
+
             $bedType->delete();
-            return redirect()->back()->with('success', 'Tipe tempat tidur berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            return redirect()->back()->with('warning', 'Tipe tempat tidur tidak ditemukan');
+            return redirect()->back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

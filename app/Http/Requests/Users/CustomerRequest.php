@@ -4,6 +4,7 @@ namespace App\Http\Requests\Users;
 
 use App\Enums\GenderEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
 
 class CustomerRequest extends FormRequest
@@ -13,7 +14,7 @@ class CustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,9 +24,11 @@ class CustomerRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = Request::route("id");
+
         return [
             "user_id" => ["required", "string", "exists:users,id"],
-            "nik_passport" => ["required", "string", "max:55"],
+            "nik_passport" => ["required", "string", "max:55", Rule::unique("customers", "nik_passport")->ignore($id)],
             "gender" => ["required", Rule::in(GenderEnum::getValues())],
             "birthdate" => ["required", "date"],
             "phone" => ["nullable", "string", "max:55"],

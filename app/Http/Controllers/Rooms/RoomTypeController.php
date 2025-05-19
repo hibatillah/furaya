@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Rooms;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Rooms\RoomTypeRequest;
 use Inertia\Inertia;
 use App\Models\RoomType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class RoomTypeController extends Controller
 {
@@ -16,6 +18,7 @@ class RoomTypeController extends Controller
     public function index()
     {
         $roomTypes = RoomType::orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('roomtype/index', [
             'roomTypes' => $roomTypes,
         ]);
@@ -32,28 +35,23 @@ class RoomTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RoomTypeRequest $request)
     {
-        RoomType::create($request->all());
+        $roomType = RoomType::create($request->validated());
+
+        Log::channel('project')->info('RoomType created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'room_types',
+            'record_id' => $roomType->id,
+        ]);
+
         return redirect()->route('roomtype.index')->with('success', 'Tipe kamar berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $roomType = RoomType::findOrFail($id);
-            return Inertia::render('roomtype/show', [
-                'roomType' => $roomType,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Tipe kamar tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -62,11 +60,12 @@ class RoomTypeController extends Controller
     {
         try {
             $roomType = RoomType::findOrFail($id);
+
             return Inertia::render('roomtype/edit', [
                 'roomType' => $roomType,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Tipe kamar tidak ditemukan');
+            return back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -75,15 +74,21 @@ class RoomTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(RoomTypeRequest $request, string $id)
     {
         try {
             $roomType = RoomType::findOrFail($id);
-            $roomType->update($request->all());
-            return redirect()->route('roomtype.show', ['id' => $id])
-                ->with('success', 'Tipe kamar berhasil diperbarui');
+            $roomType->update($request->validated());
+
+            Log::channel('project')->info('RoomType updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'room_types',
+                'record_id' => $roomType->id,
+            ]);
+
+            return redirect()->route('roomtype.index')->with('success', 'Tipe kamar berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Tipe kamar tidak ditemukan');
+            return back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -96,8 +101,16 @@ class RoomTypeController extends Controller
     {
         try {
             $roomType = RoomType::findOrFail($id);
+
+            Log::channel('project')->info('RoomType deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'room_types',
+                'record_id' => $roomType->id,
+            ]);
+
             $roomType->delete();
-            return redirect()->back()->with('success', 'Tipe kamar berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {

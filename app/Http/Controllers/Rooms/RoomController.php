@@ -9,10 +9,21 @@ use App\Models\BedType;
 use App\Models\Room;
 use App\Models\RoomType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class RoomController extends Controller
 {
+    protected $roomTypes;
+    protected $bedTypes;
+
+    public function __construct()
+    {
+        $this->roomTypes = RoomType::all();
+        $this->bedTypes = BedType::all();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -22,6 +33,8 @@ class RoomController extends Controller
 
         return Inertia::render("rooms/index", [
             "rooms" => $rooms,
+            "roomTypes" => $this->roomTypes,
+            "bedTypes" => $this->bedTypes,
         ]);
     }
 
@@ -30,13 +43,11 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $roomTypes = RoomType::all();
-        $bedTypes = BedType::all();
         $statusOptions = RoomStatusEnum::getValues();
 
         return Inertia::render("rooms/create", [
-            "roomTypes" => $roomTypes,
-            "bedTypes" => $bedTypes,
+            "roomTypes" => $this->roomTypes,
+            "bedTypes" => $this->bedTypes,
             "statusOptions" => $statusOptions,
         ]);
     }
@@ -46,7 +57,14 @@ class RoomController extends Controller
      */
     public function store(RoomRequest $request)
     {
-        Room::create($request->validated());
+        $room = Room::create($request->validated());
+
+        Log::channel("project")->info("Room created", [
+            "user_id" => Auth::user()->id,
+            "table" => "rooms",
+            "record_id" => $room->id,
+        ]);
+
         return redirect()->route("room.index")->with("success", "Kamar berhasil ditambahkan");
     }
 
@@ -62,15 +80,12 @@ class RoomController extends Controller
                 "room" => $room,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with("error", "Kamar tidak ditemukan");
+            return back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
             return back()->with("error", $e->getMessage());
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         try {
@@ -86,7 +101,7 @@ class RoomController extends Controller
                 "statusOptions" => $statusOptions,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with("error", "Kamar tidak ditemukan");
+            return back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
             return back()->with("error", $e->getMessage());
         }
@@ -101,10 +116,15 @@ class RoomController extends Controller
             $room = Room::findOrFail($id);
             $room->update($request->validated());
 
-            return redirect()->route("room.show", ["id" => $id])
-                ->with("success", "Kamar berhasil diperbarui");
+            Log::channel('project')->info('Room updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'rooms',
+                'record_id' => $room->id,
+            ]);
+
+            return redirect()->route("room.show", ["id" => $id])->with("success", "Kamar berhasil diperbarui");
         } catch (ModelNotFoundException $e) {
-            return back()->with("error", "Kamar tidak ditemukan");
+            return back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
             return back()->with("error", $e->getMessage());
         }
@@ -117,9 +137,16 @@ class RoomController extends Controller
     {
         try {
             $room = Room::findOrFail($id);
+
+            Log::channel('project')->info('Room deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'rooms',
+                'record_id' => $room->id,
+            ]);
+
             $room->delete();
 
-            return redirect()->back()->with("success", "Kamar berhasil dihapus.");
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {

@@ -7,6 +7,8 @@ use App\Http\Requests\Users\DepartmentRequest;
 use Inertia\Inertia;
 use App\Models\Department;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class DepartmentController extends Controller
 {
@@ -16,6 +18,7 @@ class DepartmentController extends Controller
     public function index()
     {
         $departments = Department::orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('department/index', [
             'departments' => $departments,
         ]);
@@ -34,26 +37,21 @@ class DepartmentController extends Controller
      */
     public function store(DepartmentRequest $request)
     {
-        Department::create($request->validated());
+        $department = Department::create($request->validated());
+
+        Log::channel('project')->info('Department created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'departments',
+            'record_id' => $department->id,
+        ]);
+
         return redirect()->route('department.index')->with('success', 'Departemen berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $department = Department::findOrFail($id);
-            return Inertia::render('department/show', [
-                'department' => $department,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Departemen tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -62,11 +60,12 @@ class DepartmentController extends Controller
     {
         try {
             $department = Department::findOrFail($id);
+
             return Inertia::render('department/edit', [
                 'department' => $department,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Departemen tidak ditemukan');
+            return back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -80,10 +79,16 @@ class DepartmentController extends Controller
         try {
             $department = Department::findOrFail($id);
             $department->update($request->validated());
-            return redirect()->route('department.show', ['id' => $id])
-                ->with('success', 'Departemen berhasil diperbarui');
+
+            Log::channel('project')->info('Department updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'departments',
+                'record_id' => $department->id,
+            ]);
+
+            return redirect()->route('department.index')->with('success', 'Departemen berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Departemen tidak ditemukan');
+            return back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -96,8 +101,16 @@ class DepartmentController extends Controller
     {
         try {
             $department = Department::findOrFail($id);
+
+            Log::channel('project')->info('Department deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'departments',
+                'record_id' => $department->id,
+            ]);
+
             $department->delete();
-            return redirect()->back()->with('success', 'Departemen berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {

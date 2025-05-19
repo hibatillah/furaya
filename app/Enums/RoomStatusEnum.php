@@ -2,44 +2,25 @@
 
 namespace App\Enums;
 
-enum RoomStatusEnum: string
+class RoomStatusEnum extends BaseEnum
 {
-    case READY = 'ready';
-    case BOOKED = 'booked';
-    case CLEANING = 'cleaning';
-    case MAINTENANCE = 'maintenance';
-    case BOOKED_CLEANING = 'booked cleaning';
-    case UNCLEAN = 'unclean';
-    case BLOCKED = 'blocked';
-    case UNRESERVED = 'unreserved';
+    public const READY = 'ready';
+    public const BOOKED = 'booked';
+    public const CLEANING = 'cleaning';
+    public const MAINTENANCE = 'maintenance';
+    public const BOOKED_CLEANING = 'booked cleaning';
+    public const UNCLEAN = 'unclean';
+    public const BLOCKED = 'blocked';
+    public const UNRESERVED = 'unreserved';
 
-    /**
-     * Get the label for each enum case.
-     *
-     * @return array<string>
-     */
-    public static function getLabels(): array
-    {
-        return array_map(fn($case) => $case->name, self::cases());
-    }
-
-    /**
-     * Get the status options for the room.
-     *
-     * @return array<string>
-     */
-    public static function getValues(): array
-    {
-        return array_map(fn($case) => $case->value, self::cases());
-    }
-
-    /**
-     * Get the status options for the room as key-value pairs.
-     *
-     * @return array<string, string>
-     */
-    public static function getPaired(): array
-    {
-        return array_combine(self::getLabels(), self::getValues());
-    }
+    protected static array $labels = [
+        'READY' => self::READY,
+        'BOOKED' => self::BOOKED,
+        'CLEANING' => self::CLEANING,
+        'MAINTENANCE' => self::MAINTENANCE,
+        'BOOKED_CLEANING' => self::BOOKED_CLEANING,
+        'UNCLEAN' => self::UNCLEAN,
+        'BLOCKED' => self::BLOCKED,
+        'UNRESERVED' => self::UNRESERVED,
+    ];
 }

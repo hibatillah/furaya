@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import AppLayoutTemplate from "@/layouts/app/app-sidebar-layout";
-import { type BreadcrumbItem } from "@/types";
+import { cn } from "@/lib/utils";
+import { FlashMessages, type BreadcrumbItem } from "@/types";
 import { usePage } from "@inertiajs/react";
 import { useEffect, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -8,16 +9,10 @@ import { toast } from "sonner";
 interface AppLayoutProps {
   children: ReactNode;
   breadcrumbs?: BreadcrumbItem[];
+  className?: string;
 }
 
-interface FlashMessages {
-  success?: string;
-  warning?: string;
-  error?: string;
-  [key: string]: any; // Allow extra keys if needed
-}
-
-export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
+export default ({ children, breadcrumbs, className, ...props }: AppLayoutProps) => {
   const { flash } = usePage<{ flash?: FlashMessages }>().props;
 
   useEffect(() => {
@@ -28,12 +23,13 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
         description: flash.error,
       });
     }
-  }, [flash?.success, flash?.error]);
+  }, [flash?.success, flash?.error, flash?.warning]);
 
   return (
     <>
       <AppLayoutTemplate
         breadcrumbs={breadcrumbs}
+        className={className}
         {...props}
       >
         {children}

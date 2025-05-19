@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\EmployeeRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
@@ -17,6 +18,7 @@ class EmployeeController extends Controller
     public function index()
     {
         $employees = Employee::with('user', 'department')->orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('employee/index', [
             'employees' => $employees,
         ]);
@@ -35,26 +37,21 @@ class EmployeeController extends Controller
      */
     public function store(EmployeeRequest $request)
     {
-        Employee::create($request->validated());
+        $employee = Employee::create($request->validated());
+
+        Log::channel('project')->info('Employee created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'employees',
+            'record_id' => $employee->id,
+        ]);
+
         return redirect()->route('employee.index')->with('success', 'Karyawan berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $employee = Employee::with('user', 'department')->findOrFail($id);
-            return Inertia::render('employee/show', [
-                'employee' => $employee,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Karyawan tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -63,11 +60,12 @@ class EmployeeController extends Controller
     {
         try {
             $employee = Employee::with('user', 'department')->findOrFail($id);
+
             return Inertia::render('employee/edit', [
                 'employee' => $employee,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Karyawan tidak ditemukan');
+            return back()->with('warning', 'Karyawan tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +79,16 @@ class EmployeeController extends Controller
         try {
             $employee = Employee::findOrFail($id);
             $employee->update($request->validated());
-            return redirect()->route('employee.show', ['id' => $id])
-                ->with('success', 'Karyawan berhasil diperbarui');
+
+            Log::channel('project')->info('Employee updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'employees',
+                'record_id' => $employee->id,
+            ]);
+
+            return redirect()->route('employee.index')->with('success', 'Karyawan berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Karyawan tidak ditemukan');
+            return back()->with('warning', 'Karyawan tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,8 +101,16 @@ class EmployeeController extends Controller
     {
         try {
             $employee = Employee::findOrFail($id);
+
+            Log::channel('project')->info('Employee deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'employees',
+                'record_id' => $employee->id,
+            ]);
+
             $employee->delete();
-            return redirect()->back()->with('success', 'Karyawan berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Karyawan tidak ditemukan');
         } catch (\Exception $e) {

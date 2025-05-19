@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Reservations;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ReservationController extends Controller
 {
@@ -12,7 +13,7 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render("reservation/index");
     }
 
     /**

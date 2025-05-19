@@ -5,7 +5,6 @@ namespace App\Http\Requests\Rooms;
 use App\Enums\RoomStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
-// use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class RoomRequest extends FormRequest
@@ -28,7 +27,11 @@ class RoomRequest extends FormRequest
         $id = Request::route("id");
 
         return [
-            'room_number' => ['required', 'integer', Rule::unique("rooms", 'room_number')->ignore($id)],
+            'room_number' => [
+                'required',
+                'integer',
+                Rule::unique("rooms", 'room_number')->ignore($id)
+            ],
             'floor_number' => ['required', 'integer'],
             'status' => ['required', Rule::in(RoomStatusEnum::getValues())],
             'room_type_id' => ['required', 'exists:room_types,id'],

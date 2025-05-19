@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\RoleRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class RoleController extends Controller
 {
@@ -17,6 +18,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('users')->orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('role/index', [
             'roles' => $roles,
         ]);
@@ -35,26 +37,21 @@ class RoleController extends Controller
      */
     public function store(RoleRequest $request)
     {
-        Role::create($request->validated());
+        $role = Role::create($request->validated());
+
+        Log::channel('project')->info('Role created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'roles',
+            'record_id' => $role->id,
+        ]);
+
         return redirect()->route('role.index')->with('success', 'Role berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $role = Role::with('users')->findOrFail($id);
-            return Inertia::render('role/show', [
-                'role' => $role,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Role tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -63,11 +60,12 @@ class RoleController extends Controller
     {
         try {
             $role = Role::with('users')->findOrFail($id);
+
             return Inertia::render('role/edit', [
                 'role' => $role,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Role tidak ditemukan');
+            return back()->with('warning', 'Role tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +79,16 @@ class RoleController extends Controller
         try {
             $role = Role::findOrFail($id);
             $role->update($request->validated());
-            return redirect()->route('role.show', ['id' => $id])
-                ->with('success', 'Role berhasil diperbarui');
+
+            Log::channel('project')->info('Role updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'roles',
+                'record_id' => $role->id,
+            ]);
+
+            return redirect()->route('role.index')->with('success', 'Role berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Role tidak ditemukan');
+            return back()->with('warning', 'Role tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,8 +101,16 @@ class RoleController extends Controller
     {
         try {
             $role = Role::findOrFail($id);
+
+            Log::channel('project')->info('Role deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'roles',
+                'record_id' => $role->id,
+            ]);
+
             $role->delete();
-            return redirect()->back()->with('success', 'Role berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Role tidak ditemukan');
         } catch (\Exception $e) {

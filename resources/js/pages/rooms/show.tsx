@@ -8,11 +8,11 @@ export default function RoomsShow(props: { room: Room.Default }) {
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Kamar',
-      href: '/kamar',
+      href: route('room.index'),
     },
     {
-      title: 'Detail Kamar',
-      href: `/kamar/${room.id}`,
+      title: 'Detail',
+      href: route('room.show', { id: room.id }),
     },
   ];
 
@@ -21,7 +21,7 @@ export default function RoomsShow(props: { room: Room.Default }) {
       <Head title="Kamar" />
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Kamar</h1>
+          <h1 className="text-2xl font-bold">Detail Kamar</h1>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

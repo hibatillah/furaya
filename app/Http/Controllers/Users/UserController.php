@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\UserRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -17,6 +18,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('user/index', [
             'users' => $users,
         ]);
@@ -35,26 +37,21 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        User::create($request->validated());
+        $user = User::create($request->validated());
+
+        Log::channel('project')->info('User created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'users',
+            'record_id' => $user->id,
+        ]);
+
         return redirect()->route('user.index')->with('success', 'User berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            return Inertia::render('user/show', [
-                'user' => $user,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'User tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -63,11 +60,12 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+
             return Inertia::render('user/edit', [
                 'user' => $user,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'User tidak ditemukan');
+            return back()->with('warning', 'User tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +79,16 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             $user->update($request->validated());
-            return redirect()->route('user.show', ['id' => $id])
-                ->with('success', 'User berhasil diperbarui');
+
+            Log::channel('project')->info('User updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'users',
+                'record_id' => $user->id,
+            ]);
+
+            return redirect()->route('user.show', ['id' => $id])->with('success', 'User berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'User tidak ditemukan');
+            return back()->with('warning', 'User tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,8 +101,16 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+
+            Log::channel('project')->info('User deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'users',
+                'record_id' => $user->id,
+            ]);
+
             $user->delete();
-            return redirect()->back()->with('success', 'User berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'User tidak ditemukan');
         } catch (\Exception $e) {

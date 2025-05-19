@@ -1,8 +1,9 @@
-import { NavCollapsible, NavMain } from "@/components/nav-main";
+import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { NavCollapsibleItem, type NavItem } from "@/types";
 import { Link } from "@inertiajs/react";
+import AppLogo from "./app-logo";
 import {
   BadgeCheckIcon,
   BedDoubleIcon,
@@ -15,7 +16,6 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
-import AppLogo from "./app-logo";
 
 const mainNavItems: NavItem[] = [
   {
@@ -30,7 +30,7 @@ const mainNavItems: NavItem[] = [
   },
   {
     title: "Status Kamar",
-    href: "/status",
+    href: "/status/kamar",
     icon: BadgeCheckIcon,
   },
   {

@@ -11,11 +11,11 @@ import { toast } from "sonner";
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: "Kamar",
-    href: "/kamar",
+    href: route("room.index"),
   },
   {
     title: "Tambah",
-    href: "/kamar/tambah",
+    href: route("room.create"),
   },
 ];
 
@@ -35,7 +35,6 @@ export default function RoomsCreate(props: { roomTypes: RoomType.Default[]; bedT
 
     toast.loading("Menambahkan kamar...", { id: "create-room" });
     post(route("room.store"), {
-      onSuccess: () => toast.success("Kamar berhasil ditambahkan", { id: "create-room" }),
       onError: () => toast.warning("Kamar gagal ditambahkan", { id: "create-room" }),
     });
   }

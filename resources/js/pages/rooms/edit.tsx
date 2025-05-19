@@ -19,11 +19,11 @@ export default function RoomsEdit(props: {
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: "Kamar",
-      href: "/kamar",
+      href: route("room.index"),
     },
     {
       title: "Edit",
-      href: `/kamar/${room.id}/edit`,
+      href: route("room.edit", { id: room.id }),
     },
   ];
 

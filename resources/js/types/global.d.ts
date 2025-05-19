@@ -3,6 +3,11 @@ import type { route as routeFn } from 'ziggy-js';
 declare global {
   const route: typeof routeFn;
 
+  interface SelectData {
+    value: string;
+    label: string;
+  }
+
   interface Pagination<T> {
     current_page: number;
     data: T[];

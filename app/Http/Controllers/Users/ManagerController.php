@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\ManagerRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Manager;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ManagerController extends Controller
 {
@@ -17,6 +18,7 @@ class ManagerController extends Controller
     public function index()
     {
         $managers = Manager::with('user')->orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('manager/index', [
             'managers' => $managers,
         ]);
@@ -35,26 +37,21 @@ class ManagerController extends Controller
      */
     public function store(ManagerRequest $request)
     {
-        Manager::create($request->validated());
+        $manager = Manager::create($request->validated());
+
+        Log::channel('project')->info('Manager created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'managers',
+            'record_id' => $manager->id,
+        ]);
+        
         return redirect()->route('manager.index')->with('success', 'Manajer berhasil ditambahkan');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
-        try {
-            $manager = Manager::with('user')->findOrFail($id);
-            return Inertia::render('manager/show', [
-                'manager' => $manager,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Manajer tidak ditemukan');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -63,11 +60,12 @@ class ManagerController extends Controller
     {
         try {
             $manager = Manager::with('user')->findOrFail($id);
+
             return Inertia::render('manager/edit', [
                 'manager' => $manager,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Manajer tidak ditemukan');
+            return back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +79,16 @@ class ManagerController extends Controller
         try {
             $manager = Manager::findOrFail($id);
             $manager->update($request->validated());
-            return redirect()->route('manager.show', ['id' => $id])
-                ->with('success', 'Manajer berhasil diperbarui');
+
+            Log::channel('project')->info('Manager updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'managers',
+                'record_id' => $manager->id,
+            ]);
+
+            return redirect()->route('manager.index')->with('success', 'Manajer berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Manajer tidak ditemukan');
+            return back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,8 +101,16 @@ class ManagerController extends Controller
     {
         try {
             $manager = Manager::findOrFail($id);
+
+            Log::channel('project')->info('Manager deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'managers',
+                'record_id' => $manager->id,
+            ]);
+
             $manager->delete();
-            return redirect()->back()->with('success', 'Manajer berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {

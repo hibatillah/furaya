@@ -2,40 +2,17 @@
 
 namespace App\Enums;
 
-enum RoleEnum: string
+class RoleEnum extends BaseEnum
 {
-    case ADMIN = 'admin';
-    case MANAGER = 'manager';
-    case EMPLOYEE = 'employee';
-    case CUSTOMER = 'customer';
+    public const ADMIN = 'admin';
+    public const MANAGER = 'manager';
+    public const EMPLOYEE = 'employee';
+    public const CUSTOMER = 'customer';
 
-    /**
-     * Get the label for each enum case.
-     *
-     * @return array<string>
-     */
-    public static function getLabels(): array
-    {
-        return array_map(fn($case) => $case->name, self::cases());
-    }
-
-    /**
-     * Get the status options for the room.
-     *
-     * @return array<string>
-     */
-    public static function getValues(): array
-    {
-        return array_map(fn($case) => $case->value, self::cases());
-    }
-
-    /**
-     * Get the status options for the room as key-value pairs.
-     *
-     * @return array<string, string>
-     */
-    public static function getPaired(): array
-    {
-        return array_combine(self::getLabels(), self::getValues());
-    }
+    protected static array $labels = [
+        'ADMIN' => self::ADMIN,
+        'MANAGER' => self::MANAGER,
+        'EMPLOYEE' => self::EMPLOYEE,
+        'CUSTOMER' => self::CUSTOMER,
+    ];
 }

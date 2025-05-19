@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 
 class DepartmentRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class DepartmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +23,10 @@ class DepartmentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = Request::route('id');
+
         return [
-            "name" => ["required", "string", "max:255"],
+            "name" => ["required", "string", "max:255", Rule::unique("departments", "name")->ignore($id)],
         ];
     }
 
@@ -32,6 +36,7 @@ class DepartmentRequest extends FormRequest
             "name.required" => "Nama departemen wajib diisi.",
             "name.string" => "Nama departemen harus berupa string.",
             "name.max" => "Nama departemen maksimal 255 karakter.",
+            "name.unique" => "Nama departemen sudah ada.",
         ];
     }
 }

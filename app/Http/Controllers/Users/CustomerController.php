@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\CustomerRequest;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends Controller
 {
@@ -17,6 +18,7 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = Customer::with('user')->orderBy('created_at', 'desc')->paginate(10);
+
         return Inertia::render('customer/index', [
             'customers' => $customers,
         ]);
@@ -35,7 +37,14 @@ class CustomerController extends Controller
      */
     public function store(CustomerRequest $request)
     {
-        Customer::create($request->validated());
+        $customer = Customer::create($request->validated());
+
+        Log::channel('project')->info('Customer created', [
+            'user_id' => Auth::user()->id,
+            'table' => 'customers',
+            'record_id' => $customer->id,
+        ]);
+
         return redirect()->route('customer.index')->with('success', 'Customer berhasil ditambahkan');
     }
 
@@ -46,11 +55,12 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::with('user')->findOrFail($id);
+
             return Inertia::render('customer/show', [
                 'customer' => $customer,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Customer tidak ditemukan');
+            return back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -63,11 +73,12 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::with('user')->findOrFail($id);
+
             return Inertia::render('customer/edit', [
                 'customer' => $customer,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Customer tidak ditemukan');
+            return back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -81,10 +92,16 @@ class CustomerController extends Controller
         try {
             $customer = Customer::findOrFail($id);
             $customer->update($request->validated());
-            return redirect()->route('customer.show', ['id' => $id])
-                ->with('success', 'Customer berhasil diperbarui');
+
+            Log::channel('project')->info('Customer updated', [
+                'user_id' => Auth::user()->id,
+                'table' => 'customers',
+                'record_id' => $customer->id,
+            ]);
+
+            return redirect()->route('customer.show', ['id' => $id])->with('success', 'Customer berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Customer tidak ditemukan');
+            return back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -97,8 +114,16 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::findOrFail($id);
+
+            Log::channel('project')->info('Customer deleted', [
+                'user_id' => Auth::user()->id,
+                'table' => 'customers',
+                'record_id' => $customer->id,
+            ]);
+
             $customer->delete();
-            return redirect()->back()->with('success', 'Customer berhasil dihapus.');
+
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {

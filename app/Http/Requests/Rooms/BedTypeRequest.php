@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Rooms;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 
 class BedTypeRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class BedTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +23,10 @@ class BedTypeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = Request::route('id');
+
         return [
-            "name" => ["required", "string", "max:255"]
+            "name" => ["required", "string", "max:255", Rule::unique("bed_types", "name")->ignore($id)]
         ];
     }
 
@@ -32,6 +36,7 @@ class BedTypeRequest extends FormRequest
             "name.required" => "Nama tipe kasur wajib diisi.",
             "name.string" => "Nama tipe kasur harus berupa string.",
             "name.max" => "Nama tipe kasur maksimal 255 karakter.",
+            "name.unique" => "Nama tipe kasur sudah ada.",
         ];
     }
 }
