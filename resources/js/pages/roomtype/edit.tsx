@@ -1,40 +1,44 @@
 import InputError from "@/components/input-error";
 import { Button } from "@/components/ui/button";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AppLayout from "@/layouts/app-layout";
-import { BreadcrumbItem } from "@/types";
-import { Head, useForm } from "@inertiajs/react";
+import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
-export default function Edit(props: { roomType: RoomType.Default }) {
-  const { roomType } = props;
 
-  const breadcrumbs: BreadcrumbItem[] = [
-    {
-      title: "Tipe Kamar",
-      href: route("roomtype.index"),
-    },
-    {
-      title: "Edit",
-      href: route("roomtype.edit", { id: roomType.id }),
-    },
-  ];
+export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: () => void }) {
+  const { data: roomType, onClose } = props;
 
   const { data, setData, put, processing, errors } = useForm<RoomType.Update>(roomType);
 
+  // handle update room type data
   function handleUpdateRoomType(e: React.FormEvent) {
     e.preventDefault();
 
-    toast.loading("Memperbarui tipe kamar...", { id: "update-room-type" });
+    toast.loading("Memperbarui tipe kamar...", {
+      id: `update-room-type-${data.id}`,
+    });
+
     put(route("roomtype.update", { id: data.id }), {
-      onError: () => toast.error("Tipe kamar gagal diperbarui", { id: "update-room-type" }),
+      onSuccess: () => {
+        toast.success("Tipe kamar berhasil diperbarui", {
+          id: `update-room-type-${data.id}`,
+        });
+        onClose();
+      },
+      onError: () => {
+        toast.error("Tipe kamar gagal diperbarui", {
+          id: `update-room-type-${data.id}`,
+        });
+      },
     });
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Edit Tipe Kamar" />
-      <h1 className="mb-6 text-2xl font-bold">Edit Tipe Kamar</h1>
+    <>
+      <DialogHeader>
+        <DialogTitle>Edit Tipe Kamar</DialogTitle>
+      </DialogHeader>
       <form
         onSubmit={handleUpdateRoomType}
         className="max-w-lg space-y-6"
@@ -78,13 +82,21 @@ export default function Edit(props: { roomType: RoomType.Default }) {
           <InputError message={errors.base_rate} />
         </div>
 
-        <Button
-          type="submit"
-          disabled={processing}
-        >
-          Simpan
-        </Button>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Button
+            variant="outline"
+            type="button"
+          >
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            disabled={processing}
+          >
+            Perbarui
+          </Button>
+        </div>
       </form>
-    </AppLayout>
+    </>
   );
 }

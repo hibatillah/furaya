@@ -86,7 +86,7 @@ class RoomTypeController extends Controller
                 'record_id' => $roomType->id,
             ]);
 
-            return redirect()->route('roomtype.index')->with('success', 'Tipe kamar berhasil diperbarui');
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             return back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {

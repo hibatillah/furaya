@@ -65,7 +65,7 @@ class RoomController extends Controller
             "record_id" => $room->id,
         ]);
 
-        return redirect()->route("room.index")->with("success", "Kamar berhasil ditambahkan");
+        return redirect()->back();
     }
 
     /**
