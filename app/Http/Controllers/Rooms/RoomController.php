@@ -43,7 +43,7 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $statusOptions = RoomStatusEnum::getValues();
+        $statusOptions = RoomStatusEnum::getLabels();
 
         return Inertia::render("rooms/create", [
             "roomTypes" => $this->roomTypes,
@@ -80,8 +80,18 @@ class RoomController extends Controller
                 "room" => $room,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Room not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
+            Log::channel("project")->error("Error showing room", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return back()->with("error", $e->getMessage());
         }
     }
@@ -101,8 +111,18 @@ class RoomController extends Controller
                 "statusOptions" => $statusOptions,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Room not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit room page", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return back()->with("error", $e->getMessage());
         }
     }
@@ -124,8 +144,18 @@ class RoomController extends Controller
 
             return redirect()->route("room.show", ["id" => $id])->with("success", "Kamar berhasil diperbarui");
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Room not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating room", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return back()->with("error", $e->getMessage());
         }
     }
@@ -148,8 +178,18 @@ class RoomController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Room not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return redirect()->back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting room", [
+                "user_id" => Auth::user()->id,
+                "table" => "rooms",
+            ]);
+
             return redirect()->back()->with("error", $e->getMessage());
         }
     }

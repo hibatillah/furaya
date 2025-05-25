@@ -45,7 +45,7 @@ class RoomTypeController extends Controller
             'record_id' => $roomType->id,
         ]);
 
-        return redirect()->route('roomtype.index')->with('success', 'Tipe kamar berhasil ditambahkan');
+        return redirect()->back();
     }
 
     /**
@@ -65,8 +65,18 @@ class RoomTypeController extends Controller
                 'roomType' => $roomType,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("RoomType not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "room_types",
+            ]);
+
             return back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit room type page", [
+                "user_id" => Auth::user()->id,
+                "table" => "room_types",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class RoomTypeController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("RoomType not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "room_types",
+            ]);
+
             return back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating room type", [
+                "user_id" => Auth::user()->id,
+                "table" => "room_types",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class RoomTypeController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("RoomType not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "room_types",
+            ]);
+
             return redirect()->back()->with('warning', 'Tipe kamar tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting room type", [
+                "user_id" => Auth::user()->id,
+                "table" => "room_types",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

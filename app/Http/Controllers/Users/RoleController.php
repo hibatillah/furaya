@@ -65,8 +65,18 @@ class RoleController extends Controller
                 'role' => $role,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Role not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "roles",
+            ]);
+
             return back()->with('warning', 'Role tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit role page", [
+                "user_id" => Auth::user()->id,
+                "table" => "roles",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class RoleController extends Controller
 
             return redirect()->route('role.index')->with('success', 'Role berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Role not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "roles",
+            ]);
+
             return back()->with('warning', 'Role tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating role", [
+                "user_id" => Auth::user()->id,
+                "table" => "roles",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class RoleController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Role not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "roles",
+            ]);
+
             return redirect()->back()->with('warning', 'Role tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting role", [
+                "user_id" => Auth::user()->id,
+                "table" => "roles",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

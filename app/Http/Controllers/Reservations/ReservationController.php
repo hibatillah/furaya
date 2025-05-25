@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reservations;
 
 use App\Http\Controllers\Controller;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,7 +14,11 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        return Inertia::render("reservation/index");
+        $reservations = Reservation::orderBy('created_at', 'desc')->paginate(10);
+
+        return Inertia::render("reservation/index", [
+            "reservations" => $reservations,
+        ]);
     }
 
     /**

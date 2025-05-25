@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Utils\DateHelper;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -22,50 +23,58 @@ class DatabaseSeeder extends Seeder
         DB::table('bed_types')->truncate();
         DB::table('room_types')->truncate();
 
-        // add initial user
-        DB::table('users')->insert([
-            'id' => 1,
-            'name' => 'admin',
-            'email' => 'admin@admin.com',
-            'password' => bcrypt('haihaihai'),
-        ]);
-
-        // add default roles
-        $roles = ['admin', 'manager', 'employee', 'customer'];
-
-        foreach ($roles as $role) {
-            DB::table('roles')->insert([
+        // define default roles
+        $roles = ['Admin', 'Manager', 'Employee', 'Customer'];
+        $roleData = array_map(function ($role) use ($dateISO) {
+            return [
                 'id' => Str::uuid(),
                 'name' => $role,
                 'created_at' => $dateISO,
                 'updated_at' => $dateISO,
-            ]);
-        }
+            ];
+        }, $roles);
 
-        // add initial bed types
-        $bedTypes = ['single', 'double', 'twin', 'queen', 'king'];
-
-        foreach ($bedTypes as $bedType) {
-            DB::table('bed_types')->insert([
+        // define initial bed types
+        $bedTypes = ['Single', 'Double', 'Twin', 'Queen', 'King'];
+        $bedTypeData = array_map(function ($bedType) use ($dateISO) {
+            return [
                 'id' => Str::uuid(),
                 'name' => $bedType,
                 'created_at' => $dateISO,
                 'updated_at' => $dateISO,
-            ]);
-        }
+            ];
+        }, $bedTypes);
 
-        // add initial room types
-        $roomTypes = ['deluxe', 'executive', 'business', 'furaya suite'];
-
-        foreach ($roomTypes as $roomType) {
-            DB::table('room_types')->insert([
+        // define initial room types
+        $roomTypes = ['Junior', 'Deluxe', 'Executive', 'Business', 'Furaya Suite'];
+        $roomTypeData = array_map(function ($roomType) use ($dateISO) {
+            return [
                 'id' => Str::uuid(),
                 'name' => $roomType,
                 'capacity' => 2,
                 'base_rate' => 100.00,
                 'created_at' => $dateISO,
                 'updated_at' => $dateISO,
-            ]);
-        }
+            ];
+        }, $roomTypes);
+
+        // insert seed data
+        DB::table('roles')->insert($roleData);
+        DB::table('bed_types')->insert($bedTypeData);
+        DB::table('room_types')->insert($roomTypeData);
+
+        // define admin user
+        $managerRoleId = Role::where('name', 'Manager')->first()->id;
+        $user = [
+            'name' => 'admin',
+            'email' => 'admin@admin.com',
+            'password' => bcrypt('admin123'),
+            'role_id' => $managerRoleId,
+            'created_at' => $dateISO,
+            'updated_at' => $dateISO,
+        ];
+
+        // insert user data
+        DB::table('users')->insert($user);
     }
 }

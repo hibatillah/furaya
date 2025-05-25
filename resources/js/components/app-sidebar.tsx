@@ -1,9 +1,8 @@
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { NavCollapsibleItem, type NavItem } from "@/types";
-import { Link } from "@inertiajs/react";
-import AppLogo from "./app-logo";
+import { SharedData, type NavItem } from "@/types";
+import { Link, usePage } from "@inertiajs/react";
 import {
   BadgeCheckIcon,
   BedDoubleIcon,
@@ -16,151 +15,169 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
+import AppLogo from "./app-logo";
 
-const mainNavItems: NavItem[] = [
+const managerMenuItems: NavItem[] = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: route("dashboard"),
     icon: LayoutGrid,
   },
   {
-    title: "Reservasi",
-    href: "/reservasi",
-    icon: CalendarCheckIcon,
+    title: "Pengguna",
+    href: route("user.index"),
+    icon: UsersIcon,
   },
   {
-    title: "Status Kamar",
-    href: "/status/kamar",
-    icon: BadgeCheckIcon,
+    title: "Karyawan",
+    href: route("employee.index"),
+    icon: UserIcon,
+  },
+  {
+    title: "Admin",
+    href: route("admin.index"),
+    icon: ShieldUserIcon,
+  },
+  {
+    title: "Manager",
+    href: route("manager.index"),
+    icon: ShieldUserIcon,
+  },
+  {
+    title: "Role",
+    href: route("role.index"),
+    icon: ShieldIcon,
+  },
+  {
+    title: "Departemen",
+    href: route("department.index"),
+    icon: BriefcaseIcon,
+  },
+];
+
+const adminMenuItems: NavItem[] = [
+  {
+    title: "Dashboard",
+    href: route("dashboard"),
+    icon: LayoutGrid,
   },
   {
     title: "Kamar",
-    href: "/kamar",
+    href: route("room.index"),
     icon: BedSingleIcon,
   },
   {
     title: "Tipe Kamar",
-    href: "/tipe/kamar",
+    href: route("roomtype.index"),
     icon: BedDoubleIcon,
   },
   {
     title: "Tipe Kasur",
-    href: "/tipe/kasur",
+    href: route("bedtype.index"),
     icon: BedDoubleIcon,
   },
   {
-    title: "Departemen",
-    href: "/departemen",
-    icon: BriefcaseIcon,
+    title: "Pengguna",
+    href: route("user.index"),
+    icon: UsersIcon,
   },
-  {
-    title: "Karyawan",
-    href: "/karyawan",
-    icon: UserIcon,
-  },
-  {
-      title: "Manager",
-      href: "/manager",
-      icon: UserIcon,
-    },
-    {
-        title: "Customer",
-        href: "/customer",
-        icon: UsersIcon,
-    },
-    {
-        title: "Admin",
-        href: "/admin",
-        icon: ShieldUserIcon,
-    },
-    {
-      title: "Role",
-      href: "/role",
-      icon: ShieldIcon,
-    },
 ];
 
-const collapsibleNavItems: NavCollapsibleItem[] = [
+const employeeMenuItems: NavItem[] = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: route("dashboard"),
+    icon: LayoutGrid,
+  },
+  {
+    title: "Status Kamar",
+    href: route("roomstatus.index"),
+    icon: BadgeCheckIcon,
+  },
+  {
+    title: "Reservasi",
+    href: route("reservation.index"),
+    icon: CalendarCheckIcon,
+  },
+];
+
+const mainNavItems: NavItem[] = [
+  {
+    title: "Dashboard",
+    href: route("dashboard"),
     icon: LayoutGrid,
   },
   {
     title: "Reservasi",
-    href: "/reservasi",
+    href: route("reservation.index"),
     icon: CalendarCheckIcon,
   },
   {
     title: "Kamar",
-    href: "/kamar",
+    href: route("room.index"),
     icon: BedSingleIcon,
-    items: [
-      {
-        title: "Kamar",
-        href: "/kamar",
-        icon: BedSingleIcon,
-      },
-      {
-        title: "Status Kamar",
-        href: "/status",
-        icon: BadgeCheckIcon,
-      },
-      //
-      {
-        title: "Tipe Kamar",
-        href: "/tipe/kamar",
-        icon: BedDoubleIcon,
-      },
-      {
-        title: "Tipe Kasur",
-        href: "/tipe/kasur",
-        icon: BedDoubleIcon,
-      },
-    ],
   },
   {
-    title: "User",
-    href: "/user",
-    icon: UserIcon,
+    title: "Tipe Kamar",
+    href: route("roomtype.index"),
+    icon: BedDoubleIcon,
   },
   {
-    title: "Role",
-    href: "/role",
+    title: "Tipe Kasur",
+    href: route("bedtype.index"),
+    icon: BedDoubleIcon,
+  },
+  {
+    title: "Departemen",
+    href: route("department.index"),
+    icon: BriefcaseIcon,
+  },
+  {
+    title: "Karyawan",
+    href: route("employee.index"),
     icon: UserIcon,
   },
   {
     title: "Manager",
-    href: "/manager",
+    href: route("manager.index"),
     icon: UserIcon,
-  },
-  {
-    title: "Karyawan",
-    href: "/karyawan",
-    icon: UserIcon,
-  },
-  {
-    title: "Departemen",
-    href: "/departemen",
-    icon: BriefcaseIcon,
   },
   {
     title: "Customer",
-    href: "/customer",
+    href: route("customer.index"),
+    icon: UsersIcon,
+  },
+  {
+    title: "Pengguna",
+    href: route("user.index"),
     icon: UsersIcon,
   },
   {
     title: "Admin",
-    href: "/admin",
+    href: route("admin.index"),
     icon: ShieldUserIcon,
+  },
+  {
+    title: "Role",
+    href: route("role.index"),
+    icon: ShieldIcon,
   },
 ];
 
 export function AppSidebar() {
+  const { auth } = usePage<SharedData>().props;
+  const role = auth.user.role?.name.toLowerCase();
+
+  const menuItems = {
+    manager: managerMenuItems,
+    admin: adminMenuItems,
+    employee: employeeMenuItems,
+  };
+
   return (
     <Sidebar
       collapsible="icon"
-      variant="inset"
+      variant="sidebar"
     >
       <SidebarHeader>
         <SidebarMenu>
@@ -170,7 +187,7 @@ export function AppSidebar() {
               asChild
             >
               <Link
-                href="/dashboard"
+                href={route("dashboard")}
                 prefetch
               >
                 <AppLogo />
@@ -181,8 +198,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="py-10">
-        {/* <NavCollapsible items={collapsibleNavItems} /> */}
-        <NavMain items={mainNavItems} />
+        <NavMain items={menuItems[role as keyof typeof menuItems]} />
       </SidebarContent>
 
       <SidebarFooter>

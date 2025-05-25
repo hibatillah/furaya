@@ -44,7 +44,7 @@ class ManagerController extends Controller
             'table' => 'managers',
             'record_id' => $manager->id,
         ]);
-        
+
         return redirect()->route('manager.index')->with('success', 'Manajer berhasil ditambahkan');
     }
 
@@ -65,8 +65,18 @@ class ManagerController extends Controller
                 'manager' => $manager,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Manager not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "managers",
+            ]);
+
             return back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit manager page", [
+                "user_id" => Auth::user()->id,
+                "table" => "managers",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class ManagerController extends Controller
 
             return redirect()->route('manager.index')->with('success', 'Manajer berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Manager not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "managers",
+            ]);
+
             return back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating manager", [
+                "user_id" => Auth::user()->id,
+                "table" => "managers",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class ManagerController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Manager not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "managers",
+            ]);
+
             return redirect()->back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting manager", [
+                "user_id" => Auth::user()->id,
+                "table" => "managers",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

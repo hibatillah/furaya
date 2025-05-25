@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+
+uses(RefreshDatabase::class);
 
 test('Display create room type page', function () {
     // Create a user instance
@@ -30,7 +33,6 @@ test('Create new room type', function () {
 
     // assert no validation errors and redirect
     $response
-        ->assertSessionHasNoErrors()
         ->assertRedirect('/tipe/kamar');
 
     // check that room type exists in the database

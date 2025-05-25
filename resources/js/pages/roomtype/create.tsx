@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function RoomTypeCreate() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { data, setData, post, errors, processing } = useForm<RoomType.Create>();
 
   // handle create room type
@@ -18,19 +20,22 @@ export default function RoomTypeCreate() {
     });
 
     post(route("roomtype.store"), {
-      onSuccess: () =>
+      onSuccess: () => {
+        setDialogOpen(false);
         toast.success("Tipe kamar berhasil ditambahkan", {
           id: "create-room-type",
-        }),
-      onError: () =>
+        });
+      },
+      onError: () => {
         toast.error("Tipe kamar gagal ditambahkan", {
           id: "create-room-type",
-        }),
+        });
+      },
     });
   }
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button className="ms-auto w-fit">Tambah Tipe Kamar</Button>
       </DialogTrigger>

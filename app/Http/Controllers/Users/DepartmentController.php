@@ -65,8 +65,18 @@ class DepartmentController extends Controller
                 'department' => $department,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Department not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+            ]);
+
             return back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit department page", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class DepartmentController extends Controller
 
             return redirect()->route('department.index')->with('success', 'Departemen berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Department not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+            ]);
+
             return back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating department", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class DepartmentController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Department not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+            ]);
+
             return redirect()->back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting department", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

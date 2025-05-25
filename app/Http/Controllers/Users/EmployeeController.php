@@ -65,8 +65,18 @@ class EmployeeController extends Controller
                 'employee' => $employee,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Employee not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "employees",
+            ]);
+
             return back()->with('warning', 'Karyawan tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit employee page", [
+                "user_id" => Auth::user()->id,
+                "table" => "employees",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class EmployeeController extends Controller
 
             return redirect()->route('employee.index')->with('success', 'Karyawan berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Employee not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "employees",
+            ]);
+
             return back()->with('warning', 'Karyawan tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating employee", [
+                "user_id" => Auth::user()->id,
+                "table" => "employees",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class EmployeeController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Employee not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "employees",
+            ]);
+
             return redirect()->back()->with('warning', 'Karyawan tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting employee", [
+                "user_id" => Auth::user()->id,
+                "table" => "employees",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

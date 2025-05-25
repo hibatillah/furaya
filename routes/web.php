@@ -24,145 +24,190 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    /**
-     * room routes
-     * `/kamar`
-     */
-    Route::get("kamar/tambah", [RoomController::class, "create"])->name("room.create");
-    Route::resource("/kamar", RoomController::class)
-        ->except(["create"])
-        ->parameters(["kamar" => "id"])
-        ->names([
-            "index" => "room.index",
-            "store" => "room.store",
-            "show" => "room.show",
-            "edit" => "room.edit",
-            "update" => "room.update",
-            "destroy" => "room.destroy",
-        ]);
-
-    /**
-     * room status routes
-     * `/status/kamar`
-     */
-    Route::resource("status/kamar", RoomStatusController::class)
-        ->except(["create", "store", "show", "destroy"])
-        ->parameters(["status/kamar" => "id"])
-        ->names([
-            "index" => "roomstatus.index",
-            "edit" => "roomstatus.edit",
-            "update" => "roomstatus.update",
-        ]);
-
-    Route::prefix("tipe")->group(function () {
+    // ======================= access by admin and manager ======================= //
+    Route::middleware(['role:admin,manager'])->group(function () {
         /**
-         * room type routes
-         * `/kamar/tipe/kamar`
+         * user resource routes
          */
-        Route::get("kamar/tambah", [RoomTypeController::class, "create"])->name("roomtype.create");
-        Route::resource("kamar", RoomTypeController::class)
+        Route::get("user/tambah", [UserController::class, "create"])->name("user.create");
+        Route::resource("user", UserController::class)
             ->except(["create", "show"])
-            ->parameters(["kamar" => "id"])
+            ->parameters(["user" => "id"])
             ->names([
-                "index" => "roomtype.index",
-                "store" => "roomtype.store",
-                "edit" => "roomtype.edit",
-                "update" => "roomtype.update",
-                "destroy" => "roomtype.destroy",
-            ]);
-
-        /**
-         * bed type routes
-         * `/kamar/tipe/kasur`
-         */
-        Route::get("kasur/tambah", [BedTypeController::class, "create"])->name("bedtype.create");
-        Route::resource("kasur", BedTypeController::class)
-            ->except(["create", "show"])
-            ->parameters(["kasur" => "id"])
-            ->names([
-                "index" => "bedtype.index",
-                "store" => "bedtype.store",
-                "edit" => "bedtype.edit",
-                "update" => "bedtype.update",
-                "destroy" => "bedtype.destroy",
+                "index" => "user.index",
+                "store" => "user.store",
+                "edit" => "user.edit",
+                "update" => "user.update",
+                "destroy" => "user.destroy",
             ]);
     });
 
-    /**
-     * user resource routes
-     */
-    Route::get("user/tambah", [UserController::class, "create"])->name("user.create");
-    Route::resource("user", UserController::class)
-        ->except(["create", "show"])
-        ->parameters(["user" => "id"])
-        ->names([
-            "index" => "user.index",
-            "store" => "user.store",
-            "edit" => "user.edit",
-            "update" => "user.update",
-            "destroy" => "user.destroy",
-        ]);
 
-    /**
-     * role resource routes
-     */
-    Route::get("role/tambah", [RoleController::class, "create"])->name("role.create");
-    Route::resource("role", RoleController::class)
-        ->except(["create"])
-        ->parameters(["role" => "id"])
-        ->names([
-            "index" => "role.index",
-            "store" => "role.store",
-            "edit" => "role.edit",
-            "update" => "role.update",
-            "destroy" => "role.destroy",
-        ]);
+    // ======================= access by manager ======================= //
+    Route::middleware(["role:manager"])->group(function () {
+        /**
+         * role resource routes
+         */
+        Route::get("role/tambah", [RoleController::class, "create"])->name("role.create");
+        Route::resource("role", RoleController::class)
+            ->except(["create"])
+            ->parameters(["role" => "id"])
+            ->names([
+                "index" => "role.index",
+                "store" => "role.store",
+                "edit" => "role.edit",
+                "update" => "role.update",
+                "destroy" => "role.destroy",
+            ]);
 
-    /**
-     * manager resource routes
-     */
-    Route::get("manager/tambah", [ManagerController::class, "create"])->name("manager.create");
-    Route::resource("manager", ManagerController::class)
-        ->except(["create", "show"])
-        ->parameters(["manager" => "id"])
-        ->names([
-            "index" => "manager.index",
-            "store" => "manager.store",
-            "edit" => "manager.edit",
-            "update" => "manager.update",
-            "destroy" => "manager.destroy",
-        ]);
+        /**
+         * admin resource routes
+         */
+        Route::get("admin/tambah", [AdminController::class, "create"])->name("admin.create");
+        Route::resource("admin", AdminController::class)
+            ->except(["create", "show"])
+            ->parameters(["admin" => "id"])
+            ->names([
+                "index" => "admin.index",
+                "store" => "admin.store",
+                "edit" => "admin.edit",
+                "update" => "admin.update",
+                "destroy" => "admin.destroy",
+            ]);
 
-    /**
-     * employee resource routes
-     */
-    Route::get("karyawan/tambah", [EmployeeController::class, "create"])->name("employee.create");
-    Route::resource("karyawan", EmployeeController::class)
-        ->except(["create"])
-        ->parameters(["employee" => "id"])
-        ->names([
-            "index" => "employee.index",
-            "store" => "employee.store",
-            "show" => "employee.show",
-            "edit" => "employee.edit",
-            "update" => "employee.update",
-            "destroy" => "employee.destroy",
-        ]);
+        /**
+         * manager resource routes
+         */
+        Route::get("manager/tambah", [ManagerController::class, "create"])->name("manager.create");
+        Route::resource("manager", ManagerController::class)
+            ->except(["create", "show"])
+            ->parameters(["manager" => "id"])
+            ->names([
+                "index" => "manager.index",
+                "store" => "manager.store",
+                "edit" => "manager.edit",
+                "update" => "manager.update",
+                "destroy" => "manager.destroy",
+            ]);
 
-    /**
-     * department resource routes
-     */
-    Route::get("departemen/tambah", [DepartmentController::class, "create"])->name("department.create");
-    Route::resource("departemen", DepartmentController::class)
-        ->except(["create", "show"])
-        ->parameters(["department" => "id"])
-        ->names([
-            "index" => "department.index",
-            "store" => "department.store",
-            "edit" => "department.edit",
-            "update" => "department.update",
-            "destroy" => "department.destroy",
-        ]);
+        /**
+         * employee resource routes
+         */
+        Route::get("karyawan/tambah", [EmployeeController::class, "create"])->name("employee.create");
+        Route::resource("karyawan", EmployeeController::class)
+            ->except(["create"])
+            ->parameters(["employee" => "id"])
+            ->names([
+                "index" => "employee.index",
+                "store" => "employee.store",
+                "show" => "employee.show",
+                "edit" => "employee.edit",
+                "update" => "employee.update",
+                "destroy" => "employee.destroy",
+            ]);
+
+        /**
+         * department resource routes
+         */
+        Route::get("departemen/tambah", [DepartmentController::class, "create"])->name("department.create");
+        Route::resource("departemen", DepartmentController::class)
+            ->except(["create", "show"])
+            ->parameters(["department" => "id"])
+            ->names([
+                "index" => "department.index",
+                "store" => "department.store",
+                "edit" => "department.edit",
+                "update" => "department.update",
+                "destroy" => "department.destroy",
+            ]);
+    });
+
+    // ======================= access by admin ======================= //
+    Route::middleware(["role:admin"])->group(function () {
+        /**
+         * room routes
+         * `/kamar`
+         */
+        Route::get("kamar/tambah", [RoomController::class, "create"])->name("room.create");
+        Route::resource("/kamar", RoomController::class)
+            ->except(["create"])
+            ->parameters(["kamar" => "id"])
+            ->names([
+                "index" => "room.index",
+                "store" => "room.store",
+                "show" => "room.show",
+                "edit" => "room.edit",
+                "update" => "room.update",
+                "destroy" => "room.destroy",
+            ]);
+
+        // add prefix "/tipe"
+        Route::prefix("tipe")->group(function () {
+            /**
+             * room type routes
+             * `/tipe/kamar`
+             */
+            Route::get("kamar/tambah", [RoomTypeController::class, "create"])->name("roomtype.create");
+            Route::resource("kamar", RoomTypeController::class)
+                ->except(["create", "show"])
+                ->parameters(["kamar" => "id"])
+                ->names([
+                    "index" => "roomtype.index",
+                    "store" => "roomtype.store",
+                    "edit" => "roomtype.edit",
+                    "update" => "roomtype.update",
+                    "destroy" => "roomtype.destroy",
+                ]);
+
+            /**
+             * bed type routes
+             * `/tipe/kasur`
+             */
+            Route::get("kasur/tambah", [BedTypeController::class, "create"])->name("bedtype.create");
+            Route::resource("kasur", BedTypeController::class)
+                ->except(["create", "show"])
+                ->parameters(["kasur" => "id"])
+                ->names([
+                    "index" => "bedtype.index",
+                    "store" => "bedtype.store",
+                    "edit" => "bedtype.edit",
+                    "update" => "bedtype.update",
+                    "destroy" => "bedtype.destroy",
+                ]);
+        });
+    });
+
+    // ======================= access by employee ======================= //
+    Route::middleware(["role:employee"])->group(function () {
+        /**
+         * room status routes
+         * `/status/kamar`
+         */
+        Route::resource("status/kamar", RoomStatusController::class)
+            ->except(["create", "store", "show", "destroy"])
+            ->parameters(["status/kamar" => "id"])
+            ->names([
+                "index" => "roomstatus.index",
+                "edit" => "roomstatus.edit",
+                "update" => "roomstatus.update",
+            ]);
+
+        /**
+         * reservation resource routes
+         */
+        Route::get("reservasi/tambah", [ReservationController::class, "create"])->name("reservation.create");
+        Route::resource("reservasi", ReservationController::class)
+            ->except(["create"])
+            ->parameters(["reservasi" => "id"])
+            ->names([
+                "index" => "reservation.index",
+                "store" => "reservation.store",
+                "show" => "reservation.show",
+                "edit" => "reservation.edit",
+                "update" => "reservation.update",
+                "destroy" => "reservation.destroy",
+            ]);
+    });
 
     /**
      * customer resource routes
@@ -178,37 +223,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             "edit" => "customer.edit",
             "update" => "customer.update",
             "destroy" => "customer.destroy",
-        ]);
-
-    /**
-     * admin resource routes
-     */
-    Route::get("admin/tambah", [AdminController::class, "create"])->name("admin.create");
-    Route::resource("admin", AdminController::class)
-        ->except(["create", "show"])
-        ->parameters(["admin" => "id"])
-        ->names([
-            "index" => "admin.index",
-            "store" => "admin.store",
-            "edit" => "admin.edit",
-            "update" => "admin.update",
-            "destroy" => "admin.destroy",
-        ]);
-
-    /**
-     * reservation resource routes
-     */
-    Route::get("reservasi/tambah", [ReservationController::class, "create"])->name("reservation.create");
-    Route::resource("reservasi", ReservationController::class)
-        ->except(["create"])
-        ->parameters(["reservasi" => "id"])
-        ->names([
-            "index" => "reservation.index",
-            "store" => "reservation.store",
-            "show" => "reservation.show",
-            "edit" => "reservation.edit",
-            "update" => "reservation.update",
-            "destroy" => "reservation.destroy",
         ]);
 });
 

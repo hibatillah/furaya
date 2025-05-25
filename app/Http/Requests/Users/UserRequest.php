@@ -13,7 +13,7 @@ class UserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -26,11 +26,31 @@ class UserRequest extends FormRequest
         $id = Request::route("id");
 
         return [
-            "name" => ["required", "string", "max:255"],
-            "email" => ["required", "string", "email", "max:255", Rule::unique("users", "email")->ignore($id)],
-            "password" => ["required", "string", "min:8"],
-            "role_id" => ["nullable", "exists:roles,id"],
-            "email_verified_at" => ["nullable", "date"],
+            "name" => [
+                $this->customRules(),
+                "string",
+                "max:255"
+            ],
+            "email" => [
+                $this->customRules(),
+                "string",
+                "email",
+                "max:255",
+                Rule::unique("users", "email")->ignore($id)
+            ],
+            "password" => [
+                $this->customRules(),
+                "string",
+                "min:8"
+            ],
+            "role_id" => [
+                $this->customRules("nullable"),
+                "exists:roles,id"
+            ],
+            "email_verified_at" => [
+                $this->customRules("nullable"),
+                "date"
+            ],
         ];
     }
 
@@ -53,5 +73,12 @@ class UserRequest extends FormRequest
             "email_verified_at.nullable" => "Email verified at wajib diisi.",
             "email_verified_at.date" => "Email verified at harus berupa tanggal.",
         ];
+    }
+
+    private function customRules(?string $defaultRule = "required"): string
+    {
+        $isPatch = request()->getMethod() === "PATCH";
+
+        return $isPatch ? "sometimes" : $defaultRule;
     }
 }

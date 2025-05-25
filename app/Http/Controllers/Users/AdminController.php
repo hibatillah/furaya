@@ -65,8 +65,18 @@ class AdminController extends Controller
                 'admin' => $admin,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Admin not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "admins",
+            ]);
+
             return back()->with('warning', 'Admin tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit admin page", [
+                "user_id" => Auth::user()->id,
+                "table" => "admins",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class AdminController extends Controller
 
             return redirect()->route('admin.index')->with('success', 'Admin berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Admin not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "admins",
+            ]);
+
             return back()->with('warning', 'Admin tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating admin", [
+                "user_id" => Auth::user()->id,
+                "table" => "admins",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class AdminController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Admin not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "admins",
+            ]);
+
             return redirect()->back()->with('warning', 'Admin tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting admin", [
+                "user_id" => Auth::user()->id,
+                "table" => "admins",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

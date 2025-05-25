@@ -2,10 +2,4 @@
 
 namespace App\Utils;
 
-class Helper
-{
-    public function __construct()
-    {
-        //
-    }
-}
+class Helper {}

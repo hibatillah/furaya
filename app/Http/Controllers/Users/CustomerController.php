@@ -60,8 +60,18 @@ class CustomerController extends Controller
                 'customer' => $customer,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Customer not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing customer", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -78,8 +88,18 @@ class CustomerController extends Controller
                 'customer' => $customer,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Customer not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit customer page", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -101,8 +121,18 @@ class CustomerController extends Controller
 
             return redirect()->route('customer.show', ['id' => $id])->with('success', 'Customer berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Customer not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating customer", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -125,8 +155,18 @@ class CustomerController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("Customer not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return redirect()->back()->with('warning', 'Customer tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting customer", [
+                "user_id" => Auth::user()->id,
+                "table" => "customers",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

@@ -65,8 +65,18 @@ class BedTypeController extends Controller
                 'bedType' => $bedType,
             ]);
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("BedType not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "bed_types",
+            ]);
+
             return back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Showing edit bed type page", [
+                "user_id" => Auth::user()->id,
+                "table" => "bed_types",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -88,8 +98,18 @@ class BedTypeController extends Controller
 
             return redirect()->route('bedtype.index')->with('success', 'Tipe kasur berhasil diperbarui');
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("BedType not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "bed_types",
+            ]);
+
             return back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Updating bed type", [
+                "user_id" => Auth::user()->id,
+                "table" => "bed_types",
+            ]);
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -112,8 +132,18 @@ class BedTypeController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            Log::channel("project")->error("BedType not found", [
+                "user_id" => Auth::user()->id,
+                "table" => "bed_types",
+            ]);
+
             return redirect()->back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
+            Log::channel("project")->error("Deleting bed type", [
+                "user_id" => Auth::user()->id,
+                "table" => "bed_types",
+            ]);
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

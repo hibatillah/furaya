@@ -3,13 +3,15 @@ import { useAppearance } from "@/hooks/use-appearance";
 import { type BreadcrumbItem as BreadcrumbItemType } from "@/types";
 import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "./ui/button";
+import { SidebarTrigger } from "./ui/sidebar";
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
   const { appearance, updateAppearance } = useAppearance();
 
   return (
-    <header className="border-sidebar-border/50 flex h-16 shrink-0 items-center gap-2 border-b px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4">
+    <header className="border-sidebar-border/50 flex h-14 shrink-0 items-center gap-2 border-b px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4">
       <div className="flex items-center gap-2">
+        <SidebarTrigger />
         <Breadcrumbs breadcrumbs={breadcrumbs} />
       </div>
       <Button
