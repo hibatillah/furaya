@@ -1,13 +1,17 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
-import { PencilIcon, TrashIcon } from "lucide-react";
-import { toast } from "sonner";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useState } from "react";
+import BedTypeCreate from "./create";
+import BedTypeDelete from "./delete";
+import BedTypeEdit from "./edit";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -16,19 +20,23 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function BedTypeIndex(props: { bedTypes: Pagination<BedType.Default> }) {
+export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
   const { bedTypes } = props;
-  const { delete: deleteBedType } = useForm();
 
-  // handle delete each bed type
-  function handleDelete(e: React.FormEvent, id: string) {
-    e.preventDefault();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
+  const [selectedRow, setSelectedRow] = useState<BedType.Default | null>(null);
 
-    toast.loading("Menghapus tipe kasur...", { id: `delete-${id}` });
-    deleteBedType(route("bedtype.destroy", { id }), {
-      onSuccess: () => toast.success("Tipe kasur berhasil dihapus", { id: `delete-${id}` }),
-      onError: () => toast.error("Tipe kasur gagal dihapus", { id: `delete-${id}` }),
-    });
+  function handleDialog(type: "delete" | "edit", row: BedType.Default) {
+    setDialogType(type);
+    setSelectedRow(row);
+    setDialogOpen(true);
+  }
+
+  function handleDialogClose() {
+    setDialogOpen(false);
+    setDialogType(null);
+    setSelectedRow(null);
   }
 
   // define data table columns
@@ -44,44 +52,27 @@ export default function BedTypeIndex(props: { bedTypes: Pagination<BedType.Defau
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                asChild
-              >
-                <Link href={route("bedtype.edit", { id: row.original.id })}>
-                  <PencilIcon className="size-3" />
-                  <span className="sr-only">Edit Data</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit Data</p>
-            </TooltipContent>
-          </Tooltip>
-          <form onSubmit={(e) => handleDelete(e, row.original.id)}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  type="submit"
-                >
-                  <TrashIcon className="size-3" />
-                  <span className="sr-only">Hapus Data</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Hapus Data</p>
-              </TooltipContent>
-            </Tooltip>
-          </form>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+            >
+              <EllipsisVerticalIcon className="size-4" />
+              <span className="sr-only">Aksi</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => handleDialog("delete", row.original)}
+            >
+              Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ];
@@ -96,21 +87,39 @@ export default function BedTypeIndex(props: { bedTypes: Pagination<BedType.Defau
         <CardContent>
           <DataTable
             columns={columns}
-            data={bedTypes.data}
+            data={bedTypes}
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <Button
-                  className="ms-auto w-fit"
-                  asChild
-                >
-                  <Link href={route("bedtype.create")}>Tambah Tipe Kasur</Link>
-                </Button>
+                <BedTypeCreate />
               </DataTableControls>
             )}
           </DataTable>
         </CardContent>
       </Card>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      >
+        <DialogContent
+          className="w-120"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          noClose
+        >
+          {dialogType === "delete" && selectedRow && (
+            <BedTypeDelete
+              id={selectedRow.id}
+              onClose={handleDialogClose}
+            />
+          )}
+          {dialogType === "edit" && selectedRow && (
+            <BedTypeEdit
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

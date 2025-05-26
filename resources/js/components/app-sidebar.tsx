@@ -12,9 +12,9 @@ import {
   LayoutGrid,
   ShieldIcon,
   ShieldUserIcon,
-  UserIcon,
   UsersIcon,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import AppLogo from "./app-logo";
 
 const managerMenuItems: NavItem[] = [
@@ -31,16 +31,11 @@ const managerMenuItems: NavItem[] = [
   {
     title: "Karyawan",
     href: route("employee.index"),
-    icon: UserIcon,
+    icon: UsersIcon,
   },
   {
     title: "Admin",
     href: route("admin.index"),
-    icon: ShieldUserIcon,
-  },
-  {
-    title: "Manager",
-    href: route("manager.index"),
     icon: ShieldUserIcon,
   },
   {
@@ -101,72 +96,8 @@ const employeeMenuItems: NavItem[] = [
   },
 ];
 
-const mainNavItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: route("dashboard"),
-    icon: LayoutGrid,
-  },
-  {
-    title: "Reservasi",
-    href: route("reservation.index"),
-    icon: CalendarCheckIcon,
-  },
-  {
-    title: "Kamar",
-    href: route("room.index"),
-    icon: BedSingleIcon,
-  },
-  {
-    title: "Tipe Kamar",
-    href: route("roomtype.index"),
-    icon: BedDoubleIcon,
-  },
-  {
-    title: "Tipe Kasur",
-    href: route("bedtype.index"),
-    icon: BedDoubleIcon,
-  },
-  {
-    title: "Departemen",
-    href: route("department.index"),
-    icon: BriefcaseIcon,
-  },
-  {
-    title: "Karyawan",
-    href: route("employee.index"),
-    icon: UserIcon,
-  },
-  {
-    title: "Manager",
-    href: route("manager.index"),
-    icon: UserIcon,
-  },
-  {
-    title: "Customer",
-    href: route("customer.index"),
-    icon: UsersIcon,
-  },
-  {
-    title: "Pengguna",
-    href: route("user.index"),
-    icon: UsersIcon,
-  },
-  {
-    title: "Admin",
-    href: route("admin.index"),
-    icon: ShieldUserIcon,
-  },
-  {
-    title: "Role",
-    href: route("role.index"),
-    icon: ShieldIcon,
-  },
-];
-
 export function AppSidebar() {
   const { auth } = usePage<SharedData>().props;
-  const role = auth.user.role?.name.toLowerCase();
 
   const menuItems = {
     manager: managerMenuItems,
@@ -198,7 +129,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="py-10">
-        <NavMain items={menuItems[role as keyof typeof menuItems]} />
+        <NavMain items={menuItems[auth.role as keyof typeof menuItems]} />
       </SidebarContent>
 
       <SidebarFooter>

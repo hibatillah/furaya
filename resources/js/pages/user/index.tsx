@@ -30,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function UserIndex(props: { users: Pagination<User.Default>; roles: Role.Default[] }) {
+export default function UserIndex(props: { users: User.Default[]; roles: Role.Default[] }) {
   const { users, roles } = props;
 
   // define users columns
@@ -52,10 +52,10 @@ export default function UserIndex(props: { users: Pagination<User.Default>; role
       cell: ({ row }) => {
         const role: string = row.getValue("role") ?? "Not Set";
         const badgeColor = {
-          manager: "bg-indigo-500 text-indigo-100 dark:bg-indigo-900 dark:text-indigo-100",
-          admin: "bg-blue-500 text-blue-100 dark:bg-blue-900 dark:text-blue-100",
-          employee: "bg-emerald-500 text-emerald-100 dark:bg-emerald-900 dark:text-emerald-100",
-          customer: "bg-yellow-500 text-yellow-100 dark:bg-yellow-900 dark:text-yellow-100",
+          manager: "bg-indigo-600 text-indigo-100 dark:bg-indigo-900 dark:text-indigo-100",
+          admin: "bg-sky-600 text-sky-100 dark:bg-sky-900 dark:text-sky-100",
+          employee: "bg-emerald-600 text-emerald-100 dark:bg-emerald-900 dark:text-emerald-100",
+          customer: "bg-yellow-600 text-yellow-100 dark:bg-yellow-900 dark:text-yellow-100",
         };
 
         return (
@@ -153,7 +153,7 @@ export default function UserIndex(props: { users: Pagination<User.Default>; role
         <CardContent>
           <DataTable
             columns={columns}
-            data={users.data}
+            data={users}
           >
             {({ table }) => (
               <DataTableControls table={table}>

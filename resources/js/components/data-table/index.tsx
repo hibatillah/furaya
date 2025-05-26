@@ -101,6 +101,7 @@ export function DataTable<Data, Value>(
     children,
     controls = { pagination: true, sorting: true },
     className,
+    fixed = false,
     ...rest
   } = props;
 
@@ -165,7 +166,7 @@ export function DataTable<Data, Value>(
         )}
         {...rest}
       >
-        <Table className="bg-card">
+        <Table className={cn("bg-card", fixed && "table-fixed")}>
           <TableHeader className="bg-muted-foreground/10 dark:bg-muted/30 overflow-hidden">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

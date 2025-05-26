@@ -17,7 +17,7 @@ class RoomTypeController extends Controller
      */
     public function index()
     {
-        $roomTypes = RoomType::orderBy('created_at', 'desc')->paginate(10);
+        $roomTypes = RoomType::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('roomtype/index', [
             'roomTypes' => $roomTypes,

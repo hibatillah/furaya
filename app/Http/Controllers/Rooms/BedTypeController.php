@@ -17,7 +17,7 @@ class BedTypeController extends Controller
      */
     public function index()
     {
-        $bedTypes = BedType::orderBy('created_at', 'desc')->paginate(10);
+        $bedTypes = BedType::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('bedtype/index', [
             'bedTypes' => $bedTypes,
@@ -27,10 +27,7 @@ class BedTypeController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        return Inertia::render('bedtype/create');
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -45,7 +42,7 @@ class BedTypeController extends Controller
             'record_id' => $bedType->id,
         ]);
 
-        return redirect()->route('bedtype.index')->with('success', 'Tipe kasur berhasil ditambahkan');
+        return redirect()->back();
     }
 
     /**
@@ -56,30 +53,7 @@ class BedTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        try {
-            $bedType = BedType::findOrFail($id);
-
-            return Inertia::render('bedtype/edit', [
-                'bedType' => $bedType,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("BedType not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-            ]);
-
-            return back()->with('warning', 'Tipe kasur tidak ditemukan');
-        } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit bed type page", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-            ]);
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -96,21 +70,21 @@ class BedTypeController extends Controller
                 'record_id' => $bedType->id,
             ]);
 
-            return redirect()->route('bedtype.index')->with('success', 'Tipe kasur berhasil diperbarui');
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("BedType not found", [
                 "user_id" => Auth::user()->id,
                 "table" => "bed_types",
             ]);
 
-            return back()->with('warning', 'Tipe kasur tidak ditemukan');
+            return redirect()->back()->with('warning', 'Tipe kasur tidak ditemukan');
         } catch (\Exception $e) {
             Log::channel("project")->error("Updating bed type", [
                 "user_id" => Auth::user()->id,
                 "table" => "bed_types",
             ]);
 
-            return back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 

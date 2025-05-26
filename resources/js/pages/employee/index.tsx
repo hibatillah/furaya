@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function EmployeeIndex(props: { employees: Pagination<Employee.Default> }) {
+export default function EmployeeIndex(props: { employees: Employee.Default[] }) {
   const { employees } = props;
   const { delete: deleteEmployee } = useForm();
 
@@ -93,7 +93,7 @@ export default function EmployeeIndex(props: { employees: Pagination<Employee.De
         <CardContent>
           <DataTable
             columns={columns}
-            data={employees.data}
+            data={employees}
           >
             {({ table }) => (
               <DataTableControls table={table}>

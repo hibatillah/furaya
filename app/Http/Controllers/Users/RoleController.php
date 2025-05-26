@@ -17,7 +17,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::with('users')->orderBy('created_at', 'desc')->paginate(10);
+        $roles = Role::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('role/index', [
             'roles' => $roles,
@@ -27,10 +27,7 @@ class RoleController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        return Inertia::render('role/create');
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -45,7 +42,7 @@ class RoleController extends Controller
             'record_id' => $role->id,
         ]);
 
-        return redirect()->route('role.index')->with('success', 'Role berhasil ditambahkan');
+        return redirect()->back();
     }
 
     /**
@@ -56,30 +53,7 @@ class RoleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        try {
-            $role = Role::with('users')->findOrFail($id);
-
-            return Inertia::render('role/edit', [
-                'role' => $role,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Role not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "roles",
-            ]);
-
-            return back()->with('warning', 'Role tidak ditemukan');
-        } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit role page", [
-                "user_id" => Auth::user()->id,
-                "table" => "roles",
-            ]);
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -96,7 +70,7 @@ class RoleController extends Controller
                 'record_id' => $role->id,
             ]);
 
-            return redirect()->route('role.index')->with('success', 'Role berhasil diperbarui');
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Role not found", [
                 "user_id" => Auth::user()->id,

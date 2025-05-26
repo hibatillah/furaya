@@ -5,33 +5,35 @@ import { useForm } from "@inertiajs/react";
 import { AlertOctagonIcon } from "lucide-react";
 import { toast } from "sonner";
 
-export default function RoomTypeDelete({ id, onClose }: { id: string; onClose: () => void }) {
+export default function RoomDelete(props: { id: string; onClose: () => void }) {
+  const { id, onClose } = props;
   const form = useForm();
 
-  // Handle delete room type
+  // Handle delete room
   function handleDelete(e: React.FormEvent, id: string) {
     e.preventDefault();
 
-    toast.loading("Menghapus tipe kamar...", { id: `delete-roomtype-${id}` });
-    form.delete(route("roomtype.destroy", { id }), {
+    toast.loading("Menghapus kamar...", { id: `delete-room-${id}` });
+
+    form.delete(route("room.destroy", { id }), {
       onSuccess: () => {
-        toast.success("Tipe kamar berhasil dihapus", { id: `delete-roomtype-${id}` });
+        toast.success("Kamar berhasil dihapus", { id: `delete-room-${id}` });
         onClose();
       },
-      onError: () => toast.error("Tipe kamar gagal dihapus", { id: `delete-roomtype-${id}` }),
+      onError: () => toast.error("Kamar gagal dihapus", { id: `delete-room-${id}` }),
     });
   }
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Hapus Tipe Kamar</DialogTitle>
-        <DialogDescription>Apakah anda yakin ingin menghapus tipe kamar ini?</DialogDescription>
+        <DialogTitle>Hapus Kamar</DialogTitle>
+        <DialogDescription>Apakah anda yakin ingin menghapus kamar ini?</DialogDescription>
       </DialogHeader>
       <Alert variant="destructive">
         <AlertOctagonIcon className="size-4" />
         <AlertTitle>Peringatan</AlertTitle>
-        <AlertDescription>Data Kamar yang berkaitan tidak akan memiliki Tipe Kamar</AlertDescription>
+        <AlertDescription>Data Kamar yang ....</AlertDescription>
       </Alert>
       <div className="flex items-center justify-end gap-2">
         <DialogClose asChild>

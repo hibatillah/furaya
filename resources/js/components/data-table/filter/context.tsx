@@ -2,7 +2,7 @@ import React from "react";
 
 import { Column } from "@tanstack/react-table";
 
-import type { FilterContext, FilterVariant } from "@/types/data-table"
+import type { FilterContext, FilterState, FilterVariant } from "@/types/data-table";
 
 import { customFilterFns } from "@/components/data-table/utils";
 
@@ -31,7 +31,7 @@ export function useFilter<T>() {
 
 /** FilterContext provider */
 export function FilterProvider<T>({ children }: { children: React.ReactNode }) {
-  const [state, setState] = React.useState<keyof T>();
+  const [state, setState] = React.useState<FilterState<T>>();
 
   // Get all filter variant based on `utils.ts`
   const filters = React.useMemo<FilterVariant[]>(() => {
@@ -50,7 +50,7 @@ export function FilterProvider<T>({ children }: { children: React.ReactNode }) {
 
   // Reset filter value column
   const clearFilter = React.useCallback((column: Column<T>) => {
-    setState(undefined);
+    setState("idle");
     column.setFilterValue(undefined);
   }, []);
 
@@ -66,9 +66,5 @@ export function FilterProvider<T>({ children }: { children: React.ReactNode }) {
     [state, setState, filters, clearFilter, isFilterActive, getFilterName],
   );
 
-  return (
-    <FilterContext.Provider value={contextValue}>
-      {children}
-    </FilterContext.Provider>
-  );
+  return <FilterContext.Provider value={contextValue}>{children}</FilterContext.Provider>;
 }

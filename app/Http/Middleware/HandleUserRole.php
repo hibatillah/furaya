@@ -27,7 +27,7 @@ class HandleUserRole
         // ]);
 
         if (!$authorized) {
-            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses');
+            return redirect()->route('dashboard')->with('warning', 'Anda tidak memiliki akses');
         }
 
         return $next($request);

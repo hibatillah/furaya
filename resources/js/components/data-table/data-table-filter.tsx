@@ -11,22 +11,10 @@ import React from "react";
 
 import { Column } from "@tanstack/react-table";
 
-import type {
-  DataTableFilter,
-  FilterComponent,
-  FilterMap,
-  FilterMapItem,
-  FilterVariant,
-  GroupedFilter,
-  StandaloneFilter,
-} from "@/types/data-table";
+import type { DataTableFilter, FilterComponent, FilterMap, FilterMapItem, FilterVariant, GroupedFilter, StandaloneFilter } from "@/types/data-table";
 
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
 import { CheckboxFilter } from "./filter/checkbox-filter";
@@ -35,13 +23,7 @@ import { DateRangeFilter } from "./filter/date-range-filter";
 import { DateYearFilter } from "./filter/date-year-filter";
 import { RadioFilter } from "./filter/radio-filter";
 
-import {
-  CalendarIcon,
-  CalendarRangeIcon,
-  CircleCheckIcon,
-  ListFilterIcon,
-  SquareCheckIcon,
-} from "lucide-react";
+import { CalendarIcon, CalendarRangeIcon, CircleCheckIcon, ListFilterIcon, SquareCheckIcon } from "lucide-react";
 
 /**
  * Define each filter component based on extended filter functions.
@@ -62,7 +44,7 @@ function filterComponentsMap<T>(variant?: FilterVariant) {
  * @function Filter list for grouped filter
  * @description Manage filter state to show active filter component on popover
  */
-function GroupedFilter<T>(props: FilterComponent<T>) {
+function FilterItem<T>(props: FilterComponent<T>) {
   const { column, data, label } = props;
   const { state, setState, isFilterActive, getFilterName } = useFilter<T>();
 
@@ -87,41 +69,44 @@ function GroupedFilter<T>(props: FilterComponent<T>) {
   // define filter components and icon
   const filterComponents = filterComponentsMap<T>() as FilterMap<T>;
   const Icon = filterComponents[filterKey].icon;
-  const Component = filterComponents[filterKey].component;
+  const FilterComponent = filterComponents[filterKey].component;
 
   // active state not match this filter
-  if (state && state !== column.id) return null;
+  if (state && state !== column.id && state !== "idle") return null;
 
   // return active filter component
   if (state === column.id) {
-    return <Component column={column} data={data} label={label} />;
+    return (
+      <FilterComponent
+        column={column}
+        data={data}
+        label={label}
+      />
+    );
   }
 
   return (
     <Button
       size="sm"
       variant="ghost"
-      className="h-7 justify-start !ps-2 text-sm"
+      className="h-7 justify-start !ps-1 text-sm"
       onClick={() => setState(column.id as keyof T)}
     >
       <Icon className="text-muted-foreground size-4" />
       <span className="capitalize">{label ?? filterText[filterKey]}</span>
 
       {isFiltering && (
-        <span className="text-primary max-w-18 -me-1 ms-auto line-clamp-1 inline-flex h-5 max-h-full items-center rounded px-1 font-[inherit] text-xs capitalize dark:text-teal-600">
-          {filterKey === "checkbox"
-            ? `${selectedValue.length} dipilih`
-            : "Dipilih"}
+        <span className="text-muted-foreground ms-auto -me-1 line-clamp-1 inline-flex h-5 max-h-full max-w-18 items-center rounded px-1 text-xs font-[weight:inherit] capitalize">
+          {filterKey === "checkbox" ? `${selectedValue.length} dipilih` : "Dipilih"}
         </span>
       )}
     </Button>
   );
 }
 
-function FilterComponent<T>(props: DataTableFilter<T>) {
+function GroupedFilter<T>(props: DataTableFilter<T>) {
   const { table, standalone = false, className, ...rest } = props;
-  const { state, setState, filters, getFilterName, isFilterActive } =
-    useFilter<T>();
+  const { state, setState, filters, getFilterName, isFilterActive } = useFilter<T>();
 
   const [open, setOpen] = React.useState(false);
 
@@ -134,9 +119,7 @@ function FilterComponent<T>(props: DataTableFilter<T>) {
 
   // exclude columns from detached extend data
   if (extend) {
-    excludeColumns = excludeColumns.concat(
-      detachedColumns.map((item) => item.id) as string[],
-    );
+    excludeColumns = excludeColumns.concat(detachedColumns.map((item) => item.id) as string[]);
   }
 
   /**
@@ -151,10 +134,6 @@ function FilterComponent<T>(props: DataTableFilter<T>) {
       return filters.includes(filterKey);
     });
 
-  React.useEffect(() => {
-    if (!open) setState(undefined); // back to filter list view if popover closed
-  }, [open, setState]);
-
   // get standalone column
   const standaloneColumn = columns.find((column) => column.id === filterKey);
 
@@ -163,13 +142,11 @@ function FilterComponent<T>(props: DataTableFilter<T>) {
     const filterKey = getFilterName(standaloneColumn) as FilterVariant;
 
     // get filter components
-    const filterComponents = filterComponentsMap<T>(
-      filterKey,
-    ) as FilterMapItem<T>;
-    const Component = filterComponents.component;
+    const filterComponents = filterComponentsMap<T>(filterKey) as FilterMapItem<T>;
+    const FilterComponent = filterComponents.component;
 
     return (
-      <Component
+      <FilterComponent
         column={standaloneColumn!}
         data={data}
         label={label}
@@ -196,32 +173,40 @@ function FilterComponent<T>(props: DataTableFilter<T>) {
   if (columns.length === 0) return null;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(value: boolean) => {
+        setOpen(value);
+        if (value) setState("idle");
+      }}
+    >
       <PopoverTrigger asChild>
-        <Button variant="outline" className={className} {...rest}>
+        <Button
+          variant="outline"
+          className={className}
+          {...rest}
+        >
           <div
             data-active={isFiltering}
-            className="after:bg-primary relative after:absolute after:-end-px after:top-px after:size-1.5 after:rounded-full data-[active=false]:after:hidden dark:after:bg-teal-600"
+            className="relative after:absolute after:-end-px after:top-px after:size-1.5 after:rounded-full after:bg-teal-700 data-[active=false]:after:hidden dark:after:bg-teal-600"
           >
             <ListFilterIcon className="text-muted-foreground" />
           </div>
-          <span className="@2xl:not-sr-only text-foreground sr-only">
-            Filter
-          </span>
+          <span className="text-foreground sr-only @2xl:not-sr-only">Filter</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
         align="center"
         className="group flex !w-max !min-w-52 flex-col !gap-1 p-2"
       >
-        {!state && (
+        {state === "idle" && (
           <>
             <div className="flex items-center justify-between px-1 pt-0.5">
               <div className="text-foreground/90 text-xs">Pilih Filter</div>
               <button
                 onClick={resetColumnsFilter}
                 disabled={!isFiltering}
-                className="text-muted-foreground not-disabled:hover:text-foreground not-disabled:cursor-pointer not-disabled:hover:underline text-xs underline-offset-2"
+                className="text-muted-foreground not-disabled:hover:text-foreground text-xs underline-offset-2 not-disabled:cursor-pointer not-disabled:hover:underline"
               >
                 Reset
               </button>
@@ -229,14 +214,22 @@ function FilterComponent<T>(props: DataTableFilter<T>) {
             <Separator className="my-0.5" />
           </>
         )}
-        {columns.map((column, i) => (
-          <GroupedFilter
-            key={i}
-            column={column}
-            data={extendItems(column)?.data ?? undefined}
-            label={extendItems(column)?.label ?? undefined}
-          />
-        ))}
+        {columns.length > 0 &&
+          columns.map((column, i) => {
+            const data = extendItems(column)?.data ?? undefined;
+
+            return (
+              data &&
+              data.length > 0 && (
+                <FilterItem
+                  key={i}
+                  column={column}
+                  data={data}
+                  label={extendItems(column)?.label ?? undefined}
+                />
+              )
+            );
+          })}
       </PopoverContent>
     </Popover>
   );
@@ -245,7 +238,7 @@ function FilterComponent<T>(props: DataTableFilter<T>) {
 export function DataTableFilter<T>(props: DataTableFilter<T>) {
   return (
     <FilterProvider>
-      <FilterComponent {...props} />
+      <GroupedFilter {...props} />
     </FilterProvider>
   );
 }

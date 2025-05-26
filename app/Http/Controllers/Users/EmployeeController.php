@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\EmployeeRequest;
 use Inertia\Inertia;
+use App\Models\User;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +18,9 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $employees = Employee::with('user', 'department')->orderBy('created_at', 'desc')->paginate(10);
+        $employees = User::withWhereHas("role", function ($query) {
+            $query->where("name", "ILIKE", "employee");    // case-insensitive for pgsql
+        })->orderBy('created_at', 'desc')->get();
 
         return Inertia::render('employee/index', [
             'employees' => $employees,

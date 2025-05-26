@@ -1,13 +1,17 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
-import { PencilIcon, TrashIcon } from "lucide-react";
-import { toast } from "sonner";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useState } from "react";
+import RoleCreate from "./create";
+import RoleDelete from "./delete";
+import RoleEdit from "./edit";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -16,19 +20,23 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoleIndex(props: { roles: Pagination<Role.Default> }) {
+export default function RoleIndex(props: { roles: Role.Default[] }) {
   const { roles } = props;
-  const { delete: deleteRole } = useForm();
 
-  // handle delete each role
-  function handleDelete(e: React.FormEvent, id: string) {
-    e.preventDefault();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Role.Default | null>(null);
 
-    toast.loading("Menghapus role...", { id: `delete-${id}` });
-    deleteRole(route("role.destroy", { id }), {
-      onSuccess: () => toast.success("Role berhasil dihapus", { id: `delete-${id}` }),
-      onError: () => toast.error("Role gagal dihapus", { id: `delete-${id}` }),
-    });
+  function handleDialog(type: "delete" | "edit", row: Role.Default) {
+    setDialogType(type);
+    setSelectedRow(row);
+    setDialogOpen(true);
+  }
+
+  function handleDialogClose() {
+    setDialogOpen(false);
+    setDialogType(null);
+    setSelectedRow(null);
   }
 
   // define data table columns
@@ -41,44 +49,28 @@ export default function RoleIndex(props: { roles: Pagination<Role.Default> }) {
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                asChild
-              >
-                <Link href={route("role.edit", { id: row.original.id })}>
-                  <PencilIcon className="size-3" />
-                  <span className="sr-only">Edit Data</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit Data</p>
-            </TooltipContent>
-          </Tooltip>
-          <form onSubmit={(e) => handleDelete(e, row.original.id)}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  type="submit"
-                >
-                  <TrashIcon className="size-3" />
-                  <span className="sr-only">Hapus Data</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Hapus Data</p>
-              </TooltipContent>
-            </Tooltip>
-          </form>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+            >
+              <EllipsisVerticalIcon className="size-4" />
+              <span className="sr-only">Aksi</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => handleDialog("delete", row.original)}
+            >
+              Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ];
@@ -93,21 +85,39 @@ export default function RoleIndex(props: { roles: Pagination<Role.Default> }) {
         <CardContent>
           <DataTable
             columns={columns}
-            data={roles.data}
+            data={roles}
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <Button
-                  className="ms-auto"
-                  asChild
-                >
-                  <Link href={route("role.create")}>Tambah Role</Link>
-                </Button>
+                <RoleCreate />
               </DataTableControls>
             )}
           </DataTable>
         </CardContent>
       </Card>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      >
+        <DialogContent
+          className="w-120"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          noClose
+        >
+          {dialogType === "delete" && selectedRow && (
+            <RoleDelete
+              id={selectedRow.id}
+              onClose={handleDialogClose}
+            />
+          )}
+          {dialogType === "edit" && selectedRow && (
+            <RoleEdit
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\ManagerRequest;
 use Inertia\Inertia;
 use App\Models\Manager;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,9 @@ class ManagerController extends Controller
      */
     public function index()
     {
-        $managers = Manager::with('user')->orderBy('created_at', 'desc')->paginate(10);
+        $managers = User::withWhereHas("role", function ($query) {
+            $query->where("name", "ILIKE", "manager");    // case-insensitive for pgsql
+        })->orderBy('created_at', 'desc')->paginate(10);
 
         return Inertia::render('manager/index', [
             'managers' => $managers,
@@ -27,10 +30,7 @@ class ManagerController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        return Inertia::render('manager/create');
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -45,7 +45,7 @@ class ManagerController extends Controller
             'record_id' => $manager->id,
         ]);
 
-        return redirect()->route('manager.index')->with('success', 'Manajer berhasil ditambahkan');
+        return redirect()->back();
     }
 
     /**
@@ -56,30 +56,7 @@ class ManagerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        try {
-            $manager = Manager::with('user')->findOrFail($id);
-
-            return Inertia::render('manager/edit', [
-                'manager' => $manager,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Manager not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "managers",
-            ]);
-
-            return back()->with('warning', 'Manajer tidak ditemukan');
-        } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit manager page", [
-                "user_id" => Auth::user()->id,
-                "table" => "managers",
-            ]);
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -96,21 +73,21 @@ class ManagerController extends Controller
                 'record_id' => $manager->id,
             ]);
 
-            return redirect()->route('manager.index')->with('success', 'Manajer berhasil diperbarui');
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Manager not found", [
                 "user_id" => Auth::user()->id,
                 "table" => "managers",
             ]);
 
-            return back()->with('warning', 'Manajer tidak ditemukan');
+            return redirect()->back()->with('warning', 'Manajer tidak ditemukan');
         } catch (\Exception $e) {
             Log::channel("project")->error("Updating manager", [
                 "user_id" => Auth::user()->id,
                 "table" => "managers",
             ]);
 
-            return back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 

@@ -1,42 +1,46 @@
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { toast } from 'sonner';
-export default function BedTypeEdit(props: { bedType: BedType.Default }) {
-  const { bedType } = props;
+import InputError from "@/components/input-error";
+import { Button } from "@/components/ui/button";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useForm } from "@inertiajs/react";
+import { toast } from "sonner";
 
-  const breadcrumbs: BreadcrumbItem[] = [
-    {
-      title: "Tipe Kasur",
-      href: route("bedtype.index"),
-    },
-    {
-      title: "Edit",
-      href: route("bedtype.edit", { id: bedType.id }),
-    },
-  ];
+export default function BedTypeEdit(props: { data: BedType.Default; onClose: () => void }) {
+  const { data: bedType, onClose } = props;
 
   const { data, setData, put, processing, errors } = useForm<BedType.Update>(bedType);
 
-  function handleSubmit(e: React.FormEvent) {
+  // handle update bed type data
+  function handleUpdateBedType(e: React.FormEvent) {
     e.preventDefault();
 
-    toast.loading("Mengubah tipe kasur...", { id: "edit-bed-type" });
-    put(route("bedtype.update", { id: bedType.id }), {
-      onError: () => toast.error("Tipe kasur gagal diubah", { id: "edit-bed-type" }),
+    toast.loading("Memperbarui tipe kasur...", {
+      id: `update-bed-type-${data.id}`,
+    });
+
+    put(route("bedtype.update", { id: data.id }), {
+      onSuccess: () => {
+        toast.success("Tipe kasur berhasil diperbarui", {
+          id: `update-bed-type-${data.id}`,
+        });
+        onClose();
+      },
+      onError: () => {
+        toast.error("Tipe kasur gagal diperbarui", {
+          id: `update-bed-type-${data.id}`,
+        });
+      },
     });
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Edit Tipe Kasur" />
-      <h1 className="mb-6 text-2xl font-bold">Edit Tipe Kasur</h1>
+    <>
+      <DialogHeader>
+        <DialogTitle>Edit Tipe Kasur</DialogTitle>
+      </DialogHeader>
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleUpdateBedType}
         className="max-w-lg space-y-6"
       >
         <div className="grid gap-2">
@@ -46,14 +50,27 @@ export default function BedTypeEdit(props: { bedType: BedType.Default }) {
             type="text"
             value={data.name}
             onChange={(e) => setData("name", e.target.value)}
+            required
+            placeholder="Nama"
           />
           <InputError message={errors.name} />
         </div>
 
-        <Button type="submit" className="w-full" disabled={processing}>
-          {processing ? "Mengubah..." : "Simpan"}
-        </Button>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Button
+            variant="outline"
+            type="button"
+          >
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            disabled={processing}
+          >
+            Perbarui
+          </Button>
+        </div>
       </form>
-    </AppLayout>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
 import AppLayoutTemplate from "@/layouts/app/app-sidebar-layout";
-import { cn } from "@/lib/utils";
 import { FlashMessages, type BreadcrumbItem } from "@/types";
 import { usePage } from "@inertiajs/react";
 import { useEffect, type ReactNode } from "react";

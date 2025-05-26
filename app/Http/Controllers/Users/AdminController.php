@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\AdminRequest;
 use Inertia\Inertia;
 use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -17,20 +18,24 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $admins = Admin::with('user')->orderBy('created_at', 'desc')->paginate(10);
+        $admins = User::withWhereHas("role", function ($query) {
+            $query->where("name", "ILIKE", "admin");    // case-insensitive for pgsql
+        })->orderBy('created_at', 'desc')->get();
+
+        $managers = User::withWhereHas("role", function ($query) {
+            $query->where("name", "ILIKE", "manager");    // case-insensitive for pgsql
+        })->orderBy('created_at', 'desc')->get();
 
         return Inertia::render('admin/index', [
             'admins' => $admins,
+            'managers' => $managers,
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        return Inertia::render('admin/create');
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -56,30 +61,7 @@ class AdminController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        try {
-            $admin = Admin::with('user')->findOrFail($id);
-
-            return Inertia::render('admin/edit', [
-                'admin' => $admin,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Admin not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "admins",
-            ]);
-
-            return back()->with('warning', 'Admin tidak ditemukan');
-        } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit admin page", [
-                "user_id" => Auth::user()->id,
-                "table" => "admins",
-            ]);
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.

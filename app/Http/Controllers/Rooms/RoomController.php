@@ -29,7 +29,7 @@ class RoomController extends Controller
      */
     public function index()
     {
-        $rooms = Room::with("roomType", "bedType")->orderBy("created_at", "desc")->paginate(10);
+        $rooms = Room::with("roomType", "bedType")->orderBy("created_at", "desc")->get();
 
         return Inertia::render("rooms/index", [
             "rooms" => $rooms,
@@ -43,7 +43,7 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $statusOptions = RoomStatusEnum::getLabels();
+        $statusOptions = RoomStatusEnum::getValues();
 
         return Inertia::render("rooms/create", [
             "roomTypes" => $this->roomTypes,

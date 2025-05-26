@@ -112,7 +112,7 @@ export function CheckboxFilter<T>(props: FilterComponent<T>) {
           >
             <div
               data-active={isFiltering}
-              className="after:bg-primary relative after:absolute after:-end-px after:top-px after:size-1.5 after:rounded-full data-[active=false]:after:hidden dark:after:bg-teal-600"
+              className="after:bg-teal-700 dark:after:bg-teal-600 relative after:absolute after:-end-px after:top-px after:size-1.5 after:rounded-full data-[active=false]:after:hidden"
             >
               <FilterIcon className="text-muted-foreground" />
             </div>
@@ -121,7 +121,7 @@ export function CheckboxFilter<T>(props: FilterComponent<T>) {
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="group !w-fit !min-w-32 !gap-2 p-3"
+          className="group !w-fit !min-w-40 !gap-2 p-2"
         >
           <div className="flex items-center justify-between">
             <span className="text-foreground/90 text-xs">Filter</span>
@@ -136,7 +136,7 @@ export function CheckboxFilter<T>(props: FilterComponent<T>) {
               Reset
             </button>
           </div>
-          <Separator className="my-1" />
+          <Separator className="mt-1 mb-2" />
           <Filter column={column} data={mapData} selected={selectedValue} />
         </PopoverContent>
       </Popover>
@@ -150,7 +150,7 @@ export function CheckboxFilter<T>(props: FilterComponent<T>) {
           variant="ghost"
           size="sm"
           className="h-5 gap-1 rounded-sm py-0.5 !pe-2 !ps-0.5"
-          onClick={() => setState(undefined)}
+          onClick={() => setState("idle")}
         >
           <ChevronLeftIcon className="size-3" />
           <span className="text-xs capitalize">{label ?? column.id}</span>

@@ -6,13 +6,13 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
-import { EllipsisVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
+import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
+import RoomTypeCreate from "./create";
 import RoomTypeDelete from "./delete";
 import RoomTypeEdit from "./edit";
-import RoomTypeCreate from "./create";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -21,7 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomTypeIndex(props: { roomTypes: Pagination<RoomType.Default> }) {
+export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) {
   const { roomTypes } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -61,22 +61,19 @@ export default function RoomTypeIndex(props: { roomTypes: Pagination<RoomType.De
             <Button
               variant="ghost"
               size="icon"
+              className="size-8"
             >
               <EllipsisVerticalIcon className="size-4" />
               <span className="sr-only">Aksi</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>
-              <PencilIcon className="size-4" />
-              <span>Edit</span>
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDialog("delete", row.original)}
             >
-              <TrashIcon className="size-4" />
-              <span>Hapus</span>
+              Hapus
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -94,7 +91,7 @@ export default function RoomTypeIndex(props: { roomTypes: Pagination<RoomType.De
         <CardContent>
           <DataTable
             columns={columns}
-            data={roomTypes.data}
+            data={roomTypes}
           >
             {({ table }) => (
               <DataTableControls table={table}>

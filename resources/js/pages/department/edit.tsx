@@ -1,63 +1,75 @@
 import InputError from "@/components/input-error";
 import { Button } from "@/components/ui/button";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AppLayout from "@/layouts/app-layout";
-import { BreadcrumbItem } from "@/types";
-import { Head, useForm } from "@inertiajs/react";
+import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
 
-export default function DepartmentEdit(props: { department: Department.Default }) {
-  const { department } = props;
+export default function DepartmentEdit(props: { data: Department.Default, onClose: () => void }) {
+  const { data: dataDepartment, onClose } = props;
 
-  const breadcrumbs: BreadcrumbItem[] = [
-    {
-      title: "Department",
-      href: route("department.index"),
-    },
-    {
-      title: "Edit",
-      href: route("department.edit", { id: department.id }),
-    },
-  ];
-
-  const { data, setData, put, errors, processing } = useForm<Department.Update>(department);
+  const { data, setData, put, errors, processing } = useForm<Department.Update>(dataDepartment);
 
   function handleUpdateDepartment(e: React.FormEvent) {
     e.preventDefault();
 
-    toast.loading("Mengubah departemen...", { id: "update-department" });
-    put(route("department.update", { id: department.id }), {
-      onError: () => toast.error("Departemen gagal diubah", { id: "update-department" }),
+    toast.loading("Memperbarui departemen...", {
+      id: `update-department-${data.id}`,
+    });
+
+    put(route("department.update", { id: data.id }), {
+      onSuccess: () => {
+        toast.success("Departemen berhasil diperbarui", {
+          id: `update-department-${data.id}`,
+        });
+        onClose();
+      },
+      onError: () => {
+        toast.error("Departemen gagal diperbarui", {
+          id: `update-department-${data.id}`,
+        });
+      },
     });
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Edit Department" />
-      <h1 className="text-2xl font-bold">Edit Departemen</h1>
+    <>
+      <DialogHeader>
+        <DialogTitle>Edit Departemen</DialogTitle>
+      </DialogHeader>
       <form
         onSubmit={handleUpdateDepartment}
-        className="flex flex-col gap-4"
+        className="max-w-lg space-y-6"
       >
-        <div className="grid">
-          <Label>Nama Departemen</Label>
+        <div className="grid gap-2">
+          <Label htmlFor="name">Nama</Label>
           <Input
-            name="name"
+            id="name"
+            type="text"
             value={data.name}
             onChange={(e) => setData("name", e.target.value)}
-            placeholder="Masukkan nama departemen"
+            required
+            placeholder="Nama"
           />
           <InputError message={errors.name} />
         </div>
 
-        <Button
-          type="submit"
-          disabled={processing}
-        >
-          Simpan
-        </Button>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Button
+            variant="outline"
+            type="button"
+          >
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            disabled={processing}
+          >
+            Perbarui
+          </Button>
+        </div>
       </form>
-    </AppLayout>
+    </>
   );
 }

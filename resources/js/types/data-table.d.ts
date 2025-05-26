@@ -7,12 +7,7 @@
  *
  * @author hibatillah
  */
-import {
-  Column,
-  ColumnDef,
-  FilterFnOption,
-  Table,
-} from "@tanstack/react-table";
+import { Column, ColumnDef, FilterFnOption, Table } from "@tanstack/react-table";
 
 import { customFilterFns } from "../components/data-table/utils";
 
@@ -29,9 +24,8 @@ interface DataTable<Data, Value> {
   data: Data[];
   controls?: Controls;
   globalFilter?: FilterFnOption<Data>;
-  children?:
-    | React.ReactNode
-    | ((props: { table: Table<Data> }) => React.ReactNode);
+  children?: React.ReactNode | ((props: { table: Table<Data> }) => React.ReactNode);
+  fixed?: boolean;
 }
 
 // Data Table Controls Type Definition
@@ -54,14 +48,14 @@ export interface FilterComponent<T> extends React.ComponentProps<"button"> {
 
 export interface FilterMapItem<T> {
   icon: LucideIcon;
-  component: (
-    props: FilterComponent<T> & React.ComponentProps<"button">,
-  ) => React.ReactNode;
+  component: (props: FilterComponent<T> & React.ComponentProps<"button">) => React.ReactNode;
 }
 
+export type FilterState<T> = keyof T | "idle" | undefined;
+
 export interface FilterContext<T> {
-  state: keyof T | undefined;
-  setState: React.Dispatch<React.SetStateAction<keyof T | undefined>>;
+  state: FilterState<T>;
+  setState: React.Dispatch<React.SetStateAction<FilterState<T>>>;
   filters: FilterVariant[];
   clearFilter: (column: Column<T>) => void;
   isFilterActive: (column: Column<T>) => boolean;
@@ -90,5 +84,4 @@ export interface BaseFilter<T> extends React.ComponentProps<"button"> {
   standalone?: boolean;
 }
 
-export type DataTableFilter<T> = BaseFilter<T> &
-  (GroupedFilter<T> | StandaloneFilter<T>);
+export type DataTableFilter<T> = BaseFilter<T> & (GroupedFilter<T> | StandaloneFilter<T>);

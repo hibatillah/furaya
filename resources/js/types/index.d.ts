@@ -3,6 +3,7 @@ import type { Config } from "ziggy-js";
 
 export interface Auth {
   user: User;
+  role: string;
 }
 
 export interface BreadcrumbItem {
@@ -28,6 +29,7 @@ export interface NavCollapsibleItem extends NavItem {
 
 export interface SharedData {
   name: string;
+  url: string;
   quote: { message: string; author: string };
   auth: Auth;
   ziggy: Config & { location: string };

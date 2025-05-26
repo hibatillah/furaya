@@ -2,32 +2,19 @@ import { Table } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 
 export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
   const { table } = props;
   const pageSizeOpt = [10, 20, 30]; // Define the page size options
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const totalPages = Math.ceil(table.getRowCount() / table.getState().pagination.pageSize);
 
   return (
-    <div className="flex items-center justify-between gap-8">
+    <div className="flex items-center justify-between gap-4">
       {/* Results per page */}
       <div className="flex items-center gap-3">
         <Select
@@ -40,7 +27,7 @@ export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
           <SelectTrigger className="w-fit whitespace-nowrap">
             <SelectValue placeholder="Select number of results" />
           </SelectTrigger>
-          <SelectContent className="[&_*[role=option]>span]:end-2 [&_*[role=option]>span]:start-auto [&_*[role=option]]:pe-8 [&_*[role=option]]:ps-2">
+          <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
             {pageSizeOpt.map((pageSize) => (
               <SelectItem
                 key={pageSize}
@@ -51,34 +38,19 @@ export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
             ))}
           </SelectContent>
         </Select>
-        <Label className="max-sm:sr-only">Baris per halaman</Label>
+        <Label className="text-muted-foreground max-sm:sr-only">Baris per halaman</Label>
       </div>
 
       {/* Page number information */}
-      <div className="text-muted-foreground flex grow justify-end whitespace-nowrap text-sm">
+      <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
         <p
-          className="text-muted-foreground whitespace-nowrap text-sm"
+          className="text-muted-foreground text-sm whitespace-nowrap"
           aria-live="polite"
         >
-          <span className="text-foreground">
-            {table.getState().pagination.pageIndex *
-              table.getState().pagination.pageSize +
-              1}
-            {" - "}
-            {Math.min(
-              Math.max(
-                table.getState().pagination.pageIndex *
-                  table.getState().pagination.pageSize +
-                  table.getState().pagination.pageSize,
-                0,
-              ),
-              table.getRowCount(),
-            )}
-          </span>{" "}
-          dari{" "}
-          <span className="text-foreground">
-            {table.getRowCount().toString()}
-          </span>
+          <span className="me-1">Halaman</span>
+          <span className="text-foreground">{currentPage}</span>
+          <span className="mx-1">/</span>
+          <span className="text-foreground">{totalPages}</span>
         </p>
       </div>
 

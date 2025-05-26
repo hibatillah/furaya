@@ -109,7 +109,7 @@ export function DateRangeFilter<T>(props: FilterComponent<T>) {
           variant="ghost"
           size="sm"
           className="h-fit gap-1 rounded-sm py-0.5 !pe-2 !ps-0.5"
-          onClick={() => setState(undefined)}
+          onClick={() => setState("idle")}
         >
           <ChevronLeftIcon className="size-3" />
           <span className="text-xs capitalize">Tanggal</span>

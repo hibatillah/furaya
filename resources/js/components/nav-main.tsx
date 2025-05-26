@@ -78,7 +78,7 @@ export function NavCollapsible({ items }: { items: NavCollapsibleItem[] }) {
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
   const page = usePage();
-  const appUrl = page.props.appUrl as string;
+  const appUrl = page.props.url as string;
 
   return (
     <SidebarGroup className="px-2 py-0">

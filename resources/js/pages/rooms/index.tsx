@@ -3,13 +3,15 @@ import { DataTableFilter } from "@/components/data-table/data-table-filter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
-import { PencilIcon, TrashIcon } from "lucide-react";
-import { toast } from "sonner";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useState } from "react";
+import RoomDelete from "./delete";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -18,19 +20,23 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomsIndex(props: { rooms: Pagination<Room.Default>; roomTypes: RoomType.Default[]; bedTypes: BedType.Default[] }) {
+export default function RoomsIndex(props: { rooms: Room.Default[]; roomTypes: RoomType.Default[]; bedTypes: BedType.Default[] }) {
   const { rooms, roomTypes, bedTypes } = props;
-  const { delete: deleteRoom } = useForm();
 
-  // handle delete each room
-  function handleDelete(e: React.FormEvent, id: string) {
-    e.preventDefault();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Room.Default | null>(null);
 
-    toast.loading("Menghapus kamar...", { id: `delete-${id}` });
-    deleteRoom(route("room.destroy", { id }), {
-      onSuccess: () => toast.success("Kamar berhasil dihapus", { id: `delete-${id}` }),
-      onError: () => toast.error("Kamar gagal dihapus", { id: `delete-${id}` }),
-    });
+  function handleDialog(type: "delete" | "edit", row: Room.Default) {
+    setDialogType(type);
+    setSelectedRow(row);
+    setDialogOpen(true);
+  }
+
+  function handleDialogClose() {
+    setDialogOpen(false);
+    setDialogType(null);
+    setSelectedRow(null);
   }
 
   // define data table columns
@@ -86,44 +92,32 @@ export default function RoomsIndex(props: { rooms: Pagination<Room.Default>; roo
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                asChild
-              >
-                <Link href={route("roomtype.edit", { id: row.original.id })}>
-                  <PencilIcon className="size-3" />
-                  <span className="sr-only">Edit Data</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit Data</p>
-            </TooltipContent>
-          </Tooltip>
-          <form onSubmit={(e) => handleDelete(e, row.original.id)}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  type="submit"
-                >
-                  <TrashIcon className="size-3" />
-                  <span className="sr-only">Hapus Data</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Hapus Data</p>
-              </TooltipContent>
-            </Tooltip>
-          </form>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+            >
+              <EllipsisVerticalIcon className="size-4" />
+              <span className="sr-only">Aksi</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={route("room.show", { id: row.original.id })}>Detail</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={route("room.edit", { id: row.original.id })}>Edit</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => handleDialog("delete", row.original)}
+            >
+              Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ];
@@ -138,7 +132,7 @@ export default function RoomsIndex(props: { rooms: Pagination<Room.Default>; roo
         <CardContent>
           <DataTable
             columns={columns}
-            data={rooms.data}
+            data={rooms}
           >
             {({ table }) => (
               <DataTableControls table={table}>
@@ -172,6 +166,24 @@ export default function RoomsIndex(props: { rooms: Pagination<Room.Default>; roo
           </DataTable>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      >
+        <DialogContent
+          className="w-120"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          noClose
+        >
+          {dialogType === "delete" && selectedRow && (
+            <RoomDelete
+              id={selectedRow.id}
+              onClose={handleDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

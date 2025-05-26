@@ -17,7 +17,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::orderBy('created_at', 'desc')->paginate(10);
+        $departments = Department::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('department/index', [
             'departments' => $departments,
@@ -27,10 +27,7 @@ class DepartmentController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        return Inertia::render('department/create');
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -45,7 +42,7 @@ class DepartmentController extends Controller
             'record_id' => $department->id,
         ]);
 
-        return redirect()->route('department.index')->with('success', 'Departemen berhasil ditambahkan');
+        return redirect()->back();
     }
 
     /**
@@ -56,30 +53,7 @@ class DepartmentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        try {
-            $department = Department::findOrFail($id);
-
-            return Inertia::render('department/edit', [
-                'department' => $department,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Department not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
-            ]);
-
-            return back()->with('warning', 'Departemen tidak ditemukan');
-        } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit department page", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
-            ]);
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -96,21 +70,21 @@ class DepartmentController extends Controller
                 'record_id' => $department->id,
             ]);
 
-            return redirect()->route('department.index')->with('success', 'Departemen berhasil diperbarui');
+            return redirect()->back();
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Department not found", [
                 "user_id" => Auth::user()->id,
                 "table" => "departments",
             ]);
 
-            return back()->with('warning', 'Departemen tidak ditemukan');
+            return redirect()->back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
             Log::channel("project")->error("Updating department", [
                 "user_id" => Auth::user()->id,
                 "table" => "departments",
             ]);
 
-            return back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 

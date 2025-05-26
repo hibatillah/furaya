@@ -1,13 +1,17 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
-import { PencilIcon, TrashIcon } from "lucide-react";
-import { toast } from "sonner";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useState } from "react";
+import DepartmentCreate from "./create";
+import DepartmentDelete from "./delete";
+import DepartmentEdit from "./edit";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -16,19 +20,23 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function DepartmentIndex(props: { departments: Pagination<Department.Default> }) {
+export default function DepartmentIndex(props: { departments: Department.Default[] }) {
   const { departments } = props;
-  const { delete: deleteDepartment } = useForm();
 
-  // handle delete each department
-  function handleDelete(e: React.FormEvent, id: string) {
-    e.preventDefault();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Department.Default | null>(null);
 
-    toast.loading("Menghapus departemen...", { id: `delete-${id}` });
-    deleteDepartment(route("department.destroy", { id }), {
-      onSuccess: () => toast.success("Departemen berhasil dihapus", { id: `delete-${id}` }),
-      onError: () => toast.error("Departemen gagal dihapus", { id: `delete-${id}` }),
-    });
+  function handleDialog(type: "delete" | "edit", row: Department.Default) {
+    setDialogType(type);
+    setSelectedRow(row);
+    setDialogOpen(true);
+  }
+
+  function handleDialogClose() {
+    setDialogOpen(false);
+    setDialogType(null);
+    setSelectedRow(null);
   }
 
   // define data table columns
@@ -41,73 +49,73 @@ export default function DepartmentIndex(props: { departments: Pagination<Departm
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                asChild
-              >
-                <Link href={route("department.edit", { id: row.original.id })}>
-                  <PencilIcon className="size-3" />
-                  <span className="sr-only">Edit Data</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit Data</p>
-            </TooltipContent>
-          </Tooltip>
-          <form onSubmit={(e) => handleDelete(e, row.original.id)}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  type="submit"
-                >
-                  <TrashIcon className="size-3" />
-                  <span className="sr-only">Hapus Data</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Hapus Data</p>
-              </TooltipContent>
-            </Tooltip>
-          </form>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+            >
+              <EllipsisVerticalIcon className="size-4" />
+              <span className="sr-only">Aksi</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => handleDialog("delete", row.original)}
+            >
+              Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Department" />
+      <Head title="Departemen" />
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold">Department Index Page</h1>
+          <h1 className="text-2xl font-bold">Data Departemen Karyawan</h1>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={columns}
-            data={departments.data}
+            data={departments}
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <Button
-                  className="ms-auto"
-                  asChild
-                >
-                  <Link href={route("department.create")}>Tambah Departemen</Link>
-                </Button>
+                <DepartmentCreate />
               </DataTableControls>
             )}
           </DataTable>
         </CardContent>
       </Card>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      >
+        <DialogContent
+          className="w-120"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          noClose
+        >
+          {dialogType === "delete" && selectedRow && (
+            <DepartmentDelete
+              id={selectedRow.id}
+              onClose={handleDialogClose}
+            />
+          )}
+          {dialogType === "edit" && selectedRow && (
+            <DepartmentEdit
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

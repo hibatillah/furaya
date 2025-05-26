@@ -65,16 +65,28 @@ class DatabaseSeeder extends Seeder
 
         // define admin user
         $managerRoleId = Role::where('name', 'Manager')->first()->id;
-        $user = [
-            'name' => 'admin',
-            'email' => 'admin@admin.com',
-            'password' => bcrypt('admin123'),
-            'role_id' => $managerRoleId,
-            'created_at' => $dateISO,
-            'updated_at' => $dateISO,
+        $adminRoleId = Role::where('name', 'Admin')->first()->id;
+
+        $users = [
+            [
+                'name' => 'manager',
+                'email' => 'manager@gmail.com',
+                'password' => bcrypt('haihaihai'),
+                'role_id' => $managerRoleId,
+                'created_at' => $dateISO,
+                'updated_at' => $dateISO,
+            ],
+            [
+                'name' => 'admin',
+                'email' => 'admin@gmail.com',
+                'password' => bcrypt('haihaihai'),
+                'role_id' => $adminRoleId,
+                'created_at' => $dateISO,
+                'updated_at' => $dateISO,
+            ],
         ];
 
         // insert user data
-        DB::table('users')->insert($user);
+        DB::table('users')->insert($users);
     }
 }

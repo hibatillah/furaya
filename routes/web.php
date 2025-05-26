@@ -25,7 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // ======================= access by admin and manager ======================= //
-    Route::middleware(['role:admin,manager'])->group(function () {
+    Route::middleware("role:admin,manager")->group(function () {
         /**
          * user resource routes
          */
@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // ======================= access by manager ======================= //
-    Route::middleware(["role:manager"])->group(function () {
+    Route::middleware("role:manager")->group(function () {
         /**
          * role resource routes
          */
@@ -73,21 +73,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 "edit" => "admin.edit",
                 "update" => "admin.update",
                 "destroy" => "admin.destroy",
-            ]);
-
-        /**
-         * manager resource routes
-         */
-        Route::get("manager/tambah", [ManagerController::class, "create"])->name("manager.create");
-        Route::resource("manager", ManagerController::class)
-            ->except(["create", "show"])
-            ->parameters(["manager" => "id"])
-            ->names([
-                "index" => "manager.index",
-                "store" => "manager.store",
-                "edit" => "manager.edit",
-                "update" => "manager.update",
-                "destroy" => "manager.destroy",
             ]);
 
         /**
@@ -123,7 +108,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ======================= access by admin ======================= //
-    Route::middleware(["role:admin"])->group(function () {
+    Route::middleware("role:admin")->group(function () {
         /**
          * room routes
          * `/kamar`
@@ -178,7 +163,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ======================= access by employee ======================= //
-    Route::middleware(["role:employee"])->group(function () {
+    Route::middleware("role:employee")->group(function () {
         /**
          * room status routes
          * `/status/kamar`
@@ -224,6 +209,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             "update" => "customer.update",
             "destroy" => "customer.destroy",
         ]);
+
+    // IMPORTANT: This fallback route MUST be the very last route
+    Route::fallback(function () {
+        return Inertia::render('not-found');
+    });
 });
 
 require __DIR__ . '/settings.php';
