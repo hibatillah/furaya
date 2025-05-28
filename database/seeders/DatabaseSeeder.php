@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
 use App\Utils\DateHelper;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -19,24 +18,12 @@ class DatabaseSeeder extends Seeder
 
         // truncate existing data to avoid duplicates
         DB::table('users')->truncate();
-        DB::table('roles')->truncate();
         DB::table('bed_types')->truncate();
         DB::table('room_types')->truncate();
 
-        // define default roles
-        $roles = ['Admin', 'Manager', 'Employee', 'Customer'];
-        $roleData = array_map(function ($role) use ($dateISO) {
-            return [
-                'id' => Str::uuid(),
-                'name' => $role,
-                'created_at' => $dateISO,
-                'updated_at' => $dateISO,
-            ];
-        }, $roles);
-
         // define initial bed types
         $bedTypes = ['Single', 'Double', 'Twin', 'Queen', 'King'];
-        $bedTypeData = array_map(function ($bedType) use ($dateISO) {
+        $bedTypesData = array_map(function ($bedType) use ($dateISO) {
             return [
                 'id' => Str::uuid(),
                 'name' => $bedType,
@@ -47,7 +34,7 @@ class DatabaseSeeder extends Seeder
 
         // define initial room types
         $roomTypes = ['Junior', 'Deluxe', 'Executive', 'Business', 'Furaya Suite'];
-        $roomTypeData = array_map(function ($roomType) use ($dateISO) {
+        $roomTypesData = array_map(function ($roomType) use ($dateISO) {
             return [
                 'id' => Str::uuid(),
                 'name' => $roomType,
@@ -59,28 +46,34 @@ class DatabaseSeeder extends Seeder
         }, $roomTypes);
 
         // insert seed data
-        DB::table('roles')->insert($roleData);
-        DB::table('bed_types')->insert($bedTypeData);
-        DB::table('room_types')->insert($roomTypeData);
+        DB::table('bed_types')->insert($bedTypesData);
+        DB::table('room_types')->insert($roomTypesData);
 
         // define admin user
-        $managerRoleId = Role::where('name', 'Manager')->first()->id;
-        $adminRoleId = Role::where('name', 'Admin')->first()->id;
+        $password = bcrypt('haihaihai');
 
         $users = [
             [
                 'name' => 'manager',
                 'email' => 'manager@gmail.com',
-                'password' => bcrypt('haihaihai'),
-                'role_id' => $managerRoleId,
+                'password' => $password,
+                'role' => 'manager',
                 'created_at' => $dateISO,
                 'updated_at' => $dateISO,
             ],
             [
                 'name' => 'admin',
                 'email' => 'admin@gmail.com',
-                'password' => bcrypt('haihaihai'),
-                'role_id' => $adminRoleId,
+                'password' => $password,
+                'role' => 'admin',
+                'created_at' => $dateISO,
+                'updated_at' => $dateISO,
+            ],
+            [
+                'name' => 'employee',
+                'email' => 'employee@gmail.com',
+                'password' => $password,
+                'role' => 'employee',
                 'created_at' => $dateISO,
                 'updated_at' => $dateISO,
             ],

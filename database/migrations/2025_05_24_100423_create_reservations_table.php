@@ -45,6 +45,27 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        Schema::create('check_ins', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('reservation_id')->constrained('reservations')->cascadeOnDelete();
+            $table->datetime('checked_in_at');
+            $table->foreignUuid('employee_id')->constrained('employees')->nullOnDelete();
+            $table->string('notes')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('check_outs', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('reservation_id')->constrained('reservations')->cascadeOnDelete();
+            $table->datetime('checked_out_at');
+            $table->foreignUuid('employee_id')->constrained('employees')->nullOnDelete();
+            $table->float('final_total', 10, 2);
+            $table->string('notes')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -53,5 +74,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('reservations');
+        Schema::dropIfExists('check_ins');
+        Schema::dropIfExists('check_outs');
     }
 };

@@ -15,4 +15,9 @@ class Room extends BaseModel
     {
         return $this->belongsTo(BedType::class);
     }
+
+    public function roomStatus()
+    {
+        return $this->belongsTo(RoomStatus::class);
+    }
 }

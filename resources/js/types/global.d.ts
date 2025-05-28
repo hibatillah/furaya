@@ -40,6 +40,7 @@ declare module '@inertiajs/inertia' {
   interface PageProps {
     flash?: {
       success?: string;
+      warning?: string;
       error?: string;
     };
   }

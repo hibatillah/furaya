@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 abstract class Controller {
 
-  abstract public function index();
 
   abstract public function create();
 

@@ -6,12 +6,63 @@ import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/p
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
+import { router } from "@inertiajs/react";
 
-export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
-  const { table } = props;
+export function DataTablePaginations<TData>(props: { table: Table<TData>; pagination?: Pagination<TData> }) {
+  const { table, pagination } = props;
+  console.log(pagination);
+
   const pageSizeOpt = [10, 20, 30]; // Define the page size options
-  const currentPage = table.getState().pagination.pageIndex + 1;
-  const totalPages = Math.ceil(table.getRowCount() / table.getState().pagination.pageSize);
+  const currentPage = pagination?.current_page ?? table.getState().pagination.pageIndex + 1;
+  const totalPages = pagination?.last_page ?? Math.ceil(table.getRowCount() / table.getState().pagination.pageSize);
+
+  function firstPage() {
+    if (pagination?.first_page_url) {
+      router.get(pagination.first_page_url);
+    } else {
+      table.firstPage();
+    }
+  }
+
+  function lastPage() {
+    if (pagination?.last_page_url) {
+      router.get(pagination.last_page_url);
+    } else {
+      table.lastPage();
+    }
+  }
+
+  function previousPage() {
+    if (pagination?.prev_page_url) {
+      router.get(pagination.prev_page_url);
+    } else {
+      table.previousPage();
+    }
+  }
+
+  function nextPage() {
+    if (pagination?.next_page_url) {
+      router.get(pagination.next_page_url);
+    } else {
+      table.nextPage();
+    }
+  }
+
+  function isFirstPage(): boolean {
+    if (pagination?.first_page_url) {
+      return currentPage === 1;
+    } else {
+      return !table.getCanPreviousPage();
+    }
+  }
+
+  function isLastPage(): boolean {
+    if (pagination?.last_page_url) {
+      return currentPage === totalPages;
+    } else {
+      return !table.getCanNextPage();
+    }
+  }
 
   return (
     <div className="flex items-center justify-between gap-4">
@@ -64,8 +115,8 @@ export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
                 size="icon"
                 variant="outline"
                 className="cursor-pointer disabled:pointer-events-none disabled:opacity-50"
-                onClick={() => table.firstPage()}
-                disabled={!table.getCanPreviousPage()}
+                onClick={firstPage}
+                disabled={isFirstPage()}
                 aria-label="Go to first page"
               >
                 <ChevronsLeftIcon
@@ -82,8 +133,8 @@ export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
                 size="icon"
                 variant="outline"
                 className="cursor-pointer disabled:pointer-events-none disabled:opacity-50"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                onClick={previousPage}
+                disabled={isFirstPage()}
                 aria-label="Go to previous page"
               >
                 <ChevronLeftIcon
@@ -100,8 +151,8 @@ export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
                 size="icon"
                 variant="outline"
                 className="cursor-pointer disabled:pointer-events-none disabled:opacity-50"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                onClick={nextPage}
+                disabled={isLastPage()}
                 aria-label="Go to next page"
               >
                 <ChevronRightIcon
@@ -118,8 +169,8 @@ export function DataTablePaginations<TData>(props: { table: Table<TData> }) {
                 size="icon"
                 variant="outline"
                 className="cursor-pointer disabled:pointer-events-none disabled:opacity-50"
-                onClick={() => table.lastPage()}
-                disabled={!table.getCanNextPage()}
+                onClick={lastPage}
+                disabled={isLastPage()}
                 aria-label="Go to last page"
               >
                 <ChevronsRightIcon

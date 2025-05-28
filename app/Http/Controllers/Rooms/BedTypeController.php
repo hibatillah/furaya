@@ -9,15 +9,19 @@ use App\Models\BedType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 class BedTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(?Request $request)
     {
-        $bedTypes = BedType::orderBy('created_at', 'desc')->get();
+        $perPage = $request->perPage ?? 10;
+
+        $bedTypes = BedType::orderBy('created_at', 'asc')->paginate($perPage);
+        // dd($bedTypes);
 
         return Inertia::render('bedtype/index', [
             'bedTypes' => $bedTypes,

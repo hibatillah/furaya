@@ -17,26 +17,14 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import type { DataTable, DataTableControls } from "../../types/data-table";
 import { Input } from "../ui/input";
 import { DataTablePaginations } from "./data-table-pagination";
 import { customFilterFns } from "./utils";
 
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  SearchIcon,
-  XIcon,
-} from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, SearchIcon, XIcon } from "lucide-react";
 
 /**
  * Data Table Toolbar Controls.
@@ -49,9 +37,7 @@ export function DataTableControls<T>(props: DataTableControls<T>) {
 
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const isInputEmpty = inputRef.current
-    ? inputRef.current.value.trim() === ""
-    : true;
+  const isInputEmpty = inputRef.current ? inputRef.current.value.trim() === "" : true;
 
   // reset global filter
   function resetSearch() {
@@ -63,14 +49,17 @@ export function DataTableControls<T>(props: DataTableControls<T>) {
   }
 
   return (
-    <div className={cn("@container flex w-full gap-3", className)} {...rest}>
+    <div
+      className={cn("@container flex w-full gap-3", className)}
+      {...rest}
+    >
       {search && (
         <div className="relative h-full">
           <Input
             ref={inputRef}
             type="search"
             placeholder="Cari data"
-            className="@3xl:w-60 bg-card border-border z-10 w-44 pe-6 ps-8"
+            className="bg-card border-border z-10 w-44 ps-8 pe-6 @3xl:w-60"
             onChange={(e) => table.setGlobalFilter(String(e.target.value))}
           />
           <div className="text-muted-foreground pointer-events-none absolute inset-y-0 start-2.5 flex items-center">
@@ -92,38 +81,26 @@ export function DataTableControls<T>(props: DataTableControls<T>) {
   );
 }
 
-export function DataTable<Data, Value>(
-  props: DataTable<Data, Value> & Omit<React.ComponentProps<"div">, "children">,
-) {
-  const {
-    columns,
-    data,
-    children,
-    controls = { pagination: true, sorting: true },
-    className,
-    fixed = false,
-    ...rest
-  } = props;
+export function DataTable<Data, Value>(props: DataTable<Data, Value> & Omit<React.ComponentProps<"div">, "children">) {
+  const { columns, data, children, controls = { pagination: true, sorting: true }, className, fixed = false, pagination, ...rest } = props;
 
   const defaultPageSize = 10;
 
   const [globalFilter, setGlobalFilter] = React.useState<string>();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
   const [isPageSizeLoaded, setIsPageSizeLoaded] = React.useState(false);
-  const [pagination, setPagination] = React.useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: defaultPageSize,
+  const [_pagination, _setPagination] = React.useState<PaginationState>({
+    pageIndex: pagination?.currentPage ? pagination?.currentPage - 1 : 0,
+    pageSize: pagination?.perPage ?? defaultPageSize,
   });
 
   // load page size from local storage before rendering
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const storedSize = localStorage.getItem("pageSize");
-      setPagination((prev) => ({
+      _setPagination((prev) => ({
         ...prev,
         pageSize: storedSize ? Number(storedSize) : defaultPageSize,
       }));
@@ -139,13 +116,13 @@ export function DataTable<Data, Value>(
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onPaginationChange: setPagination,
+    onPaginationChange: _setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: "includesString",
     state: {
-      pagination,
+      pagination: _pagination,
       sorting,
       columnFilters,
       globalFilter,
@@ -160,10 +137,7 @@ export function DataTable<Data, Value>(
     <div className="relative w-full space-y-3 overflow-visible">
       {typeof children === "function" ? children({ table }) : children}
       <div
-        className={cn(
-          "shadow-xs border-border overflow-hidden rounded-lg border",
-          className,
-        )}
+        className={cn("border-border overflow-hidden rounded-lg border shadow-xs", className)}
         {...rest}
       >
         <Table className={cn("bg-card", fixed && "table-fixed")}>
@@ -174,32 +148,22 @@ export function DataTable<Data, Value>(
                   return (
                     <TableHead
                       key={header.id}
-                      className="not-has-[*]:w-14 text-foreground has-[*]:min-w-24"
+                      className="text-foreground not-has-[*]:w-14 has-[*]:min-w-24"
                     >
-                      {header.isPlaceholder ? null : header.column.getCanSort() &&
-                        controls.sorting ? (
+                      {header.isPlaceholder ? null : header.column.getCanSort() && controls.sorting ? (
                         <div
-                          className={cn(
-                            header.column.getCanSort() &&
-                              "flex h-full cursor-pointer select-none items-center gap-2",
-                          )}
+                          className={cn(header.column.getCanSort() && "flex h-full cursor-pointer items-center gap-2 select-none")}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyDown={(e) => {
                             // Enhanced keyboard handling for sorting
-                            if (
-                              header.column.getCanSort() &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
+                            if (header.column.getCanSort() && (e.key === "Enter" || e.key === " ")) {
                               e.preventDefault();
                               header.column.getToggleSortingHandler()?.(e);
                             }
                           }}
                           tabIndex={header.column.getCanSort() ? 0 : undefined}
                         >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
                             asc: (
                               <ChevronUpIcon
@@ -220,10 +184,7 @@ export function DataTable<Data, Value>(
                           }[header.column.getIsSorted() as string] ?? null}
                         </div>
                       ) : (
-                        flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )
+                        flexRender(header.column.columnDef.header, header.getContext())
                       )}
                     </TableHead>
                   );
@@ -239,12 +200,7 @@ export function DataTable<Data, Value>(
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
@@ -261,7 +217,12 @@ export function DataTable<Data, Value>(
           </TableBody>
         </Table>
       </div>
-      {controls.pagination && <DataTablePaginations table={table} />}
+      {controls.pagination && (
+        <DataTablePaginations
+          table={table}
+          pagination={pagination}
+        />
+      )}
     </div>
   );
 }

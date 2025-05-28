@@ -26,6 +26,7 @@ interface DataTable<Data, Value> {
   globalFilter?: FilterFnOption<Data>;
   children?: React.ReactNode | ((props: { table: Table<Data> }) => React.ReactNode);
   fixed?: boolean;
+  pagination?: Pagination<Data>;
 }
 
 // Data Table Controls Type Definition

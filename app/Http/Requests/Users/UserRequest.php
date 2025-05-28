@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Users;
 
+use App\Enums\RoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
@@ -43,9 +44,9 @@ class UserRequest extends FormRequest
                 "string",
                 "min:8"
             ],
-            "role_id" => [
-                $this->customRules("nullable"),
-                "exists:roles,id"
+            "role" => [
+                $this->customRules(),
+                Rule::in(RoleEnum::getValues())
             ],
             "email_verified_at" => [
                 $this->customRules("nullable"),
@@ -68,8 +69,8 @@ class UserRequest extends FormRequest
             "password.required" => "Password wajib diisi.",
             "password.string" => "Password harus berupa string.",
             "password.min" => "Password minimal 8 karakter.",
-            "role_id.nullable" => "Role wajib diisi.",
-            "role_id.exists" => "Role tidak ditemukan.",
+            "role.required" => "Role wajib diisi.",
+            "role.in" => "Role tidak valid.",
             "email_verified_at.nullable" => "Email verified at wajib diisi.",
             "email_verified_at.date" => "Email verified at harus berupa tanggal.",
         ];

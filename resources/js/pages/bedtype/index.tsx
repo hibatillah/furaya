@@ -20,7 +20,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
+export default function BedTypeIndex(props: { bedTypes: Pagination<BedType.Default> }) {
   const { bedTypes } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -87,7 +87,8 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
         <CardContent>
           <DataTable
             columns={columns}
-            data={bedTypes}
+            data={bedTypes.data}
+            pagination={bedTypes}
           >
             {({ table }) => (
               <DataTableControls table={table}>
