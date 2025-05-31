@@ -1,4 +1,4 @@
-import type { route as routeFn } from 'ziggy-js';
+import type { route as routeFn } from "ziggy-js";
 
 declare global {
   const route: typeof routeFn;
@@ -34,9 +34,11 @@ declare global {
     edit: (id: string) => string;
     destroy: (id: string) => string;
   }
+
+  type DialogType = "delete" | "edit" | "detail";
 }
 
-declare module '@inertiajs/inertia' {
+declare module "@inertiajs/react" {
   interface PageProps {
     flash?: {
       success?: string;
@@ -45,4 +47,3 @@ declare module '@inertiajs/inertia' {
     };
   }
 }
-

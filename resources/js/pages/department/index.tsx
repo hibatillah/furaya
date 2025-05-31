@@ -39,12 +39,19 @@ export default function DepartmentIndex(props: { departments: Department.Default
     setSelectedRow(null);
   }
 
+  console.log(departments);
+
   // define data table columns
   const columns: ColumnDef<Department.Default>[] = [
     {
       id: "name",
       accessorKey: "name",
       header: "Nama",
+    },
+    {
+      id: "employees_count",
+      accessorKey: "employees_count",
+      header: "Jumlah Karyawan",
     },
     {
       id: "actions",
@@ -105,6 +112,7 @@ export default function DepartmentIndex(props: { departments: Department.Default
           {dialogType === "delete" && selectedRow && (
             <DepartmentDelete
               id={selectedRow.id}
+              canDelete={selectedRow.can_delete}
               onClose={handleDialogClose}
             />
           )}

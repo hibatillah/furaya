@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests\Roles;
 
 use App\Enums\GenderEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class EmployeeRequest extends FormRequest
@@ -23,11 +24,13 @@ class EmployeeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = Request::route("id");
+
         return [
-            "user_id" => ["required", "string", "exist:users,id"],
-            "department_id" => ["required", "string", "exist:departments,id"],
+            "user_id" => ["required", "integer", Rule::exists("users", "id")],
+            "department_id" => ["required", "string", Rule::exists("departments", "id")],
             "gender" => ["required", Rule::in(GenderEnum::getValues())],
-            "phone" => ["nullable", "string", "max:55"],
+            "phone" => ["nullable", "string", Rule::unique("employees", "phone")->ignore($id)],
             "address" => ["nullable", "string", "max:255"],
             "hire_date" => ["required", "date"],
             "salary" => ["nullable", "numeric"],
@@ -39,10 +42,10 @@ class EmployeeRequest extends FormRequest
         return [
             "user_id.required" => "User ID wajib diisi.",
             "user_id.string" => "User ID harus berupa string.",
-            "user_id.exist" => "User ID tidak ditemukan.",
+            "user_id.exists" => "User ID tidak ditemukan.",
             "department_id.required" => "Departemen wajib diisi.",
             "department_id.string" => "Departemen harus berupa string.",
-            "department_id.exist" => "Departemen tidak ditemukan.",
+            "department_id.exists" => "Departemen tidak ditemukan.",
             "gender.required" => "Jenis kelamin wajib diisi.",
             "gender.in" => "Jenis kelamin tidak valid.",
             "phone.string" => "Nomor telepon harus berupa string.",

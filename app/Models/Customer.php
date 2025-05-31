@@ -3,9 +3,26 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use Carbon\Carbon;
 
 class Customer extends BaseModel
 {
+    protected $appends = [
+        'formatted_birthdate',
+        'formatted_gender',
+    ];
+
+    public function getFormattedGenderAttribute()
+    {
+        return $this->gender === 'male' ? 'Pria' : 'Wanita';
+    }
+
+    public function getFormattedBirthdateAttribute()
+    {
+        if (!$this->birthdate) return "-";
+        return Carbon::parse($this->birthdate)->translatedFormat('j F, Y');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

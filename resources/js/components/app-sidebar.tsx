@@ -9,92 +9,124 @@ import {
   BedSingleIcon,
   BriefcaseIcon,
   CalendarCheckIcon,
+  ClockArrowDownIcon,
+  ClockArrowUpIcon,
   LayoutGrid,
-  ShieldIcon,
+  Package2Icon,
   ShieldUserIcon,
   UsersIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 import AppLogo from "./app-logo";
 
-const managerMenuItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: route("dashboard"),
-    icon: LayoutGrid,
-  },
-  {
-    title: "Pengguna",
-    href: route("user.index"),
-    icon: UsersIcon,
-  },
-  {
-    title: "Karyawan",
-    href: route("employee.index"),
-    icon: UsersIcon,
-  },
-  {
-    title: "Admin",
-    href: route("admin.index"),
-    icon: ShieldUserIcon,
-  },
-  {
-    title: "Role",
-    href: route("role.index"),
-    icon: ShieldIcon,
-  },
-  {
-    title: "Departemen",
-    href: route("department.index"),
-    icon: BriefcaseIcon,
-  },
-];
+const managerMenuItems: Record<string, NavItem[]> = {
+  Default: [
+    {
+      title: "Dashboard",
+      href: route("dashboard"),
+      icon: LayoutGrid,
+    },
+  ],
+  Layanan: [
+    {
+      title: "Reservasi",
+      href: route("reservation.index"),
+      icon: CalendarCheckIcon,
+    },
+    {
+      title: "Customer",
+      href: route("customer.index"),
+      icon: UsersIcon,
+    },
+  ],
+  Manajemen: [
+    {
+      title: "Pengguna",
+      href: route("user.index"),
+      icon: UsersIcon,
+    },
+    {
+      title: "Karyawan",
+      href: route("employee.index"),
+      icon: UsersIcon,
+    },
+    {
+      title: "Admin",
+      href: route("admin.index"),
+      icon: ShieldUserIcon,
+    },
+    {
+      title: "Departemen",
+      href: route("department.index"),
+      icon: BriefcaseIcon,
+    },
+  ],
+};
 
-const adminMenuItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: route("dashboard"),
-    icon: LayoutGrid,
-  },
-  {
-    title: "Kamar",
-    href: route("room.index"),
-    icon: BedSingleIcon,
-  },
-  {
-    title: "Tipe Kamar",
-    href: route("roomtype.index"),
-    icon: BedDoubleIcon,
-  },
-  {
-    title: "Tipe Kasur",
-    href: route("bedtype.index"),
-    icon: BedDoubleIcon,
-  },
-  {
-    title: "Pengguna",
-    href: route("user.index"),
-    icon: UsersIcon,
-  },
-];
+const adminMenuItems: Record<string, NavItem[]> = {
+  Default: [
+    {
+      title: "Dashboard",
+      href: route("dashboard"),
+      icon: LayoutGrid,
+    },
+  ],
+  Layanan: [
+    {
+      title: "Kamar",
+      href: route("room.index"),
+      icon: BedSingleIcon,
+    },
+    {
+      title: "Tipe Kamar",
+      href: route("roomtype.index"),
+      icon: BedDoubleIcon,
+    },
+    {
+      title: "Tipe Kasur",
+      href: route("bedtype.index"),
+      icon: BedDoubleIcon,
+    },
+    {
+      title: "Fasilitas",
+      href: route("facility.index"),
+      icon: Package2Icon,
+    },
+  ],
+};
 
-const employeeMenuItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: route("dashboard"),
-    icon: LayoutGrid,
-  },
-  {
-    title: "Status Kamar",
-    href: route("roomstatus.index"),
-    icon: BadgeCheckIcon,
-  },
-  {
-    title: "Reservasi",
-    href: route("reservation.index"),
-    icon: CalendarCheckIcon,
-  },
-];
+const employeeMenuItems: Record<string, NavItem[]> = {
+  Default: [
+    {
+      title: "Dashboard",
+      href: route("dashboard"),
+      icon: LayoutGrid,
+    },
+  ],
+  Reservasi: [
+    {
+      title: "Reservasi",
+      href: route("reservation.index"),
+      icon: CalendarCheckIcon,
+    },
+    {
+      title: "Check In",
+      href: route("checkin.index"),
+      icon: ClockArrowUpIcon,
+    },
+    {
+      title: "Check Out",
+      href: route("checkout.index"),
+      icon: ClockArrowDownIcon,
+    },
+  ],
+  Kamar: [
+    {
+      title: "Status Kamar",
+      href: route("room.status.index"),
+      icon: BadgeCheckIcon,
+    },
+  ],
+};
 
 export function AppSidebar() {
   const { auth } = usePage<SharedData>().props;
@@ -129,7 +161,13 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="py-10">
-        <NavMain items={menuItems[auth.role as keyof typeof menuItems]} />
+        {Object.entries(menuItems[auth.role as keyof typeof menuItems]).map(([key, value]) => (
+          <NavMain
+            key={key}
+            title={key}
+            items={value}
+          />
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

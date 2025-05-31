@@ -10,7 +10,6 @@ import { router } from "@inertiajs/react";
 
 export function DataTablePaginations<TData>(props: { table: Table<TData>; pagination?: Pagination<TData> }) {
   const { table, pagination } = props;
-  console.log(pagination);
 
   const pageSizeOpt = [10, 20, 30]; // Define the page size options
   const currentPage = pagination?.current_page ?? table.getState().pagination.pageIndex + 1;

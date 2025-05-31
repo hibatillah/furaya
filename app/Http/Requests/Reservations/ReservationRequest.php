@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Reservations;
 
 use App\Enums\BookingTypeEnum;
 use App\Enums\VisitPurposeEnum;
@@ -28,7 +28,7 @@ class ReservationRequest extends FormRequest
     public function rules(): array
     {
         $id = Request::route("id");
-        
+
         return [
             "booking_number" => ["required", "integer", Rule::unique("reservations", "booking_number")->ignore($id)],
             "adults" => ["required", "integer"],

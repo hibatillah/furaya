@@ -17,8 +17,7 @@ class HandleUserRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        $user = Auth::user();
-        $userRole = strtolower($user->role?->name) ?? "customer";
+        $userRole = Auth::user()?->role;
         $authorized = in_array($userRole, $roles);
 
         // Log::channel('project')->debug("check user role", [

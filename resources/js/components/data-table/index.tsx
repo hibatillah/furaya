@@ -92,8 +92,8 @@ export function DataTable<Data, Value>(props: DataTable<Data, Value> & Omit<Reac
 
   const [isPageSizeLoaded, setIsPageSizeLoaded] = React.useState(false);
   const [_pagination, _setPagination] = React.useState<PaginationState>({
-    pageIndex: pagination?.currentPage ? pagination?.currentPage - 1 : 0,
-    pageSize: pagination?.perPage ?? defaultPageSize,
+    pageIndex: pagination?.current_page ? pagination?.current_page - 1 : 0,
+    pageSize: pagination?.per_page ?? defaultPageSize,
   });
 
   // load page size from local storage before rendering

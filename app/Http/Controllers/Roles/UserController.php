@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Users;
+namespace App\Http\Controllers\Roles;
 
+use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\UserRequest;
-use App\Models\Role;
+use App\Http\Requests\Roles\UserRequest;
 use Inertia\Inertia;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,8 +19,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
-        $users = User::with('role')->orderBy('created_at', 'desc')->get();
+        $users = User::orderBy('created_at', 'desc')->get();
+        $roles = RoleEnum::getValues();
 
         return Inertia::render('user/index', [
             'users' => $users,
@@ -31,26 +31,12 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        return Inertia::render('user/create');
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserRequest $request)
-    {
-        $user = User::create($request->validated());
-
-        Log::channel('project')->info('User created', [
-            'user_id' => Auth::user()->id,
-            'table' => 'users',
-            'record_id' => $user->id,
-        ]);
-
-        return redirect()->route('user.index')->with('success', 'User berhasil ditambahkan');
-    }
+    public function store(UserRequest $request) {}
 
     /**
      * Display the specified resource.
@@ -60,30 +46,7 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        try {
-            $user = User::findOrFail($id);
-
-            return Inertia::render('user/edit', [
-                'user' => $user,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("User not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "users",
-            ]);
-
-            return back()->with('warning', 'User tidak ditemukan');
-        } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit user page", [
-                "user_id" => Auth::user()->id,
-                "table" => "users",
-            ]);
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -93,13 +56,8 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-
-            Log::channel('project')->debug('Before:', ['role_id' => $user->role_id]);
-
             $user->update($request->validated());
-
             $user->refresh();
-            Log::channel('project')->debug('After:', ['role_id' => $user->role_id]);
 
             $method = Request::getMethod();
 
@@ -117,14 +75,18 @@ class UserController extends Controller
                 "table" => "users",
             ]);
 
-            return back()->with('warning', 'User tidak ditemukan');
+            return back()->withErrors([
+                'message' => 'User tidak ditemukan'
+            ]);
         } catch (\Exception $e) {
             Log::channel("project")->error("Updating user", [
                 "user_id" => Auth::user()->id,
                 "table" => "users",
             ]);
 
-            return back()->with('error', $e->getMessage());
+            return back()->withErrors([
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -151,14 +113,18 @@ class UserController extends Controller
                 "table" => "users",
             ]);
 
-            return redirect()->back()->with('warning', 'User tidak ditemukan');
+            return back()->withErrors([
+                'message' => 'User tidak ditemukan'
+            ]);
         } catch (\Exception $e) {
             Log::channel("project")->error("Deleting user", [
                 "user_id" => Auth::user()->id,
                 "table" => "users",
             ]);
 
-            return redirect()->back()->with('error', $e->getMessage());
+            return back()->withErrors([
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }

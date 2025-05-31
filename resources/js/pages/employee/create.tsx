@@ -1,129 +1,214 @@
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { toast } from 'sonner';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import RadioGroupCard from '@/components/radio-group-card';
-import { format } from "date-fns"
+import InputError from "@/components/input-error";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AppLayout from "@/layouts/app-layout";
+import { BreadcrumbItem } from "@/types";
+import { Head, useForm } from "@inertiajs/react";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
-    title: 'Karyawan',
-    href: route('employee.index'),
+    title: "Karyawan",
+    href: route("employee.index"),
   },
   {
-    title: 'Tambah',
-    href: route('employee.create'),
+    title: "Tambah",
+    href: route("employee.create"),
   },
 ];
 
-export default function EmployeeCreate() {
-  const items: SelectData[] = [
-    { label: 'Laki-laki', value: 'male' },
-    { label: 'Perempuan', value: 'female' },
-  ];
+export default function EmployeeCreate(props: { departments: Department.Default[] }) {
+  const { departments } = props;
 
   const { data, setData, post, processing, errors } = useForm<Employee.Create>();
 
+  // handle create employee
   function handleCreateEmployee(e: React.FormEvent) {
     e.preventDefault();
 
-    toast.loading("Menambahkan karyawan...", { id: "create-employee" });
+    toast.loading("Menambahkan karyawan...", {
+      id: `create-employee`,
+    });
+
     post(route("employee.store"), {
-      onError: () => toast.warning("Karyawan gagal ditambahkan", { id: "create-employee" }),
+      onError: (error) => {
+        toast.error("Karyawan gagal ditambahkan", {
+          id: `create-employee`,
+          description: error.message,
+        });
+      },
     });
   }
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Tambah Karyawan" />
-      <h1 className="mb-6 text-2xl font-bold">Tambah Karyawan</h1>
-      <form
-        onSubmit={handleCreateEmployee}
-        className="max-w-lg space-y-6"
-      >
-        <div className="grid gap-2">
-          <Label htmlFor="user_id">Nama</Label>
-          <Input
-            id="user_id"
-            type="text"
-            value={data.user_id}
-            onChange={(e) => setData("user_id", e.target.value)}
-          />
-          <InputError message={errors.user_id} />
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h1 className="text-2xl font-bold">Tambah Karyawan</h1>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={handleCreateEmployee}
+            className="grid grid-cols-2 gap-6"
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="name">Nama</Label>
+              <Input
+                id="name"
+                type="text"
+                value={data.name}
+                onChange={(e) => setData("name", e.target.value)}
+                required
+                placeholder="Nama"
+              />
+              <InputError message={errors.name} />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="department_id">Departemen</Label>
-          <Input
-            id="department_id"
-            type="text"
-            value={data.department_id}
-            onChange={(e) => setData("department_id", e.target.value)}
-          />
-          <InputError message={errors.department_id} />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={data.email}
+                onChange={(e) => setData("email", e.target.value)}
+                required
+                placeholder="Email"
+              />
+              <InputError message={errors.email} />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="gender">Jenis Kelamin</Label>
-          <RadioGroupCard items={items} />
-          <InputError message={errors.gender} />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Nomor Telepon</Label>
+              <Input
+                id="phone"
+                type="text"
+                value={data.phone}
+                onChange={(e) => setData("phone", e.target.value)}
+                placeholder="Nomor Telepon"
+              />
+              <InputError message={errors.phone} />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="phone">Nomor Telepon</Label>
-          <Input
-            id="phone"
-            type="text"
-            value={data.phone}
-            onChange={(e) => setData("phone", e.target.value)}
-          />
-          <InputError message={errors.phone} />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={data.password}
+                onChange={(e) => setData("password", e.target.value)}
+                placeholder="Password"
+                required
+              />
+              <InputError message={errors.password} />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="address">Alamat</Label>
-          <Input
-            id="address"
-            type="text"
-            value={data.address}
-            onChange={(e) => setData("address", e.target.value)}
-          />
-          <InputError message={errors.address} />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="gender">Gender</Label>
+              <Select
+                value={data.gender}
+                onValueChange={(value) => setData("gender", value as Enum.Gender)}
+              >
+                <SelectTrigger id="gender">
+                  <SelectValue placeholder="Pilih Gender">
+                    <span className="capitalize">{data.gender === "male" ? "Pria" : "Wanita"}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    key="male"
+                    value="male"
+                  >
+                    Pria
+                  </SelectItem>
+                  <SelectItem
+                    key="female"
+                    value="female"
+                  >
+                    Wanita
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <InputError message={errors.gender} />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="hire_date">Tanggal Bergabung</Label>
-          <Input
-            id="hire_date"
-            type="date"
-            value={format(data.hire_date, "yyyy-MM-dd")}
-            onChange={(e) => setData("hire_date", e.target.value)}
-          />
-          <InputError message={errors.hire_date} />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="department_id">Departemen</Label>
+              <Select
+                value={data.department_id}
+                onValueChange={(value) => setData("department_id", value)}
+              >
+                <SelectTrigger id="department_id">
+                  <SelectValue placeholder="Pilih Departemen">
+                    <span>{departments.find((department) => department.id === data.department_id)?.name}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((department) => (
+                    <SelectItem
+                      key={department.id}
+                      value={department.id}
+                    >
+                      {department.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.department_id} />
+            </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="salary">Gaji</Label>
-          <Input
-            id="salary"
-            type="number"
-            value={data.salary}
-            onChange={(e) => setData("salary", parseInt(e.target.value))}
-          />
-          <InputError message={errors.salary} />
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="hire_date">Tanggal Bergabung</Label>
+              <DatePicker
+                value={data.hire_date as Date}
+                onChange={(date) => setData("hire_date", format(date, "yyyy-MM-dd"))}
+                className="w-full"
+              />
+              <InputError message={errors.hire_date} />
+            </div>
 
-        <Button
-          type="submit"
-          disabled={processing}
-        >
-          Simpan
-        </Button>
-      </form>
+            <div className="grid gap-2">
+              <Label htmlFor="salary">Gaji</Label>
+              <Input
+                id="salary"
+                type="number"
+                value={data.salary}
+                onChange={(e) => setData("salary", Number(e.target.value))}
+                placeholder="Gaji"
+              />
+              <InputError message={errors.salary} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="address">Alamat</Label>
+              <Input
+                id="address"
+                type="text"
+                value={data.address}
+                onChange={(e) => setData("address", e.target.value)}
+                placeholder="Alamat"
+              />
+              <InputError message={errors.address} />
+            </div>
+
+            <div className="col-span-2 flex justify-end gap-2">
+              <Button
+                type="submit"
+                disabled={processing}
+              >
+                Tambah Karyawan
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </AppLayout>
   );
 }

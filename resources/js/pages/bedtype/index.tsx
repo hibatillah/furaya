@@ -50,6 +50,11 @@ export default function BedTypeIndex(props: { bedTypes: Pagination<BedType.Defau
       },
     },
     {
+      id: "rooms_count",
+      accessorKey: "rooms_count",
+      header: "Jumlah Kamar",
+    },
+    {
       id: "actions",
       cell: ({ row }) => (
         <DropdownMenu>

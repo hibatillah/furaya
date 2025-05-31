@@ -54,6 +54,10 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) 
       header: "Tarif Dasar",
     },
     {
+      accessorKey: "rooms_count",
+      header: "Jumlah Kamar",
+    },
+    {
       id: "actions",
       cell: ({ row }) => (
         <DropdownMenu>

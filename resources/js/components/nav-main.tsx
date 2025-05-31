@@ -1,5 +1,6 @@
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -76,12 +77,13 @@ export function NavCollapsible({ items }: { items: NavCollapsibleItem[] }) {
   );
 }
 
-export function NavMain({ items = [] }: { items: NavItem[] }) {
+export function NavMain({ title, items = [] }: { title?: string; items: NavItem[] }) {
   const page = usePage();
   const appUrl = page.props.url as string;
 
   return (
     <SidebarGroup className="px-2 py-0">
+      {title && title !== "Default" && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => {
           const itemUrl = item.href.split(appUrl)[1];

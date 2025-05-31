@@ -21,8 +21,8 @@ return new class extends Migration
             $table->integer("adults");
             $table->integer("people_count");
             $table->integer("length_of_stay");
-            $table->datetime("check_in");
-            $table->datetime("check_out");
+            $table->datetime("check_in")->nullable();
+            $table->datetime("check_out")->nullable();
             $table->float("total_price", 10, 3);
             $table->foreignUuid("room_id")->constrained("rooms")->nullOnDelete();
             $table->foreignUuid("customer_id")->constrained("customers")->nullOnDelete();

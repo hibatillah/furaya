@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AppLayout from "@/layouts/app-layout";
-import { BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/react";
+import { BreadcrumbItem, SharedData } from "@/types";
+import { Head, Link, usePage } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { PencilIcon } from "lucide-react";
 
@@ -17,6 +17,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ReservationsIndex() {
+  const { auth } = usePage<SharedData>().props;
+  const isManager = auth.user.role === "manager";
+
   // define data table columns
   const columns: ColumnDef<Room.Default>[] = [
     {
@@ -100,12 +103,14 @@ export default function ReservationsIndex() {
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <Button
-                  className="ms-auto"
-                  asChild
-                >
-                  <Link href={route("reservation.create")}>Tambah Reservasi</Link>
-                </Button>
+                {!isManager && (
+                  <Button
+                    className="ms-auto"
+                    asChild
+                  >
+                    <Link href={route("reservation.create")}>Tambah Reservasi</Link>
+                  </Button>
+                )}
               </DataTableControls>
             )}
           </DataTable>

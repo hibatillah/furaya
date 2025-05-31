@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests\Roles;
 
 use App\Enums\RoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
@@ -40,7 +40,7 @@ class UserRequest extends FormRequest
                 Rule::unique("users", "email")->ignore($id)
             ],
             "password" => [
-                $this->customRules(),
+                $this->customRules("nullable"),
                 "string",
                 "min:8"
             ],
@@ -54,6 +54,30 @@ class UserRequest extends FormRequest
             ],
         ];
     }
+
+    public function rulesEssential(?int $userId = null): array
+    {
+        return [
+            "name" => [
+                $this->customRules(),
+                "string",
+                "max:255"
+            ],
+            "email" => [
+                $this->customRules(),
+                "string",
+                "email",
+                "max:255",
+                Rule::unique("users", "email")->ignore($userId)
+            ],
+            "password" => [
+                $this->customRules("nullable"),
+                "string",
+                "min:8"
+            ],
+        ];
+    }
+
 
     public function messages(): array
     {

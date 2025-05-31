@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests\Roles;
 
 use App\Enums\GenderEnum;
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,15 +27,14 @@ class CustomerRequest extends FormRequest
         $id = Request::route("id");
 
         return [
-            "user_id" => ["required", "string", "exists:users,id"],
+            "user_id" => ["required", "integer", "exists:users,id"],
             "nik_passport" => ["required", "string", "max:55", Rule::unique("customers", "nik_passport")->ignore($id)],
             "gender" => ["required", Rule::in(GenderEnum::getValues())],
             "birthdate" => ["required", "date"],
             "phone" => ["nullable", "string", "max:55"],
             "profession" => ["nullable", "string", "max:255"],
             "nationality" => ["nullable", "string", "max:255"],
-            "province" => ["nullable", "string", "max:255"],
-            "city" => ["nullable", "string", "max:255"],
+            "address" => ["nullable", "string", "max:255"],
         ];
     }
 
@@ -58,10 +57,8 @@ class CustomerRequest extends FormRequest
             "profession.max" => "Profesi maksimal 255 karakter.",
             "nationality.string" => "Kewarganegaraan harus berupa string.",
             "nationality.max" => "Kewarganegaraan maksimal 255 karakter.",
-            "province.string" => "Provinsi harus berupa string.",
-            "province.max" => "Provinsi maksimal 255 karakter.",
-            "city.string" => "Kota harus berupa string.",
-            "city.max" => "Kota maksimal 255 karakter.",
+            "address.string" => "Alamat harus berupa string.",
+            "address.max" => "Alamat maksimal 255 karakter.",
         ];
     }
 }

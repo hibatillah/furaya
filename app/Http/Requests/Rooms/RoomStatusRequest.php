@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Rooms;
 
+use App\Enums\RoomStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CheckInRequest extends FormRequest
+class RoomStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,24 +24,26 @@ class CheckInRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "reservation_id" => ["required", "string", Rule::exists("reservations", "id")],
-            "checked_in_at" => ["required", "datetime"],
             "employee_id" => ["required", "string", Rule::exists("employees", "id")],
-            "notes" => ["nullable", "string", "max:255"],
+            "status" => ["required", Rule::in(RoomStatusEnum::getValues())],
+            "from" => ["required", "datetime"],
+            "to" => ["required", "datetime", "after:from"],
         ];
     }
 
     public function messages(): array
     {
         return [
-            "reservation_id.required" => "Reservation ID wajib diisi.",
-            "reservation_id.string" => "Reservation ID harus berupa string.",
-            "reservation_id.exists" => "Reservation ID tidak ditemukan.",
-            "checked_in_at.required" => "Tanggal check-in wajib diisi.",
-            "checked_in_at.datetime" => "Tanggal check-in harus berupa tanggal.",
             "employee_id.required" => "Employee ID wajib diisi.",
             "employee_id.string" => "Employee ID harus berupa string.",
             "employee_id.exists" => "Employee ID tidak ditemukan.",
+            "status.required" => "Status wajib diisi.",
+            "status.in" => "Status tidak valid.",
+            "from.required" => "Tanggal mulai wajib diisi.",
+            "from.datetime" => "Tanggal mulai harus berupa tanggal.",
+            "to.required" => "Tanggal selesai wajib diisi.",
+            "to.datetime" => "Tanggal selesai harus berupa tanggal.",
+            "to.after" => "Tanggal selesai harus setelah tanggal mulai.",
         ];
     }
 }

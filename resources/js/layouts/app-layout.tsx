@@ -18,6 +18,7 @@ export default ({ children, breadcrumbs, className, ...props }: AppLayoutProps) 
     if (flash?.success) toast.success(flash.success);
     if (flash?.warning) toast.warning(flash.warning);
     if (flash?.error) {
+      console.log(flash.error);
       toast.error("Terjadi Kesalahan", {
         description: flash.error,
       });

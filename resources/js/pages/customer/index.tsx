@@ -1,14 +1,14 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
+import { DataTableFilter } from "@/components/data-table/data-table-filter";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
-import { PencilIcon, TrashIcon } from "lucide-react";
-import { toast } from "sonner";
+import { Head, Link } from "@inertiajs/react";
+import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
+import { EllipsisVerticalIcon } from "lucide-react";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -17,51 +17,47 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function CustomerIndex(props: { customers: Pagination<Customer.Default> }) {
+export default function CustomerIndex(props: { customers: Customer.Default[] }) {
   const { customers } = props;
-  const { delete: deleteCustomer } = useForm();
-
-  // handle delete each customer
-  function handleDelete(e: React.FormEvent, id: string) {
-    e.preventDefault();
-
-    toast.loading("Menghapus customer...", { id: `delete-${id}` });
-    deleteCustomer(route("customer.destroy", { id }), {
-      onSuccess: () => toast.success("Customer berhasil dihapus", { id: `delete-${id}` }),
-      onError: () => toast.error("Customer gagal dihapus", { id: `delete-${id}` }),
-    });
-  }
 
   // define data table columns
   const columns: ColumnDef<Customer.Default>[] = [
+    {
+      id: "name",
+      accessorKey: "user.name",
+      header: "Nama",
+    },
     {
       id: "nik_passport",
       accessorKey: "nik_passport",
       header: "NIK/Passport",
     },
     {
-      id: "name",
-      accessorFn: (row) => row.user?.name,
-      header: "Nama",
-    },
-    {
-      id: "birthdate",
-      accessorKey: "birthdate",
-      header: "Tanggal Lahir",
-      cell: ({ row }) => {
-        const birthdate = format(row.getValue("birthdate") as Date, "dd MMMM yyyy");
-        return <span className="capitalize">{birthdate}</span>;
-      },
-    },
-    {
       id: "email",
-      accessorFn: (row) => row.user?.email,
+      accessorKey: "user.email",
       header: "Email",
     },
     {
       id: "phone",
       accessorKey: "phone",
       header: "Handphone",
+    },
+    {
+      id: "gender",
+      accessorKey: "formatted_gender",
+      header: "Gender",
+      cell: ({ row }) => {
+        const gender = row.getValue("gender") as string;
+        return (
+          <Badge
+            variant="outline"
+            className="text-sm"
+          >
+            {gender}
+          </Badge>
+        );
+      },
+      filterFn: "radio" as FilterFnOption<Customer.Default>,
     },
     {
       id: "nationality",
@@ -71,44 +67,35 @@ export default function CustomerIndex(props: { customers: Pagination<Customer.De
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                asChild
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+            >
+              <EllipsisVerticalIcon className="size-4" />
+              <span className="sr-only">Aksi</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Link
+                href={route("customer.show", { id: row.original.id })}
+                className="w-full"
               >
-                <Link href={route("customer.edit", { id: row.original.id })}>
-                  <PencilIcon className="size-3" />
-                  <span className="sr-only">Edit Data</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit Data</p>
-            </TooltipContent>
-          </Tooltip>
-          <form onSubmit={(e) => handleDelete(e, row.original.id)}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  type="submit"
-                >
-                  <TrashIcon className="size-3" />
-                  <span className="sr-only">Hapus Data</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Hapus Data</p>
-              </TooltipContent>
-            </Tooltip>
-          </form>
-        </div>
+                Detail
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                href={route("customer.edit", { id: row.original.id })}
+                className="w-full"
+              >
+                Edit
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ];
@@ -123,16 +110,16 @@ export default function CustomerIndex(props: { customers: Pagination<Customer.De
         <CardContent>
           <DataTable
             columns={columns}
-            data={customers.data}
+            data={customers}
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <Button
-                  className="ms-auto"
-                  asChild
-                >
-                  <Link href={route("customer.create")}>Tambah Customer</Link>
-                </Button>
+                <DataTableFilter
+                  table={table}
+                  filter="gender"
+                  data={["Pria", "Wanita"]}
+                  standalone
+                />
               </DataTableControls>
             )}
           </DataTable>

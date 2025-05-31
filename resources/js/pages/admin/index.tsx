@@ -1,11 +1,13 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
+import { DataTableFilter } from "@/components/data-table/data-table-filter";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import AppLayout from "@/layouts/app-layout";
+import { cn } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
-import { ColumnDef } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
+import { RoleBadgeColor } from "../user/utils";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -14,36 +16,42 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function AdminIndex(props: { admins: User.Default[]; managers: User.Default[] }) {
-  const { admins, managers } = props;
-
+export default function AdminIndex({ admins }: { admins: User.Default[] }) {
   // define data table columns
   const columns: ColumnDef<User.Default>[] = [
     {
       id: "name",
       accessorKey: "name",
       header: "Nama",
+      cell: ({ row }) => {
+        const name: string = row.getValue("name") ?? "Not Set";
+        return <div className="min-h-10 flex items-center">{name}</div>;
+      },
     },
     {
       id: "email",
       accessorKey: "email",
       header: "Email",
     },
+    {
+      id: "role",
+      accessorKey: "role",
+      header: "Role",
+      cell: ({ row }) => {
+        const role: string = row.getValue("role") ?? "Not Set";
+
+        return (
+          <Badge
+            variant={role === "Not Set" ? "secondary" : "default"}
+            className={cn("font-medium capitalize", RoleBadgeColor[role.toLowerCase() as keyof typeof RoleBadgeColor])}
+          >
+            {role}
+          </Badge>
+        );
+      },
+      filterFn: "radio" as FilterFnOption<User.Default>,
+    },
   ];
-
-  // handle admin data view
-  const [view, setView] = useState<"admin" | "manager" | undefined>("admin");
-
-  const showData = useMemo(() => {
-    if (view === "admin") return admins;
-    if (view === "manager") return managers;
-
-    const merged = [...admins, ...managers];
-    return merged;
-  }, [view, admins, managers]);
-
-  const adminCount = useMemo(() => admins.length, [admins]);
-  const managerCount = useMemo(() => managers.length, [managers]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -56,45 +64,17 @@ export default function AdminIndex(props: { admins: User.Default[]; managers: Us
         <CardContent>
           <DataTable
             columns={columns}
-            data={showData}
+            data={admins}
             fixed
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <div className="ms-auto me-1 border-border *:text-muted-foreground *:cursor-pointer *:hover:text-foreground/80 *:data-active:border-primary *:data-active:text-primary flex items-center border-b *:grid *:h-full *:place-items-center *:px-2.5 *:data-active:border-b">
-                  <Label
-                    htmlFor="admin"
-                    data-active={view === "admin"}
-                  >
-                    <div className="flex items-baseline gap-1.5">
-                      <span>Admin</span>
-                      <span className="px-1 h-5 rounded-sm bg-secondary grid place-items-center text-xs">{adminCount}</span>
-                    </div>
-                    <input
-                      type="radio"
-                      id="admin"
-                      name="view"
-                      onClick={() => setView("admin")}
-                      hidden
-                    />
-                  </Label>
-                  <Label
-                    htmlFor="manager"
-                    data-active={view === "manager"}
-                  >
-                    <div className="flex items-baseline gap-1.5">
-                      <span>Manager</span>
-                      <span className="px-1 h-5 rounded-sm bg-secondary grid place-items-center text-xs">{managerCount}</span>
-                    </div>
-                    <input
-                      type="radio"
-                      id="manager"
-                      name="view"
-                      onClick={() => setView("manager")}
-                      hidden
-                    />
-                  </Label>
-                </div>
+                <DataTableFilter
+                  table={table}
+                  filter="role"
+                  data={["admin", "manager"]}
+                  standalone
+                />
               </DataTableControls>
             )}
           </DataTable>

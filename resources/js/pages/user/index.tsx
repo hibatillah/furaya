@@ -3,6 +3,7 @@ import { DataTableFilter } from "@/components/data-table/data-table-filter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,13 +16,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
+import { cn } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import UserDelete from "./delete";
+import { RoleBadgeColor } from "./utils";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -30,7 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function UserIndex(props: { users: User.Default[]; roles: Role.Default[] }) {
+export default function UserIndex(props: { users: User.Default[]; roles: Enum.Role[] }) {
   const { users, roles } = props;
 
   // define users columns
@@ -48,23 +51,14 @@ export default function UserIndex(props: { users: User.Default[]; roles: Role.De
     {
       id: "role",
       header: "Role",
-      accessorFn: (row) => row.role?.name,
+      accessorFn: (row) => row.role,
       cell: ({ row }) => {
         const role: string = row.getValue("role") ?? "Not Set";
-        const badgeColor = {
-          manager: "bg-indigo-600 text-indigo-100 dark:bg-indigo-900 dark:text-indigo-100",
-          admin: "bg-sky-600 text-sky-100 dark:bg-sky-900 dark:text-sky-100",
-          employee: "bg-emerald-600 text-emerald-100 dark:bg-emerald-900 dark:text-emerald-100",
-          customer: "bg-yellow-600 text-yellow-100 dark:bg-yellow-900 dark:text-yellow-100",
-        };
 
         return (
           <Badge
             variant={role === "Not Set" ? "secondary" : "default"}
-            className={cn(
-              "rounded-full font-medium capitalize",
-              badgeColor[role.toLowerCase() as keyof typeof badgeColor]
-            )}
+            className={cn("font-medium capitalize", RoleBadgeColor[role.toLowerCase() as keyof typeof RoleBadgeColor])}
           >
             {role}
           </Badge>
@@ -76,10 +70,10 @@ export default function UserIndex(props: { users: User.Default[]; roles: Role.De
       id: "action",
       cell: ({ row }) => {
         const userId = row.original.id;
-        const userRoleId = row.original.role_id;
+        const userRoleId = row.getValue("role");
 
         const [selectedRole, setSelectedRole] = useState(userRoleId);
-        const { patch, data, setData } = useForm<Pick<User.Default, "role_id">>({ role_id: userRoleId });
+        const { patch, data, setData } = useForm<Pick<User.Default, "role">>({ role: userRoleId as Enum.Role });
 
         // handle update user role
         useEffect(() => {
@@ -94,8 +88,9 @@ export default function UserIndex(props: { users: User.Default[]; roles: Role.De
                   id: `update-user-role-${userId}`,
                 });
               },
-              onError: () => {
+              onError: (error) => {
                 toast.error("Gagal mengubah role pengguna", {
+                  description: error.message,
                   id: `update-user-role-${userId}`,
                 });
               },
@@ -104,40 +99,47 @@ export default function UserIndex(props: { users: User.Default[]; roles: Role.De
         }, [selectedRole]);
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-              >
-                <EllipsisVerticalIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Pilih Role</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup
-                    value={data.role_id}
-                    onValueChange={(value: string) => {
-                      setData({ role_id: value });
-                      setSelectedRole(value);
-                    }}
-                  >
-                    {roles.map((item) => (
-                      <DropdownMenuRadioItem
-                        value={item.id}
-                        className="capitalize"
-                      >
-                        {item.name}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Dialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                >
+                  <EllipsisVerticalIcon className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Pilih Role</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup
+                      value={data.role}
+                      onValueChange={(value: string) => {
+                        setData({ role: value as Enum.Role });
+                        setSelectedRole(value);
+                      }}
+                    >
+                      {roles.map((item) => (
+                        <DropdownMenuRadioItem
+                          value={item}
+                          className="capitalize"
+                        >
+                          {item}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem variant="destructive">Hapus</DropdownMenuItem>
+                </DialogTrigger>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DialogContent className="w-110">
+              <UserDelete user_id={userId} />
+            </DialogContent>
+          </Dialog>
         );
       },
     },
@@ -160,7 +162,7 @@ export default function UserIndex(props: { users: User.Default[]; roles: Role.De
                 <DataTableFilter
                   table={table}
                   filter="role"
-                  data={roles.map((e) => e.name)}
+                  data={roles}
                   standalone
                 />
               </DataTableControls>

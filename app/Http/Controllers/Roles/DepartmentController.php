@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Users;
+namespace App\Http\Controllers\Roles;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\DepartmentRequest;
+use App\Http\Requests\Roles\DepartmentRequest;
 use Inertia\Inertia;
 use App\Models\Department;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -42,6 +42,7 @@ class DepartmentController extends Controller
             'record_id' => $department->id,
         ]);
 
+        // handle message in frontend
         return redirect()->back();
     }
 
@@ -70,6 +71,7 @@ class DepartmentController extends Controller
                 'record_id' => $department->id,
             ]);
 
+            // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Department not found", [
@@ -104,6 +106,7 @@ class DepartmentController extends Controller
 
             $department->delete();
 
+            // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Department not found", [
