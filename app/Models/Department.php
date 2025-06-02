@@ -18,6 +18,10 @@ class Department extends BaseModel
     return Employee::where("department_id", $this->id)->count();
   }
 
+  /**
+   * Can delete if no employees in the department
+   * @return bool
+   */
   public function getCanDeleteAttribute(): bool
   {
     return $this->employees_count === 0;

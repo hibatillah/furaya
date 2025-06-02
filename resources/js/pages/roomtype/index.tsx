@@ -1,18 +1,20 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
 import { DataTableFilter } from "@/components/data-table/data-table-filter";
+import { HelpTooltip } from "@/components/help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
-import RoomTypeCreate from "./create";
 import RoomTypeDelete from "./delete";
 import RoomTypeEdit from "./edit";
+import RoomTypeCreate from "./create";
+import RoomTypeShow from "./show";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -21,14 +23,14 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) {
-  const { roomTypes } = props;
+export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; facilities: Facility.Default[] }) {
+  const { roomTypes, facilities } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
+  const [dialogType, setDialogType] = useState<"detail" |"delete" | "edit" | null>(null);
   const [selectedRow, setSelectedRow] = useState<RoomType.Default | null>(null);
 
-  function handleDialog(type: "delete" | "edit", row: RoomType.Default) {
+  function handleDialog(type: "detail" | "delete" | "edit", row: RoomType.Default) {
     setDialogType(type);
     setSelectedRow(row);
     setDialogOpen(true);
@@ -54,8 +56,17 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) 
       header: "Tarif Dasar",
     },
     {
+      accessorKey: "facilities_count",
+      header: "Jumlah Fasilitas",
+    },
+    {
       accessorKey: "rooms_count",
-      header: "Jumlah Kamar",
+      header: () => (
+        <div className="flex items-center gap-1">
+          <span>Digunakan</span>
+          <HelpTooltip>Jumlah kamar yang menggunakan tipe kamar</HelpTooltip>
+        </div>
+      ),
     },
     {
       id: "actions",
@@ -72,6 +83,7 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleDialog("detail", row.original)}>Detail</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
@@ -100,7 +112,7 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) 
             {({ table }) => (
               <DataTableControls table={table}>
                 <DataTableFilter table={table} />
-                <RoomTypeCreate />
+                <RoomTypeCreate facilities={facilities} />
               </DataTableControls>
             )}
           </DataTable>
@@ -115,15 +127,23 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[] }) 
           onOpenAutoFocus={(e) => e.preventDefault()}
           noClose
         >
+          {dialogType === "detail" && selectedRow && (
+            <RoomTypeShow
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
           {dialogType === "delete" && selectedRow && (
             <RoomTypeDelete
               id={selectedRow.id}
+              canDelete={selectedRow.can_delete}
               onClose={handleDialogClose}
             />
           )}
           {dialogType === "edit" && selectedRow && (
             <RoomTypeEdit
               data={selectedRow}
+              facilities={facilities}
               onClose={handleDialogClose}
             />
           )}

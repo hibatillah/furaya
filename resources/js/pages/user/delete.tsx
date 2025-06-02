@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogClose, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
 

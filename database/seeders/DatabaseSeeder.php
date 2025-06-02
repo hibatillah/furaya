@@ -48,6 +48,19 @@ class DatabaseSeeder extends Seeder
             ];
         }, $roomTypeOptions);
 
+        // define initial facilities
+        $facilityOptions = ['Wifi', 'Televisi', "Kursi", "Meja", "Lemari", "Cermin", "Gantungan Baju", "Kulkas", "Brankas", "Handuk", "Sikat Gigi", "Selimut", "Bantal", "Pasta Gigi", "Gelas", "Pemanas Air", "Tissue", "Tempat Sampah", "Telepon Kabel", "AC", "Tirai Jendela", "Sabun", "Sampo", "Air Mineral", "Minibar", "Teh", "Kopi", "Hanger", "Sandal", "Hair Dryer", "Setrika", "Sofa", "Speaker"];
+
+        $facilities = array_map(function ($facility) use ($dateISO) {
+            return [
+                'id' => Str::uuid(),
+                'name' => $facility,
+                'description' => 'Fasilitas ini adalah ' . $facility,
+                'created_at' => $dateISO,
+                'updated_at' => $dateISO,
+            ];
+        }, $facilityOptions);
+
         // add department data
         $department = [
             'id' => Str::uuid(),
@@ -59,6 +72,7 @@ class DatabaseSeeder extends Seeder
         // insert seed data
         DB::table('bed_types')->insert($bedTypes);
         DB::table('room_types')->insert($roomTypes);
+        DB::table('facilities')->insert($facilities);
         DB::table('departments')->insert($department);
 
         // define admin user

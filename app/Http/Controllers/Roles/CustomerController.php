@@ -55,6 +55,7 @@ class CustomerController extends Controller
             Log::channel("project")->error("Creating customer", [
                 "user_id" => Auth::user()->id,
                 "table" => "customers",
+                'error' => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -89,6 +90,7 @@ class CustomerController extends Controller
             Log::channel("project")->error("Showing customer", [
                 "user_id" => Auth::user()->id,
                 "table" => "customers",
+                'error' => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -121,6 +123,7 @@ class CustomerController extends Controller
             Log::channel("project")->error("Showing edit customer page", [
                 "user_id" => Auth::user()->id,
                 "table" => "customers",
+                'error' => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -184,6 +187,7 @@ class CustomerController extends Controller
             Log::channel("project")->error("Updating customer", [
                 "user_id" => Auth::user()->id,
                 "table" => "customers",
+                'error' => $e->getMessage(),
             ]);
 
             return back()->withErrors([

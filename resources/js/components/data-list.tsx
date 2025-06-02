@@ -20,9 +20,9 @@ export function DataList(props: DataListProps) {
       {...rest}
     >
       {data.map((item) => (
-        <Fragment key={item.value}>
-          <dt>{item.label}</dt>
-          <dd>{item.value ?? "-"}</dd>
+        <Fragment key={item.label}>
+          <dt data-label={item.label}>{item.label}</dt>
+          <dd data-value={item.label}>{item.value ?? "-"}</dd>
         </Fragment>
       ))}
     </dl>

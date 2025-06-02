@@ -3,32 +3,33 @@ import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
 
-export default function BedTypeEdit(props: { data: BedType.Default; onClose: () => void }) {
-  const { data: bedType, onClose } = props;
+export default function FacilityEdit(props: { data: Facility.Default; onClose: () => void }) {
+  const { data: facility, onClose } = props;
 
-  const { data, setData, put, processing, errors } = useForm<BedType.Update>(bedType);
+  const { data, setData, put, processing, errors } = useForm<Facility.Update>(facility);
 
-  // handle update bed type data
-  function handleUpdateBedType(e: React.FormEvent) {
+  // handle update facility data
+  function handleUpdateFacility(e: React.FormEvent) {
     e.preventDefault();
 
-    toast.loading("Memperbarui tipe kasur...", {
-      id: `update-bed-type-${data.id}`,
+    toast.loading("Memperbarui fasilitas...", {
+      id: `update-facility-${data.id}`,
     });
 
-    put(route("bedtype.update", { id: data.id }), {
+    put(route("facility.update", { id: data.id }), {
       onSuccess: () => {
-        toast.success("Tipe kasur berhasil diperbarui", {
-          id: `update-bed-type-${data.id}`,
+        toast.success("Fasilitas berhasil diperbarui", {
+          id: `update-facility-${data.id}`,
         });
         onClose();
       },
       onError: (error) => {
-        toast.error("Tipe kasur gagal diperbarui", {
-          id: `update-bed-type-${data.id}`,
+        toast.error("Fasilitas gagal diperbarui", {
+          id: `update-facility-${data.id}`,
           description: error.message,
         });
       },
@@ -38,10 +39,10 @@ export default function BedTypeEdit(props: { data: BedType.Default; onClose: () 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Edit Tipe Kasur</DialogTitle>
+        <DialogTitle>Edit Fasilitas</DialogTitle>
       </DialogHeader>
       <form
-        onSubmit={handleUpdateBedType}
+        onSubmit={handleUpdateFacility}
         className="max-w-lg space-y-6"
       >
         <div className="grid gap-2">
@@ -55,6 +56,17 @@ export default function BedTypeEdit(props: { data: BedType.Default; onClose: () 
             placeholder="Nama"
           />
           <InputError message={errors.name} />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="description">Deskripsi</Label>
+          <Textarea
+            id="description"
+            value={data.description}
+            onChange={(e) => setData("description", e.target.value)}
+            placeholder="Deskripsi"
+          />
+          <InputError message={errors.description} />
         </div>
 
         <div className="grid gap-3 lg:grid-cols-2">

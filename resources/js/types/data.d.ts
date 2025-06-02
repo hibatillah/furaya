@@ -32,16 +32,28 @@ declare namespace RoomStatus {
 }
 
 declare namespace RoomType {
-  interface Default {
+  interface Default extends Additional {
     id: string;
     name: string;
     capacity: number | "";
     base_rate?: number | "";
-    rooms_count: number;
   }
 
-  type Create = Omit<Default, "id">;
-  type Update = Partial<Default>;
+  interface Additional {
+    rooms_count?: number;
+    can_delete: boolean;
+    facilities_count: number;
+    room_type_facility: RoomTypeFacility.Default[];
+    facility: Facility.Default[];
+  }
+
+  type Create = Omit<Default, "id" | "room_type_facility" | "facility"> & {
+    facilities: string[];
+  };
+
+  type Update = Partial<Omit<Default, "room_type_facility" | "facility"> & {
+    facilities?: string[];
+  }>;
 }
 
 declare namespace BedType {
@@ -49,6 +61,7 @@ declare namespace BedType {
     id: string;
     name: string;
     rooms_count: number;
+    can_delete: boolean;
   }
 
   type Create = Omit<Default, "id">;
@@ -62,11 +75,23 @@ declare namespace RoomFacility {
     room?: Room.Default;
     facility_id: string;
     facility?: Facility.Default;
-    quantity: number | "";
   }
 
   type Create = Omit<Default, "id" | "room" | "facility">;
   type Update = Partial<Omit<Default, "room" | "facility">>;
+}
+
+declare namespace RoomTypeFacility {
+  interface Default {
+    id: string;
+    room_type_id: string;
+    room_type?: RoomType.Default;
+    facility_id: string;
+    facility?: Facility.Default;
+  }
+
+  type Create = Omit<Default, "id" | "room_type" | "facility">;
+  type Update = Partial<Omit<Default, "room_type" | "facility">>;
 }
 
 declare namespace Facility {
@@ -74,6 +99,8 @@ declare namespace Facility {
     id: string;
     name: string;
     description?: string;
+    rooms_count: number;
+    can_delete: boolean;
   }
 
   type Create = Omit<Default, "id">;
@@ -159,6 +186,7 @@ declare namespace User {
     password: string;
     role: Enum.Role;
     email_verified_at?: Date | string;
+    deleted_at?: Date | string;
   }
 
   type Create = Omit<Default, "id" | "role">;

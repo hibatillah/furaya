@@ -1,5 +1,6 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
 import { DataTableFilter } from "@/components/data-table/data-table-filter";
+import { HelpTooltip } from "@/components/help-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -65,6 +66,30 @@ export default function UserIndex(props: { users: User.Default[]; roles: Enum.Ro
         );
       },
       filterFn: "checkbox" as FilterFnOption<User.Default>,
+    },
+    {
+      id: "status",
+      header: () => (
+        <div className="flex items-center gap-1">
+          <span>Status</span>
+          <HelpTooltip>
+            Pengguna <span className="font-bold">Tidak Aktif</span> sudah dihapus dari sistem, data terkait pengguna masih tersimpan.
+          </HelpTooltip>
+        </div>
+      ),
+      accessorKey: "deleted_at",
+      cell: ({ row }) => {
+        const status = row.getValue("status");
+        return (
+          <Badge
+            variant={!status ? "secondary" : "outline"}
+            className="font-medium capitalize"
+          >
+            {!status ? "Aktif" : "Tidak Aktif"}
+          </Badge>
+        );
+      },
+      filterFn: "radio" as FilterFnOption<User.Default>,
     },
     {
       id: "action",

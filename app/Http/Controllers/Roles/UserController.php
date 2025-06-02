@@ -19,8 +19,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::orderBy('created_at', 'desc')->get();
         $roles = RoleEnum::getValues();
+        $users = User::withTrashed()
+            ->orderBy('deleted_at', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return Inertia::render('user/index', [
             'users' => $users,
@@ -82,6 +85,7 @@ class UserController extends Controller
             Log::channel("project")->error("Updating user", [
                 "user_id" => Auth::user()->id,
                 "table" => "users",
+                "error" => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -120,6 +124,7 @@ class UserController extends Controller
             Log::channel("project")->error("Deleting user", [
                 "user_id" => Auth::user()->id,
                 "table" => "users",
+                "error" => $e->getMessage(),
             ]);
 
             return back()->withErrors([

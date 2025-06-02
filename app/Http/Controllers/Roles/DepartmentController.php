@@ -9,6 +9,7 @@ use App\Models\Department;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class DepartmentController extends Controller
 {
@@ -34,6 +35,7 @@ class DepartmentController extends Controller
      */
     public function store(DepartmentRequest $request)
     {
+        try {
         $department = Department::create($request->validated());
 
         Log::channel('project')->info('Department created', [
@@ -42,8 +44,21 @@ class DepartmentController extends Controller
             'record_id' => $department->id,
         ]);
 
-        // handle message in frontend
-        return redirect()->back();
+            // handle message in frontend
+            return redirect()->back();
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::channel("project")->error("Creating department", [
+                "user_id" => Auth::user()->id,
+                "table" => "departments",
+                "error" => $e->getMessage(),
+            ]);
+
+            return back()->withErrors([
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -84,9 +99,12 @@ class DepartmentController extends Controller
             Log::channel("project")->error("Updating department", [
                 "user_id" => Auth::user()->id,
                 "table" => "departments",
+                "error" => $e->getMessage(),
             ]);
 
-            return redirect()->back()->with('error', $e->getMessage());
+            return back()->withErrors([
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -119,9 +137,12 @@ class DepartmentController extends Controller
             Log::channel("project")->error("Deleting department", [
                 "user_id" => Auth::user()->id,
                 "table" => "departments",
+                "error" => $e->getMessage(),
             ]);
 
-            return redirect()->back()->with('error', $e->getMessage());
+            return back()->withErrors([
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }

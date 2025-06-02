@@ -1,33 +1,35 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
+import { HelpTooltip } from "@/components/help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
+import { cn } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
-import BedTypeCreate from "./create";
-import BedTypeDelete from "./delete";
-import BedTypeEdit from "./edit";
+import FacilityCreate from "./create";
+import FacilityDelete from "./delete";
+import FacilityEdit from "./edit";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
-    title: "Tipe Kasur",
-    href: route("bedtype.index"),
+    title: "Fasilitas",
+    href: route("facility.index"),
   },
 ];
 
-export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
-  const { bedTypes } = props;
+export default function FacilityIndex(props: { facilities: Facility.Default[] }) {
+  const { facilities } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
-  const [selectedRow, setSelectedRow] = useState<BedType.Default | null>(null);
+  const [dialogType, setDialogType] = useState<"delete" | "edit" | "show" | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Facility.Default | null>(null);
 
-  function handleDialog(type: "delete" | "edit", row: BedType.Default) {
+  function handleDialog(type: "delete" | "edit" | "show", row: Facility.Default) {
     setDialogType(type);
     setSelectedRow(row);
     setDialogOpen(true);
@@ -39,20 +41,24 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
     setSelectedRow(null);
   }
 
-  // define data table columns
-  const columns: ColumnDef<BedType.Default>[] = [
+  const columns: ColumnDef<Facility.Default>[] = [
     {
-      id: "name",
       accessorKey: "name",
       header: "Nama",
-      cell: ({ row }) => {
-        return <span className="w-full text-center capitalize">{row.original.name}</span>;
-      },
     },
     {
-      id: "rooms_count",
       accessorKey: "rooms_count",
-      header: "Jumlah Kamar",
+      header: () => (
+        <div className="flex items-center gap-1">
+          <span>Digunakan</span>
+          <HelpTooltip>Jumlah kamar yang menggunakan fasilitas</HelpTooltip>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "description",
+      header: "Deskripsi",
+      cell: ({ row }) => <div className="truncate">{row.original.description}</div>,
     },
     {
       id: "actions",
@@ -84,19 +90,19 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Tipe Kasur" />
+      <Head title="Fasilitas" />
       <Card>
         <CardHeader>
-          <h1 className="text-2xl font-bold">Tipe Kasur</h1>
+          <h1 className="text-2xl font-bold">Data Fasilitas</h1>
         </CardHeader>
         <CardContent>
           <DataTable
             columns={columns}
-            data={bedTypes}
+            data={facilities}
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <BedTypeCreate />
+                <FacilityCreate />
               </DataTableControls>
             )}
           </DataTable>
@@ -107,19 +113,19 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
         onOpenChange={setDialogOpen}
       >
         <DialogContent
-          className="w-120"
+          className={cn("w-100", dialogType === "show" && "w-110")}
           onOpenAutoFocus={(e) => e.preventDefault()}
           noClose
         >
           {dialogType === "delete" && selectedRow && (
-            <BedTypeDelete
+            <FacilityDelete
               id={selectedRow.id}
               canDelete={selectedRow.can_delete}
               onClose={handleDialogClose}
             />
           )}
           {dialogType === "edit" && selectedRow && (
-            <BedTypeEdit
+            <FacilityEdit
               data={selectedRow}
               onClose={handleDialogClose}
             />

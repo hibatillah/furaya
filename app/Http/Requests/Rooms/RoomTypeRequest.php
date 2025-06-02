@@ -29,6 +29,8 @@ class RoomTypeRequest extends FormRequest
             "name" => ["required", "string", "max:255", Rule::unique("room_types", "name")->ignore($id)],
             "capacity" => ["required", "integer"],
             "base_rate" => ["required", "numeric"],
+            "facilities" => ["nullable", "array"],
+            "facilities.*" => ["nullable", "string", "exists:facilities,id"],
         ];
     }
 
@@ -43,6 +45,9 @@ class RoomTypeRequest extends FormRequest
             "capacity.integer" => "Kapasitas tipe kamar harus berupa angka.",
             "base_rate.required" => "Tarif dasar tipe kamar wajib diisi.",
             "base_rate.numeric" => "Tarif dasar tipe kamar harus berupa angka.",
+            "facilities.array" => "Fasilitas tipe kamar harus berupa array.",
+            "facilities.*.string" => "Fasilitas tipe kamar harus berupa string.",
+            "facilities.*.exists" => "Fasilitas tipe kamar tidak ditemukan.",
         ];
     }
 }

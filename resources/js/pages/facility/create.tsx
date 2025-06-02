@@ -3,32 +3,34 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
 import { useState } from "react";
 
-export default function BedTypeCreate() {
+export default function FacilityCreate() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data, setData, post, errors, processing } = useForm<BedType.Create>();
+  const { data, setData, post, errors, processing, reset } = useForm<Facility.Create>();
 
-  // handle create bed type
-  function handleCreateBedType(e: React.FormEvent) {
+  // handle create facility
+  function handleCreateFacility(e: React.FormEvent) {
     e.preventDefault();
 
-    toast.loading("Membuat tipe kasur...", {
-      id: "create-bed-type",
+    toast.loading("Membuat fasilitas...", {
+      id: "create-facility",
     });
 
-    post(route("bedtype.store"), {
+    post(route("facility.store"), {
       onSuccess: () => {
         setDialogOpen(false);
-        toast.success("Tipe kasur berhasil ditambahkan", {
-          id: "create-bed-type",
+        reset()
+        toast.success("Fasilitas berhasil ditambahkan", {
+          id: "create-facility",
         });
       },
       onError: (error) => {
-        toast.error("Tipe kasur gagal ditambahkan", {
-          id: "create-bed-type",
+        toast.error("Fasilitas gagal ditambahkan", {
+          id: "create-facility",
           description: error.message,
         });
       },
@@ -38,14 +40,14 @@ export default function BedTypeCreate() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button className="ms-auto w-fit">Tambah Tipe Kasur</Button>
+        <Button className="ms-auto w-fit">Tambah Fasilitas</Button>
       </DialogTrigger>
       <DialogContent className="w-120">
         <DialogHeader>
-          <DialogTitle>Tambah Tipe Kasur</DialogTitle>
+          <DialogTitle>Tambah Fasilitas</DialogTitle>
         </DialogHeader>
         <form
-          onSubmit={handleCreateBedType}
+          onSubmit={handleCreateFacility}
           className="max-w-lg space-y-6"
         >
           <div className="grid gap-2">
@@ -59,6 +61,17 @@ export default function BedTypeCreate() {
               required
             />
             <InputError message={errors.name} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="description">Deskripsi</Label>
+            <Textarea
+              id="description"
+              value={data.description}
+              placeholder="Deskripsi"
+              onChange={(e) => setData("description", e.target.value)}
+            />
+            <InputError message={errors.description} />
           </div>
 
           <Button

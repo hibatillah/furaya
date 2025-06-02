@@ -1,15 +1,40 @@
 import InputError from "@/components/input-error";
+import Multiselect from "@/components/multiselect";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Option } from "@/components/ui/multiselect";
 import { useForm } from "@inertiajs/react";
+import { Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: () => void }) {
-  const { data: roomType, onClose } = props;
+export default function RoomTypeEdit(props: { data: RoomType.Default; facilities: Facility.Default[]; onClose: () => void }) {
+  const { data: roomType, facilities: facilitiesData, onClose } = props;
+  const { can_delete, rooms_count, room_type_facility, facilities_count, ...rest } = roomType;
 
-  const { data, setData, put, processing, errors } = useForm<RoomType.Update>(roomType);
+  // define form data
+  const { data, setData, put, processing, errors } = useForm<RoomType.Update>({
+    ...rest,
+    facilities: room_type_facility?.map((item) => item.facility_id),
+  });
+
+  // handle selected facilities for multiselect
+  const [selectedFacilities, setSelectedFacilities] = useState<Option[]>(
+    room_type_facility?.map((item) => ({
+      value: item.facility_id,
+      label: item.facility?.name || "",
+    })) || [],
+  );
+
+  // define facility options for multiselect
+  const facilityOptions = useMemo(() => {
+    return facilitiesData?.map((facility) => ({
+      value: facility.id,
+      label: facility.name,
+    }));
+  }, [facilitiesData]);
 
   // handle update room type data
   function handleUpdateRoomType(e: React.FormEvent) {
@@ -24,13 +49,14 @@ export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: (
         toast.success("Tipe kamar berhasil diperbarui", {
           id: `update-room-type-${data.id}`,
         });
-        onClose();
       },
-      onError: () => {
+      onError: (error) => {
         toast.error("Tipe kamar gagal diperbarui", {
           id: `update-room-type-${data.id}`,
+          description: error.message,
         });
       },
+      onFinish: () => onClose(),
     });
   }
 
@@ -41,7 +67,7 @@ export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: (
       </DialogHeader>
       <form
         onSubmit={handleUpdateRoomType}
-        className="max-w-lg space-y-6"
+        className="space-y-6"
       >
         <div className="grid gap-2">
           <Label htmlFor="name">Nama</Label>
@@ -49,9 +75,9 @@ export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: (
             id="name"
             type="text"
             value={data.name}
+            placeholder="Nama"
             onChange={(e) => setData("name", e.target.value)}
             required
-            placeholder="Nama"
           />
           <InputError message={errors.name} />
         </div>
@@ -62,9 +88,9 @@ export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: (
             id="capacity"
             type="number"
             value={data.capacity}
+            placeholder="Kapasitas"
             onChange={(e) => setData("capacity", parseInt(e.target.value))}
             required
-            placeholder="Kapasitas"
           />
           <InputError message={errors.capacity} />
         </div>
@@ -75,27 +101,38 @@ export default function RoomTypeEdit(props: { data: RoomType.Default; onClose: (
             id="base_rate"
             type="number"
             value={data.base_rate}
+            placeholder="Tarif Dasar"
             onChange={(e) => setData("base_rate", parseFloat(e.target.value))}
             required
-            placeholder="Tarif Dasar"
           />
           <InputError message={errors.base_rate} />
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-2">
-          <Button
-            variant="outline"
-            type="button"
-          >
-            Batal
-          </Button>
-          <Button
-            type="submit"
-            disabled={processing}
-          >
-            Perbarui
-          </Button>
+        <div className="grid gap-2">
+          <Label htmlFor="facilities">Fasilitas</Label>
+          <Multiselect
+            label="Fasilitas"
+            data={facilityOptions}
+            value={selectedFacilities}
+            onChange={(value) => {
+              setSelectedFacilities(value);
+              setData(
+                "facilities",
+                value.map((item) => item.value),
+              );
+            }}
+          />
+          <InputError message={errors.facilities} />
         </div>
+
+        <Button
+          type="submit"
+          disabled={processing}
+          className="w-full"
+        >
+          {processing && <Loader2 className="size-4 animate-spin" />}
+          Perbarui Tipe Kamar
+        </Button>
       </form>
     </>
   );

@@ -5,12 +5,22 @@ import { useForm } from "@inertiajs/react";
 import { AlertOctagonIcon } from "lucide-react";
 import { toast } from "sonner";
 
-export default function BedTypeDelete({ id, onClose }: { id: string; onClose: () => void }) {
+export default function BedTypeDelete(props: { id: string; canDelete: boolean; onClose: () => void }) {
+  const { id, canDelete, onClose } = props;
+
   const form = useForm();
 
   // Handle delete bed type
   function handleDelete(e: React.FormEvent, id: string) {
     e.preventDefault();
+
+    if (!canDelete) {
+      toast.warning("Tipe kasur memiliki kamar berkaitan", {
+        id: `delete-bedtype-${id}`,
+        description: "Kosongkan tipe kasur dari kamar berkaitan",
+      });
+      return;
+    }
 
     toast.loading("Menghapus tipe kasur...", { id: `delete-bedtype-${id}` });
     form.delete(route("bedtype.destroy", { id }), {
@@ -18,7 +28,11 @@ export default function BedTypeDelete({ id, onClose }: { id: string; onClose: ()
         toast.success("Tipe kasur berhasil dihapus", { id: `delete-bedtype-${id}` });
         onClose();
       },
-      onError: () => toast.error("Tipe kasur gagal dihapus", { id: `delete-bedtype-${id}` }),
+      onError: (error) =>
+        toast.error("Tipe kasur gagal dihapus", {
+          id: `delete-bedtype-${id}`,
+          description: error.message,
+        }),
     });
   }
 
@@ -28,11 +42,13 @@ export default function BedTypeDelete({ id, onClose }: { id: string; onClose: ()
         <DialogTitle>Hapus Tipe Kasur</DialogTitle>
         <DialogDescription>Apakah anda yakin ingin menghapus tipe kasur ini?</DialogDescription>
       </DialogHeader>
+      {!canDelete && (
       <Alert variant="destructive">
         <AlertOctagonIcon className="size-4" />
         <AlertTitle>Peringatan</AlertTitle>
-        <AlertDescription>Data Kamar yang berkaitan tidak akan memiliki Tipe Kasur</AlertDescription>
+        <AlertDescription>Tipe kasur hanya bisa dihapus jika tidak ada kamar yang berkaitan dengan tipe kasur ini</AlertDescription>
       </Alert>
+      )}
       <div className="flex items-center justify-end gap-2">
         <DialogClose asChild>
           <Button
@@ -46,6 +62,7 @@ export default function BedTypeDelete({ id, onClose }: { id: string; onClose: ()
           <Button
             variant="destructive"
             type="submit"
+            disabled={!canDelete}
             className="cursor-pointer"
           >
             Hapus

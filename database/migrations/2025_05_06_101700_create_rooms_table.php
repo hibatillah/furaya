@@ -19,14 +19,12 @@ return new class extends Migration
             $table->integer('capacity');
             $table->float('base_rate', 8, 2)->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
 
         Schema::create('bed_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name')->unique();
             $table->timestamps();
-            $table->softDeletes();
         });
 
         Schema::create("room_status", function (Blueprint $table) {
@@ -45,26 +43,33 @@ return new class extends Migration
             $table->integer('floor_number');
             $table->string("view")->nullable();
             $table->enum('condition', RoomConditionEnum::getValues())->default('ready');
-            $table->foreignUuid('room_type_id')->constrained("room_types")->nullOnDelete();
-            $table->foreignUuid('bed_type_id')->constrained("bed_types")->nullOnDelete();
-            $table->foreignUuid('room_status_id')->constrained("room_status")->nullOnDelete();
+            $table->foreignUuid('room_type_id')->constrained("room_types")->onDelete("cascade");
+            $table->foreignUuid('bed_type_id')->constrained("bed_types")->onDelete("cascade");
+            $table->foreignUuid('room_status_id')->nullable()->constrained("room_status")->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
 
         Schema::create("facilities", function (Blueprint $table) {
             $table->uuid("id")->primary();
-            $table->string("name");
+            $table->string("name")->unique();
             $table->string("description")->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create("room_type_facilities", function (Blueprint $table) {
+            $table->uuid("id")->primary();
+            $table->foreignUuid("room_type_id")->constrained("room_types")->onDelete("cascade");
+            $table->foreignUuid("facility_id")->constrained("facilities")->onDelete("cascade");
             $table->timestamps();
             $table->softDeletes();
         });
 
         Schema::create("room_facilities", function (Blueprint $table) {
             $table->uuid("id")->primary();
-            $table->foreignUuid("room_id")->constrained("rooms")->nullOnDelete();
-            $table->foreignUuid("facility_id")->constrained("facilities")->nullOnDelete();
-            $table->integer("quantity");
+            $table->foreignUuid("room_id")->constrained("rooms")->onDelete("cascade");
+            $table->foreignUuid("facility_id")->constrained("facilities")->onDelete("cascade");
             $table->timestamps();
             $table->softDeletes();
         });

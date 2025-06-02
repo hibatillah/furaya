@@ -4,7 +4,7 @@ declare global {
   const route: typeof routeFn;
 
   interface SelectData {
-    value: string;
+    value: string | null;
     label: string;
   }
 

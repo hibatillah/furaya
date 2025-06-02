@@ -27,12 +27,14 @@ Route::middleware(["auth", "verified", "role:admin"])->group(function () {
      * room type routes
      * `/tipe/kamar`
      */
+    Route::get("kamar/tambah", [RoomTypeController::class, "create"])->name("roomtype.create");
     Route::resource("kamar", RoomTypeController::class)
-      ->except(["create", "show"])
+      ->except(["create"])
       ->parameters(["kamar" => "id"])
       ->names([
         "index" => "roomtype.index",
         "store" => "roomtype.store",
+        "show" => "roomtype.show",
         "edit" => "roomtype.edit",
         "update" => "roomtype.update",
         "destroy" => "roomtype.destroy",

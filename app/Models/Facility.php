@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use App\Models\BaseModel;
+use App\Models\RoomFacility;
 
-class BedType extends BaseModel
+class Facility extends BaseModel
 {
   protected $appends = [
     "rooms_count",
@@ -12,16 +13,16 @@ class BedType extends BaseModel
   ];
 
   /**
-   * Get the count of rooms in the bed type
+   * Get the count of rooms in the facility
    * @return int
    */
   public function getRoomsCountAttribute(): int
   {
-    return Room::where("bed_type_id", $this->id)->count();
+    return RoomFacility::where("facility_id", $this->id)->count();
   }
 
   /**
-   * Can delete if no rooms in the bed type
+   * Can delete if no rooms in the facility
    * @return bool
    */
   public function getCanDeleteAttribute(): bool

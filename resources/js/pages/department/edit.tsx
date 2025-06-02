@@ -25,9 +25,10 @@ export default function DepartmentEdit(props: { data: Department.Default, onClos
         });
         onClose();
       },
-      onError: () => {
+      onError: (error) => {
         toast.error("Departemen gagal diperbarui", {
           id: `update-department-${data.id}`,
+          description: error.message,
         });
       },
     });

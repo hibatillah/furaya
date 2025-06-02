@@ -91,6 +91,7 @@ class EmployeeController extends Controller
             Log::channel("project")->error("Creating employee", [
                 "user_id" => Auth::user()->id,
                 "table" => "employees",
+                "error" => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -130,6 +131,7 @@ class EmployeeController extends Controller
             Log::channel("project")->error("Showing edit employee page", [
                 "user_id" => Auth::user()->id,
                 "table" => "employees",
+                "error" => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -181,6 +183,7 @@ class EmployeeController extends Controller
             Log::channel("project")->error("Updating employee", [
                 "user_id" => Auth::user()->id,
                 "table" => "employees",
+                "error" => $e->getMessage(),
             ]);
 
             return back()->withErrors([
@@ -221,6 +224,7 @@ class EmployeeController extends Controller
             Log::channel("project")->error("Deleting employee", [
                 "user_id" => Auth::user()->id,
                 "table" => "employees",
+                "error" => $e->getMessage(),
             ]);
 
             return back()->withErrors([

@@ -26,9 +26,10 @@ export default function DepartmentCreate() {
           id: "create-department",
         });
       },
-      onError: () => {
+      onError: (error) => {
         toast.error("Departemen gagal ditambahkan", {
           id: "create-department",
+          description: error.message,
         });
       },
     });
@@ -44,7 +45,7 @@ export default function DepartmentCreate() {
       </DialogTrigger>
       <DialogContent className="w-120">
         <DialogHeader>
-          <DialogTitle>Tambah Role</DialogTitle>
+          <DialogTitle>Tambah Departemen</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={handleCreateDepartment}
