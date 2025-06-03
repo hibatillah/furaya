@@ -9,12 +9,20 @@ declare namespace Room {
     room_type?: RoomType.Default;
     bed_type_id?: string;
     bed_type?: BedType.Default;
-    room_status_id?: string;
+    room_status_id?: string | null;
     room_status?: RoomStatus.Default;
+    price: number | "";
+    capacity: number | "";
   }
 
-  type Create = Omit<Default, "id" | "room_type" | "bed_type" | "room_status">;
-  type Update = Partial<Omit<Default, "room_type" | "bed_type" | "room_status">>;
+  type Create = Omit<Default, "id" | "room_type" | "bed_type" | "room_status"> & {
+    facilities: string[];
+  };
+  type Update = Partial<
+    Omit<Default, "room_type" | "bed_type" | "room_status"> & {
+      facilities?: string[];
+    }
+  >;
 }
 
 declare namespace RoomStatus {
@@ -51,9 +59,11 @@ declare namespace RoomType {
     facilities: string[];
   };
 
-  type Update = Partial<Omit<Default, "room_type_facility" | "facility"> & {
-    facilities?: string[];
-  }>;
+  type Update = Partial<
+    Omit<Default, "room_type_facility" | "facility"> & {
+      facilities?: string[];
+    }
+  >;
 }
 
 declare namespace BedType {

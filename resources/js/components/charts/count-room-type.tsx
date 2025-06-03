@@ -6,21 +6,34 @@ import { LabelList, Pie, PieChart } from "recharts";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
-export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }) {
-  const chartData = React.useMemo(() => [
-    { role: "manajer", count: data.manager, fill: "var(--color-blue-100)" },
-    { role: "admin", count: data.admin, fill: "var(--color-blue-300)" },
-    { role: "karyawan", count: data.employee, fill: "var(--color-blue-500)" },
-    { role: "customer", count: data.customer, fill: "var(--color-blue-700)" },
-  ], [data]);
+export function ChartCountRoomType({ data }: { data: Record<string, number> }) {
+  const chartData = React.useMemo(() => {
+    const colors = [
+      "var(--color-blue-100)",
+      "var(--color-blue-300)",
+      "var(--color-blue-500)",
+      "var(--color-blue-700)",
+      "var(--color-blue-900)",
+      "var(--color-indigo-100)",
+      "var(--color-indigo-300)",
+      "var(--color-indigo-500)",
+    ];
 
-  const config = React.useMemo(() => ({
-    count: { label: "Count" },
-    manajer: { label: "Manajer" },
-    admin: { label: "Admin" },
-    karyawan: { label: "Karyawan" },
-    customer: { label: "Customer" },
-  }), []) satisfies ChartConfig;
+    return Object.entries(data).map(([roomType, count], index) => ({
+      roomType,
+      count,
+      fill: colors[index % colors.length],
+    }));
+  }, [data]);
+
+  const config = React.useMemo(() => {
+    return Object.fromEntries(
+      Object.keys(data).map((roomType) => [
+        roomType.toLowerCase(),
+        { label: roomType },
+      ])
+    );
+  }, [data]) satisfies ChartConfig;
 
   const total = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + Number(curr.count), 0);
@@ -29,8 +42,8 @@ export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }
   return (
     <Card className="flex flex-col gap-2">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Jumlah Pengguna</CardTitle>
-        <CardDescription>Pembagian Pengguna Berdasarkan Role</CardDescription>
+        <CardTitle>Jumlah Kamar</CardTitle>
+        <CardDescription>Pembagian Kamar Berdasarkan Tipe</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -45,10 +58,10 @@ export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }
             <Pie
               data={chartData}
               dataKey="count"
-              nameKey="role"
+              nameKey="roomType"
             >
               <LabelList
-                dataKey="role"
+                dataKey="roomType"
                 className="fill-background"
                 stroke="none"
                 fontSize={12}
@@ -64,7 +77,7 @@ export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }
       </CardContent>
       <CardFooter className="text-muted-foreground flex justify-center gap-2">
         <span className="text-foreground font-bold">{total.toLocaleString()}</span>
-        <span>total pengguna</span>
+        <span>Total Kamar</span>
       </CardFooter>
     </Card>
   );

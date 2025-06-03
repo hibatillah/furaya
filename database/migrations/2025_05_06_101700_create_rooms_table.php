@@ -43,6 +43,8 @@ return new class extends Migration
             $table->integer('floor_number');
             $table->string("view")->nullable();
             $table->enum('condition', RoomConditionEnum::getValues())->default('ready');
+            $table->float("price", 8, 2);
+            $table->integer("capacity");
             $table->foreignUuid('room_type_id')->constrained("room_types")->onDelete("cascade");
             $table->foreignUuid('bed_type_id')->constrained("bed_types")->onDelete("cascade");
             $table->foreignUuid('room_status_id')->nullable()->constrained("room_status")->nullOnDelete();
@@ -63,7 +65,6 @@ return new class extends Migration
             $table->foreignUuid("room_type_id")->constrained("room_types")->onDelete("cascade");
             $table->foreignUuid("facility_id")->constrained("facilities")->onDelete("cascade");
             $table->timestamps();
-            $table->softDeletes();
         });
 
         Schema::create("room_facilities", function (Blueprint $table) {
@@ -71,7 +72,6 @@ return new class extends Migration
             $table->foreignUuid("room_id")->constrained("rooms")->onDelete("cascade");
             $table->foreignUuid("facility_id")->constrained("facilities")->onDelete("cascade");
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

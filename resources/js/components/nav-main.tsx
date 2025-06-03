@@ -100,12 +100,7 @@ export function NavMain({ title, items = [] }: { title?: string; items: NavItem[
                   href={item.href}
                   prefetch
                 >
-                  {item.icon && (
-                    <item.icon
-                      className="text-primary size-10"
-                      size={30}
-                    />
-                  )}
+                  {item.icon && <item.icon />}
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>

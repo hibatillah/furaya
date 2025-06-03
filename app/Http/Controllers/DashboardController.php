@@ -10,12 +10,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $userRoleCount = $this->getUserRoleCount();
-        $roomTypeCount = $this->getRoomTypeCount();
-
         return Inertia::render('dashboard', [
-            'userRoleCount' => $userRoleCount,
-            'roomTypeCount' => $roomTypeCount,
+            'userRoleCount' => $this->getUserRoleCount(),
+            'roomTypeCount' => $this->getRoomTypeCount(),
+            'bedTypeCount' => $this->getBedTypeCount(),
         ]);
     }
 
@@ -37,5 +35,15 @@ class DashboardController extends Controller
         });
 
         return $roomTypeCount;
+    }
+
+    private function getBedTypeCount()
+    {
+        $bedTypes = Room::with('bedType')->get();
+        $bedTypeCount = $bedTypes->groupBy('bedType.name')->map(function ($group) {
+            return $group->count();
+        });
+
+        return $bedTypeCount;
     }
 }

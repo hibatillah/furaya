@@ -1,13 +1,16 @@
 import InputError from "@/components/input-error";
+import Multiselect from "@/components/multiselect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Option } from "@/components/ui/multiselect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,37 +24,68 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomsCreate(props: { roomTypes: RoomType.Default[]; bedTypes: BedType.Default[]; statusOptions: Enum.RoomStatus[] }) {
-  const { roomTypes, bedTypes, statusOptions } = props;
+export default function RoomsCreate(props: {
+  roomTypes: RoomType.Default[];
+  bedTypes: BedType.Default[];
+  statusOptions: Enum.RoomStatus[];
+  roomConditions: Enum.RoomCondition[];
+  facilities: Facility.Default[];
+}) {
+  const { roomTypes, bedTypes, statusOptions, roomConditions, facilities } = props;
+
+  const [selectedFacilities, setSelectedFacilities] = useState<Option[]>([]);
+
+  // define facility options for multiselect
+  const facilityOptions = useMemo(() => {
+    return facilities.map((facility) => ({
+      value: facility.id,
+      label: facility.name,
+    }));
+  }, [facilities]);
+
+  // refine initial data
+  const initialCondition = roomConditions.find((e) => e === "ready") as Enum.RoomCondition;
 
   const { data, setData, post, processing, errors } = useForm<Room.Create>({
     room_number: "",
     floor_number: "",
-    status: "ready",
+    view: "",
+    condition: initialCondition,
+    price: "",
+    capacity: "",
     room_type_id: "",
     bed_type_id: "",
+    facilities: [],
   });
 
   function handleCreateRoom(e: React.FormEvent) {
     e.preventDefault();
 
+    // sent data
     toast.loading("Menambahkan kamar...", { id: "create-room" });
+
     post(route("room.store"), {
-      onError: () => toast.warning("Kamar gagal ditambahkan", { id: "create-room" }),
+      onError: (errors) => {
+        console.log(errors);
+        toast.warning("Kamar gagal ditambahkan", {
+          id: "create-room",
+          description: errors.message,
+        });
+      },
     });
   }
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Tambah Kamar" />
-      <Card className="max-w-lg">
+      <Card>
         <CardHeader>
           <h1 className="text-2xl font-bold">Tambah Kamar</h1>
         </CardHeader>
         <CardContent>
           <form
             onSubmit={handleCreateRoom}
-            className="max-w-lg space-y-6"
+            className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2"
           >
             <div className="grid gap-2">
               <Label htmlFor="room_number">Nomor Kamar</Label>
@@ -65,46 +99,6 @@ export default function RoomsCreate(props: { roomTypes: RoomType.Default[]; bedT
                 placeholder="Nomor Kamar"
               />
               <InputError message={errors.room_number} />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="floor_number">Nomor Lantai</Label>
-              <Input
-                id="floor_number"
-                type="number"
-                min={1}
-                value={data.floor_number}
-                onChange={(e) => setData("floor_number", parseInt(e.target.value))}
-                required
-                placeholder="Nomor Lantai"
-              />
-              <InputError message={errors.floor_number} />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={data.status}
-                onValueChange={(value) => setData("status", value as Enum.RoomStatus)}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Pilih Status">
-                    <span className="capitalize">{data.status}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((status) => (
-                    <SelectItem
-                      key={status}
-                      value={status}
-                      className="capitalize"
-                    >
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <InputError message={errors.status} />
             </div>
 
             <div className="grid gap-2">
@@ -134,6 +128,20 @@ export default function RoomsCreate(props: { roomTypes: RoomType.Default[]; bedT
             </div>
 
             <div className="grid gap-2">
+              <Label htmlFor="floor_number">Nomor Lantai</Label>
+              <Input
+                id="floor_number"
+                type="number"
+                min={1}
+                value={data.floor_number}
+                onChange={(e) => setData("floor_number", parseInt(e.target.value))}
+                required
+                placeholder="Nomor Lantai"
+              />
+              <InputError message={errors.floor_number} />
+            </div>
+
+            <div className="grid gap-2">
               <Label htmlFor="bed_type_id">Tipe Bed</Label>
               <Select
                 value={data.bed_type_id}
@@ -159,14 +167,86 @@ export default function RoomsCreate(props: { roomTypes: RoomType.Default[]; bedT
               <InputError message={errors.bed_type_id} />
             </div>
 
+            <div className="grid gap-2">
+              <Label htmlFor="price">Harga</Label>
+              <Input
+                id="price"
+                type="number"
+                min={1}
+                value={data.price}
+                onChange={(e) => setData("price", parseInt(e.target.value))}
+                required
+                placeholder="Harga"
+              />
+              <InputError message={errors.price} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="condition">Kondisi</Label>
+              <Select
+                value={data.condition}
+                onValueChange={(value) => setData("condition", value as Enum.RoomCondition)}
+              >
+                <SelectTrigger id="condition">
+                  <SelectValue placeholder="Pilih Kondisi">
+                    <span className="capitalize">{data.condition}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {roomConditions.map((condition) => (
+                    <SelectItem
+                      key={condition}
+                      value={condition}
+                      className="capitalize"
+                    >
+                      {condition}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.condition} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="capacity">Kapasitas</Label>
+              <Input
+                id="capacity"
+                type="number"
+                min={1}
+                value={data.capacity}
+                onChange={(e) => setData("capacity", parseInt(e.target.value))}
+                required
+                placeholder="Kapasitas"
+              />
+              <InputError message={errors.capacity} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="facilities">Fasilitas</Label>
+              <Multiselect
+                label="Fasilitas"
+                data={facilityOptions}
+                value={selectedFacilities}
+                onChange={(value) => {
+                  setSelectedFacilities(value);
+                  setData(
+                    "facilities",
+                    value.map((item) => item.value),
+                  );
+                }}
+              />
+              <InputError message={errors.facilities} />
+            </div>
+
             <Button
               type="submit"
               disabled={processing}
+              className="col-start-2 w-fit place-self-end"
             >
               {processing ? (
                 <div className="inline-flex items-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Memperbarui...
+                  Menyimpan...
                 </div>
               ) : (
                 "Simpan"

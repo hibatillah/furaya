@@ -4,7 +4,7 @@ import { HelpTooltip } from "@/components/help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
@@ -85,6 +85,7 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; fa
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleDialog("detail", row.original)}>Detail</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDialog("delete", row.original)}

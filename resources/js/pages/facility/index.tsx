@@ -3,7 +3,7 @@ import { HelpTooltip } from "@/components/help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";

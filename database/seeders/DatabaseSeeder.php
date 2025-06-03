@@ -22,7 +22,9 @@ class DatabaseSeeder extends Seeder
         DB::table('bed_types')->truncate();
         DB::table('room_types')->truncate();
         DB::table('departments')->truncate();
+        DB::table('facilities')->truncate();
         DB::table('employees')->truncate();
+        DB::table('customers')->truncate();
 
         // define initial bed types
         $bedTypeOptions = ['Single', 'Double', 'Twin', 'Queen', 'King'];
@@ -34,19 +36,6 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => $dateISO,
             ];
         }, $bedTypeOptions);
-
-        // define initial room types
-        $roomTypeOptions = ['Junior', 'Deluxe', 'Executive', 'Business', 'Furaya Suite'];
-        $roomTypes = array_map(function ($roomType) use ($dateISO) {
-            return [
-                'id' => Str::uuid(),
-                'name' => $roomType,
-                'capacity' => 2,
-                'base_rate' => 100.00,
-                'created_at' => $dateISO,
-                'updated_at' => $dateISO,
-            ];
-        }, $roomTypeOptions);
 
         // define initial facilities
         $facilityOptions = ['Wifi', 'Televisi', "Kursi", "Meja", "Lemari", "Cermin", "Gantungan Baju", "Kulkas", "Brankas", "Handuk", "Sikat Gigi", "Selimut", "Bantal", "Pasta Gigi", "Gelas", "Pemanas Air", "Tissue", "Tempat Sampah", "Telepon Kabel", "AC", "Tirai Jendela", "Sabun", "Sampo", "Air Mineral", "Minibar", "Teh", "Kopi", "Hanger", "Sandal", "Hair Dryer", "Setrika", "Sofa", "Speaker"];
@@ -61,6 +50,20 @@ class DatabaseSeeder extends Seeder
             ];
         }, $facilityOptions);
 
+        // define initial room types
+        $roomTypeOptions = ['Junior', 'Deluxe', 'Executive', 'Business', 'Furaya Suite'];
+
+        $roomTypes = array_map(function ($roomType) use ($dateISO) {
+            return [
+                'id' => Str::uuid(),
+                'name' => $roomType,
+                'capacity' => 2,
+                'base_rate' => 100.00,
+                'created_at' => $dateISO,
+                'updated_at' => $dateISO,
+            ];
+        }, $roomTypeOptions);
+
         // add department data
         $department = [
             'id' => Str::uuid(),
@@ -72,8 +75,24 @@ class DatabaseSeeder extends Seeder
         // insert seed data
         DB::table('bed_types')->insert($bedTypes);
         DB::table('room_types')->insert($roomTypes);
-        DB::table('facilities')->insert($facilities);
         DB::table('departments')->insert($department);
+        DB::table('facilities')->insert($facilities);
+
+        // add room type facilities
+        $existRoomTypes = DB::table('room_types')->get();
+        $existFacilities = DB::table('facilities')->get();
+
+        $roomTypeFacilities = array_map(function ($roomType) use ($existFacilities, $dateISO) {
+            return [
+                'id' => Str::uuid(),
+                'room_type_id' => $roomType->id,
+                'facility_id' => $existFacilities->random()->id,
+                'created_at' => $dateISO,
+                'updated_at' => $dateISO,
+            ];
+        }, $existRoomTypes->toArray());
+        
+        DB::table('room_type_facilities')->insert($roomTypeFacilities);
 
         // define admin user
         $password = bcrypt('haihaihai');

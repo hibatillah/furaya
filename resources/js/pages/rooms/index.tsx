@@ -20,8 +20,13 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomsIndex(props: { rooms: Room.Default[]; roomTypes: RoomType.Default[]; bedTypes: BedType.Default[] }) {
-  const { rooms, roomTypes, bedTypes } = props;
+export default function RoomsIndex(props: {
+  rooms: Room.Default[];
+  roomTypes: RoomType.Default[];
+  bedTypes: BedType.Default[];
+  roomConditions: Enum.RoomCondition[];
+}) {
+  const { rooms, roomTypes, bedTypes, roomConditions } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
@@ -58,7 +63,9 @@ export default function RoomsIndex(props: { rooms: Room.Default[]; roomTypes: Ro
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        return (
+        return !status ? (
+          "-"
+        ) : (
           <Badge
             variant="secondary"
             className="rounded-full capitalize"
@@ -75,7 +82,14 @@ export default function RoomsIndex(props: { rooms: Room.Default[]; roomTypes: Ro
       header: "Tipe Kamar",
       cell: ({ row }) => {
         const roomType = row.getValue("room_type") as string;
-        return <span className="capitalize">{roomType}</span>;
+        return (
+          <Badge
+            variant="secondary"
+            className="text-sm"
+          >
+            {roomType}
+          </Badge>
+        );
       },
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
@@ -85,7 +99,14 @@ export default function RoomsIndex(props: { rooms: Room.Default[]; roomTypes: Ro
       header: "Tipe Kasur",
       cell: ({ row }) => {
         const bedType = row.getValue("bed_type") as string;
-        return <span className="capitalize">{bedType}</span>;
+        return (
+          <Badge
+            variant="secondary"
+            className="text-sm"
+          >
+            {bedType}
+          </Badge>
+        );
       },
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
@@ -152,6 +173,11 @@ export default function RoomsIndex(props: { rooms: Room.Default[]; roomTypes: Ro
                       id: "bed_type",
                       label: "Tipe Kasur",
                       data: bedTypes.map((item) => item.name),
+                    },
+                    {
+                      id: "condition",
+                      label: "Kondisi",
+                      data: roomConditions,
                     },
                   ]}
                 />
