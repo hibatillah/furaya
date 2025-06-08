@@ -2,7 +2,7 @@ import React from "react";
 
 import { Column } from "@tanstack/react-table";
 
-import { FilterComponent } from "@/types/data-table";
+import { FilterComponent } from "@/components/data-table/data-table";
 
 import { cn } from "@/lib/utils";
 
@@ -51,18 +51,18 @@ function Filter<T>({
       {data.map((item, key) => (
         <Label
           key={key}
-          htmlFor={typeof item === "string" ? item : item.value}
+          htmlFor={typeof item === "string" ? item : item.value ?? ""}
           className="flex select-none gap-2 capitalize"
         >
           <Checkbox
-            id={typeof item === "string" ? item : item.value}
+            id={typeof item === "string" ? item : item.value ?? ""}
             checked={selected.includes(
-              typeof item === "string" ? item : item.value,
+              typeof item === "string" ? item : item.value ?? "",
             )}
             onCheckedChange={(checked: boolean) => {
               handleCheckboxChange(
                 checked,
-                typeof item === "string" ? item : item.value,
+                typeof item === "string" ? item : item.value ?? "",
               );
             }}
           />

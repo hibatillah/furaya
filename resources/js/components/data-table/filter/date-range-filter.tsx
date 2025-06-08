@@ -3,7 +3,7 @@ import React from "react";
 import { addHours, addMinutes, format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
-import { FilterComponent } from "@/types/data-table";
+import { FilterComponent } from "@/components/data-table/data-table";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";

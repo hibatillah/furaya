@@ -2,7 +2,7 @@ import React from "react";
 
 import { Column } from "@tanstack/react-table";
 
-import type { FilterContext, FilterState, FilterVariant } from "@/types/data-table";
+import type { FilterContext, FilterState, FilterVariant } from "@/components/data-table/data-table";
 
 import { customFilterFns } from "@/components/data-table/utils";
 

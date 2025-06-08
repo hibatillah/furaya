@@ -9,7 +9,7 @@
  */
 import { Column, ColumnDef, FilterFnOption, Table } from "@tanstack/react-table";
 
-import { customFilterFns } from "../components/data-table/utils";
+import { customFilterFns } from "./utils";
 
 import { LucideIcon } from "lucide-react";
 

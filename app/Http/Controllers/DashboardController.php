@@ -17,32 +17,38 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Get the count of users by role
+     */
     private function getUserRoleCount()
     {
-        $users = User::all();
-        $userRoleCount = $users->groupBy('role')->map(function ($group) {
-            return $group->count();
-        });
+        $userRoleCount = User::all()
+            ->groupBy('role')
+            ->map(fn($group) => $group->count());
 
         return $userRoleCount;
     }
 
+    /**
+     * Get the count of rooms by room type
+     */
     private function getRoomTypeCount()
     {
-        $roomTypes = Room::with('roomType')->get();
-        $roomTypeCount = $roomTypes->groupBy('roomType.name')->map(function ($group) {
-            return $group->count();
-        });
+        $roomTypeCount = Room::with('roomType')
+            ->groupBy('roomType.name')
+            ->map(fn($group) => $group->count());
 
         return $roomTypeCount;
     }
 
+    /**
+     * Get the count of rooms by bed type
+     */
     private function getBedTypeCount()
     {
-        $bedTypes = Room::with('bedType')->get();
-        $bedTypeCount = $bedTypes->groupBy('bedType.name')->map(function ($group) {
-            return $group->count();
-        });
+        $bedTypeCount = Room::with('bedType')
+            ->groupBy('bedType.name')
+            ->map(fn($group) => $group->count());
 
         return $bedTypeCount;
     }

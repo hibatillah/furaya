@@ -1,26 +1,36 @@
 # Hotel Management System
 
+Furaya Hotel Management System, focus on Front Desk module with Prototyping method.
+
 ## Features
 
-- User Management
-- Role Management
-- Department Management
-- Manager Management
-- Employee Management
-- Customer Management
+- User Role Management
+  - Manager
+  - Admin
+  - Employee
+  - Customer
 - Room Management
-- Room Status Management
-- Bed Type Management
-- Room Type Management
-- Booking Management
-- Payment Management
+  - Room Status
+  - Room Facilities
+  - Room Type
+  - Bed Type
+- Reservation Management
+  - Booking
+  - Check-in
+  - Check-out
+- Report Management
+  - Reservation Report
+  - Payment Report
+  - Room Report
 - Dashboard
 
 ## Technologies
 
-- Laravel
+- Laravel 12
+- React 19
+- Tailwind CSS 4
 - Inertia.js
-- Tailwind CSS
+- TypeScript
 
 ## Installation
 
@@ -36,8 +46,7 @@ npm install
 Migrate and seed the database
 
 ```bash
-php artisan migrate
-php artisan db:seed
+php artisan migrate --seed
 ```
 
 Run the development server
@@ -46,4 +55,4 @@ Run the development server
 composer run dev
 ```
 
-> ©[hibatillah](https://github.com/hibatillah)
+[© hibatillah](https://github.com/hibatillah)

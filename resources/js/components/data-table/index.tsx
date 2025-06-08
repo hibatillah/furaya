@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import type { DataTable, DataTableControls } from "../../types/data-table";
 import { Input } from "../ui/input";
+import type { DataTable, DataTableControls } from "./data-table";
 import { DataTablePaginations } from "./data-table-pagination";
 import { customFilterFns } from "./utils";
 

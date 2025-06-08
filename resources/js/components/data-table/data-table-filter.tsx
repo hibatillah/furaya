@@ -11,7 +11,7 @@ import React from "react";
 
 import { Column } from "@tanstack/react-table";
 
-import type { DataTableFilter, FilterComponent, FilterMap, FilterMapItem, FilterVariant, GroupedFilter, StandaloneFilter } from "@/types/data-table";
+import type { DataTableFilter, FilterComponent, FilterMap, FilterMapItem, FilterVariant, GroupedFilter, StandaloneFilter } from "@/components/data-table/data-table";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

@@ -2,7 +2,7 @@ import React from "react";
 
 import { Column } from "@tanstack/react-table";
 
-import { FilterComponent } from "@/types/data-table";
+import { FilterComponent } from "@/components/data-table/data-table";
 
 import { cn } from "@/lib/utils";
 
@@ -41,7 +41,7 @@ function Filter<T>({
           className="flex select-none gap-2 capitalize"
         >
           <RadioGroupItem
-            value={typeof item === "string" ? item : item.value}
+            value={typeof item === "string" ? item : item.value ?? ""}
             id={key.toString()}
           />
           <span>{typeof item === "string" ? item : item.label}</span>
