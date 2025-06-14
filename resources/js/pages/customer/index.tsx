@@ -17,88 +17,89 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
+// define data table columns
+export const columns: ColumnDef<Customer.Default>[] = [
+  {
+    id: "name",
+    accessorKey: "user.name",
+    header: "Nama",
+  },
+  {
+    id: "nik_passport",
+    accessorKey: "nik_passport",
+    header: "NIK/Passport",
+  },
+  {
+    id: "email",
+    accessorKey: "user.email",
+    header: "Email",
+  },
+  {
+    id: "phone",
+    accessorKey: "phone",
+    header: "Handphone",
+  },
+  {
+    id: "gender",
+    accessorKey: "formatted_gender",
+    header: "Gender",
+    cell: ({ row }) => {
+      const gender = row.getValue("gender") as string;
+      return (
+        <Badge
+          variant="outline"
+          className="text-sm"
+        >
+          {gender}
+        </Badge>
+      );
+    },
+    filterFn: "radio" as FilterFnOption<Customer.Default>,
+  },
+  {
+    id: "nationality",
+    accessorKey: "nationality",
+    header: "Kewarganegaraan",
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+          >
+            <EllipsisVerticalIcon className="size-4" />
+            <span className="sr-only">Aksi</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem>
+            <Link
+              href={route("customer.show", { id: row.original.id })}
+              className="w-full"
+            >
+              Detail
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link
+              href={route("customer.edit", { id: row.original.id })}
+              className="w-full"
+            >
+              Edit
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
+];
+
 export default function CustomerIndex(props: { customers: Customer.Default[] }) {
   const { customers } = props;
 
-  // define data table columns
-  const columns: ColumnDef<Customer.Default>[] = [
-    {
-      id: "name",
-      accessorKey: "user.name",
-      header: "Nama",
-    },
-    {
-      id: "nik_passport",
-      accessorKey: "nik_passport",
-      header: "NIK/Passport",
-    },
-    {
-      id: "email",
-      accessorKey: "user.email",
-      header: "Email",
-    },
-    {
-      id: "phone",
-      accessorKey: "phone",
-      header: "Handphone",
-    },
-    {
-      id: "gender",
-      accessorKey: "formatted_gender",
-      header: "Gender",
-      cell: ({ row }) => {
-        const gender = row.getValue("gender") as string;
-        return (
-          <Badge
-            variant="outline"
-            className="text-sm"
-          >
-            {gender}
-          </Badge>
-        );
-      },
-      filterFn: "radio" as FilterFnOption<Customer.Default>,
-    },
-    {
-      id: "nationality",
-      accessorKey: "nationality",
-      header: "Kewarganegaraan",
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-            >
-              <EllipsisVerticalIcon className="size-4" />
-              <span className="sr-only">Aksi</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Link
-                href={route("customer.show", { id: row.original.id })}
-                className="w-full"
-              >
-                Detail
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link
-                href={route("customer.edit", { id: row.original.id })}
-                className="w-full"
-              >
-                Edit
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

@@ -1,36 +1,90 @@
-import { CalendarIcon } from "lucide-react"
-import {
-  Button,
-  DatePicker,
-  Dialog,
-  Group,
-  Label,
-  Popover,
-} from "react-aria-components"
+import { cn } from "@/lib/utils";
+import { dateConfig } from "@/static";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { ChevronDownIcon } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { DateRange, Matcher } from "react-day-picker";
+import { Button } from "./ui/button";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-import { Calendar } from "@/components/ui/calendar-rac"
-import { DateInput } from "@/components/ui/datefield-rac"
+export type InputDate = Date | DateRange | undefined;
 
-export default function InputDate() {
+interface InputDateProps {
+  mode: "single" | "range";
+  value: InputDate;
+  onChange: (date: InputDate) => void;
+  popoverState?: [boolean, Dispatch<SetStateAction<boolean>>];
+  className?: string;
+  disabled?: boolean;
+  disabledDate?: Matcher | Matcher[] | undefined;
+  defaultMonth?: Date;
+}
+
+export function InputDate(props: InputDateProps) {
+  const { mode, value: date, onChange, popoverState, className, disabled, disabledDate, defaultMonth } = props;
+
+  const _popoverState = useState<boolean>(false);
+  const [open, setOpen] = popoverState ?? _popoverState;
+
+  let showDate: string;
+  if (date instanceof Date) {
+    // set for single date
+    showDate = format(date, "PP", dateConfig);
+  } else if (date?.from && date?.to) {
+    // set for range date
+    const from = format(date.from, "PP", dateConfig);
+    const to = date.to ? format(date.to, "PP", dateConfig) : null;
+    showDate = to ? `${from} - ${to}` : from;
+  } else {
+    // Placeholder
+    showDate = "Pilih tanggal";
+  }
+
   return (
-    <DatePicker className="*:not-first:mt-2">
-      <Label className="text-foreground text-sm font-medium">Date picker</Label>
-      <div className="flex">
-        <Group className="w-full">
-          <DateInput className="pe-9" />
-        </Group>
-        <Button className="text-muted-foreground/80 hover:text-foreground data-focus-visible:border-ring data-focus-visible:ring-ring/50 z-10 -ms-9 -me-px flex w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none data-focus-visible:ring-[3px]">
-          <CalendarIcon size={16} />
+    <Popover
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          id="date"
+          variant="outline"
+          className={cn("w-32 justify-between font-normal", className)}
+          disabled={disabled}
+        >
+          {showDate}
+          <ChevronDownIcon />
         </Button>
-      </div>
-      <Popover
-        className="bg-background text-popover-foreground data-entering:animate-in data-exiting:animate-out data-[entering]:fade-in-0 data-[exiting]:fade-out-0 data-[entering]:zoom-in-95 data-[exiting]:zoom-out-95 data-[placement=bottom]:slide-in-from-top-2 data-[placement=left]:slide-in-from-right-2 data-[placement=right]:slide-in-from-left-2 data-[placement=top]:slide-in-from-bottom-2 z-50 rounded-lg border shadow-lg outline-hidden"
-        offset={4}
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-auto overflow-hidden p-0"
       >
-        <Dialog className="max-h-[inherit] overflow-auto p-2">
-          <Calendar />
-        </Dialog>
-      </Popover>
-    </DatePicker>
-  )
+        {mode === "single" && (
+          <Calendar
+            mode="single"
+            selected={date as Date}
+            onSelect={onChange}
+            disabled={disabledDate}
+            locale={id}
+            defaultMonth={defaultMonth}
+            captionLayout="dropdown"
+          />
+        )}
+        {mode === "range" && (
+          <Calendar
+            mode="range"
+            selected={date as DateRange}
+            onSelect={onChange}
+            disabled={disabledDate}
+            locale={id}
+            defaultMonth={defaultMonth}
+            captionLayout="dropdown"
+          />
+        )}
+      </PopoverContent>
+    </Popover>
+  );
 }

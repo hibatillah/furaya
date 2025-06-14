@@ -59,8 +59,9 @@ export default function BedTypeEdit(props: { data: BedType.Default; onClose: () 
 
         <div className="grid gap-3 lg:grid-cols-2">
           <Button
-            variant="outline"
+            variant="secondary"
             type="button"
+            onClick={onClose}
           >
             Batal
           </Button>

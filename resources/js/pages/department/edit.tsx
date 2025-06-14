@@ -58,8 +58,9 @@ export default function DepartmentEdit(props: { data: Department.Default, onClos
 
         <div className="grid gap-3 lg:grid-cols-2">
           <Button
-            variant="outline"
+            variant="secondary"
             type="button"
+            onClick={onClose}
           >
             Batal
           </Button>

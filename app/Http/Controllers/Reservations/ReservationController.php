@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers\Reservations;
 
+use App\Enums\BookingTypeEnum;
+use App\Enums\GenderEnum;
+use App\Enums\RoomPackageEnum;
+use App\Enums\PaymentEnum;
+use App\Enums\VisitPurposeEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Models\Room;
+use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,7 +21,7 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        $reservations = Reservation::orderBy('created_at', 'desc')->paginate(10);
+        $reservations = Reservation::orderBy('updated_at', 'desc')->get();
 
         return Inertia::render("reservation/index", [
             "reservations" => $reservations,
@@ -26,7 +33,24 @@ class ReservationController extends Controller
      */
     public function create()
     {
-        //
+        $rooms = Room::all();
+        $roomTypes = RoomType::all();
+
+        $visitPurposes = VisitPurposeEnum::getValues();
+        $bookingTypes = BookingTypeEnum::getValues();
+        $roomPackages = RoomPackageEnum::getValues();
+        $paymentMethods = PaymentEnum::getValues();
+        $genders = GenderEnum::getValues();
+
+        return Inertia::render("reservation/create", [
+            "rooms" => $rooms,
+            "visitPurposes" => $visitPurposes,
+            "bookingTypes" => $bookingTypes,
+            "roomPackages" => $roomPackages,
+            "roomTypes" => $roomTypes,
+            "paymentMethods" => $paymentMethods,
+            "genders" => $genders,
+        ]);
     }
 
     /**

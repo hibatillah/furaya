@@ -5,22 +5,29 @@ import { LabelList, Pie, PieChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { chartColors } from "./utils";
 
 export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }) {
-  const chartData = React.useMemo(() => [
-    { role: "manajer", count: data.manager, fill: "var(--color-blue-100)" },
-    { role: "admin", count: data.admin, fill: "var(--color-blue-300)" },
-    { role: "karyawan", count: data.employee, fill: "var(--color-blue-500)" },
-    { role: "customer", count: data.customer, fill: "var(--color-blue-700)" },
-  ], [data]);
+  const chartData = React.useMemo(
+    () => [
+      { role: "manajer", count: data.manager, fill: chartColors[0] },
+      { role: "admin", count: data.admin, fill: chartColors[1] },
+      { role: "karyawan", count: data.employee, fill: chartColors[2] },
+      { role: "customer", count: data.customer, fill: chartColors[3] },
+    ],
+    [data],
+  );
 
-  const config = React.useMemo(() => ({
-    count: { label: "Count" },
-    manajer: { label: "Manajer" },
-    admin: { label: "Admin" },
-    karyawan: { label: "Karyawan" },
-    customer: { label: "Customer" },
-  }), []) satisfies ChartConfig;
+  const config = React.useMemo(
+    () => ({
+      count: { label: "Count" },
+      manajer: { label: "Manajer" },
+      admin: { label: "Admin" },
+      karyawan: { label: "Karyawan" },
+      customer: { label: "Customer" },
+    }),
+    [],
+  ) satisfies ChartConfig;
 
   const total = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + Number(curr.count), 0);

@@ -4,11 +4,8 @@ namespace App\Enums;
 
 class RoomStatusEnum extends BaseEnum
 {
+    // occupied (in used)
     public const OCC = "Occupied";
-    public const VC = "Vacant";
-    public const HU = "House Use";
-    public const OO = "Out of Order";
-    public const CO = "Check Out";
     public const CI = "Check In";
     public const CIP = "Check In Pagi";
     public const PDU = "Part Day Use";
@@ -17,12 +14,14 @@ class RoomStatusEnum extends BaseEnum
     public const SO = "Sleep Out";
     public const DD = "Do Not Disturb";
 
+    // vacant (not in used)
+    public const VC = "Vacant";
+    public const OO = "Out of Order";
+    public const CO = "Check Out";
+    public const HU = "House Use";
+
     protected static array $labels = [
         'OCC' => self::OCC,
-        'VC' => self::VC,
-        'HU' => self::HU,
-        'OO' => self::OO,
-        'CO' => self::CO,
         'CI' => self::CI,
         'CIP' => self::CIP,
         'PDU' => self::PDU,
@@ -30,5 +29,9 @@ class RoomStatusEnum extends BaseEnum
         'ONL' => self::ONL,
         'SO' => self::SO,
         'DD' => self::DD,
+        'VC' => self::VC,
+        'OO' => self::OO,
+        'CO' => self::CO,
+        'HU' => self::HU,
     ];
 }

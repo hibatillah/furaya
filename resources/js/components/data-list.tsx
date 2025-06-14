@@ -4,7 +4,7 @@ import { Fragment } from "react/jsx-runtime";
 interface DataListProps extends React.HTMLAttributes<HTMLDListElement> {
   data: {
     label: string;
-    value: string | number | null | undefined;
+    value: React.ReactNode | string | number | null | undefined;
   }[];
 }
 

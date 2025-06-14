@@ -55,11 +55,11 @@ export default function FacilityIndex(props: { facilities: Facility.Default[] })
         </div>
       ),
     },
-    {
-      accessorKey: "description",
-      header: "Deskripsi",
-      cell: ({ row }) => <div className="truncate">{row.original.description}</div>,
-    },
+    // {
+    //   accessorKey: "description",
+    //   header: "Deskripsi",
+    //   cell: ({ row }) => <div className="truncate">{row.original.description}</div>,
+    // },
     {
       id: "actions",
       cell: ({ row }) => (
@@ -76,6 +76,7 @@ export default function FacilityIndex(props: { facilities: Facility.Default[] })
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDialog("delete", row.original)}

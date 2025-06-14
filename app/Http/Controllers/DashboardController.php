@@ -35,6 +35,7 @@ class DashboardController extends Controller
     private function getRoomTypeCount()
     {
         $roomTypeCount = Room::with('roomType')
+            ->get()
             ->groupBy('roomType.name')
             ->map(fn($group) => $group->count());
 
@@ -47,6 +48,7 @@ class DashboardController extends Controller
     private function getBedTypeCount()
     {
         $bedTypeCount = Room::with('bedType')
+            ->get()
             ->groupBy('bedType.name')
             ->map(fn($group) => $group->count());
 

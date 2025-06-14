@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
+import { cn } from "@/lib/utils";
+import { roomStatusBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -67,8 +69,8 @@ export default function RoomsIndex(props: {
           "-"
         ) : (
           <Badge
-            variant="secondary"
-            className="rounded-full capitalize"
+            variant="default"
+            className={cn("rounded-full capitalize", roomStatusBadgeColor[status as Enum.RoomStatus])}
           >
             {status}
           </Badge>
@@ -111,6 +113,11 @@ export default function RoomsIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
     {
+      id: "count_facility",
+      accessorKey: "count_facility",
+      header: "Jumlah Fasilitas",
+    },
+    {
       id: "actions",
       cell: ({ row }) => (
         <DropdownMenu>
@@ -131,6 +138,7 @@ export default function RoomsIndex(props: {
             <DropdownMenuItem asChild>
               <Link href={route("room.edit", { id: row.original.id })}>Edit</Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDialog("delete", row.original)}

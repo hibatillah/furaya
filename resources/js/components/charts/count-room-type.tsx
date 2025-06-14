@@ -5,34 +5,19 @@ import { LabelList, Pie, PieChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { chartColors } from "./utils";
 
 export function ChartCountRoomType({ data }: { data: Record<string, number> }) {
   const chartData = React.useMemo(() => {
-    const colors = [
-      "var(--color-blue-100)",
-      "var(--color-blue-300)",
-      "var(--color-blue-500)",
-      "var(--color-blue-700)",
-      "var(--color-blue-900)",
-      "var(--color-indigo-100)",
-      "var(--color-indigo-300)",
-      "var(--color-indigo-500)",
-    ];
-
     return Object.entries(data).map(([roomType, count], index) => ({
       roomType,
       count,
-      fill: colors[index % colors.length],
+      fill: chartColors[index % chartColors.length],
     }));
   }, [data]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(
-      Object.keys(data).map((roomType) => [
-        roomType.toLowerCase(),
-        { label: roomType },
-      ])
-    );
+    return Object.fromEntries(Object.keys(data).map((roomType) => [roomType.toLowerCase(), { label: roomType }]));
   }, [data]) satisfies ChartConfig;
 
   const total = React.useMemo(() => {

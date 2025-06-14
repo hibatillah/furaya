@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
+import { RoleBadgeColor } from "@/static/user";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
-import { RoleBadgeColor } from "../user/utils";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {

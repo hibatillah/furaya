@@ -11,6 +11,7 @@ use App\Models\Facility;
 use App\Models\Room;
 use App\Models\RoomFacility;
 use App\Models\RoomType;
+use App\Models\Reservation;
 use App\Utils\DateHelper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
@@ -55,14 +56,15 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $statusOptions = RoomStatusEnum::getValues();
         $roomConditions = RoomConditionEnum::getValues();
         $facilities = Facility::all();
+        $roomTypes = RoomType::with(['roomTypeFacility.facility', 'facility'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return Inertia::render("rooms/create", [
-            "roomTypes" => $this->roomTypes,
             "bedTypes" => $this->bedTypes,
-            "statusOptions" => $statusOptions,
+            "roomTypes" => $roomTypes,
             "roomConditions" => $roomConditions,
             "facilities" => $facilities,
         ]);
@@ -132,9 +134,11 @@ class RoomController extends Controller
     {
         try {
             $room = Room::with("roomType", "bedType")->findOrFail($id);
+            $reservations = Reservation::with('room', 'employee')->where('room_id', $id)->get();
 
             return Inertia::render("rooms/show", [
                 "room" => $room,
+                "reservations" => $reservations,
             ]);
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Room not found", [
@@ -156,16 +160,17 @@ class RoomController extends Controller
     public function edit(string $id)
     {
         try {
-            $room = Room::findOrFail($id);
-            $roomTypes = RoomType::all();
-            $bedTypes = BedType::all();
-            $statusOptions = RoomStatusEnum::getValues();
+            $room = Room::with("roomType", "bedType")->findOrFail($id);
+            $roomConditions = RoomConditionEnum::getValues();
+            $facilities = Facility::all();
+            $roomTypes = RoomType::with(['roomTypeFacility.facility', 'facility'])->orderBy('created_at', 'desc')->get();
 
             return Inertia::render("rooms/edit", [
                 "room" => $room,
+                "bedTypes" => $this->bedTypes,
                 "roomTypes" => $roomTypes,
-                "bedTypes" => $bedTypes,
-                "statusOptions" => $statusOptions,
+                "roomConditions" => $roomConditions,
+                "facilities" => $facilities,
             ]);
         } catch (ModelNotFoundException $e) {
             Log::channel("project")->error("Room not found", [

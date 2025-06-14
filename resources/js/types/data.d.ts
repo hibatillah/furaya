@@ -1,5 +1,5 @@
 declare namespace Room {
-  interface Default {
+  interface Base {
     id: string;
     room_number: number | "";
     floor_number: number | "";
@@ -15,18 +15,27 @@ declare namespace Room {
     capacity: number | "";
   }
 
-  type Create = Omit<Default, "id" | "room_type" | "bed_type" | "room_status"> & {
+  interface Addition {
+    image_url?: string;
+    facility?: RoomFacility.Default[];
+    count_facility?: number;
+  }
+
+  interface Default extends Base, Addition {}
+
+  type Create = Omit<Base, "id" | "room_type" | "bed_type" | "room_status" | "room_status_id"> & {
     facilities: string[];
+    image?: File | null;
   };
-  type Update = Partial<
-    Omit<Default, "room_type" | "bed_type" | "room_status"> & {
-      facilities?: string[];
-    }
-  >;
+
+  type Update = Partial<Omit<Base, "room_type" | "bed_type" | "room_status" | "room_status_id">> & {
+    facilities?: string[];
+    image?: File | null;
+  };
 }
 
 declare namespace RoomStatus {
-  interface Default {
+  interface Base {
     id: string;
     status: Enum.RoomStatus;
     from: Date | string;
@@ -35,19 +44,21 @@ declare namespace RoomStatus {
     employee?: Employee.Default;
   }
 
-  type Create = Omit<Default, "id" | "employee">;
-  type Update = Partial<Omit<Default, "employee">>;
+  interface Addition {}
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "employee">;
+  type Update = Partial<Omit<Base, "employee">>;
 }
 
 declare namespace RoomType {
-  interface Default extends Additional {
+  interface Base {
     id: string;
     name: string;
     capacity: number | "";
     base_rate?: number | "";
   }
 
-  interface Additional {
+  interface Addition {
     rooms_count?: number;
     can_delete: boolean;
     facilities_count: number;
@@ -55,31 +66,33 @@ declare namespace RoomType {
     facility: Facility.Default[];
   }
 
-  type Create = Omit<Default, "id" | "room_type_facility" | "facility"> & {
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "room_type_facility" | "facility"> & {
     facilities: string[];
   };
-
-  type Update = Partial<
-    Omit<Default, "room_type_facility" | "facility"> & {
-      facilities?: string[];
-    }
-  >;
+  type Update = Partial<Omit<Base, "room_type_facility" | "facility">> & {
+    facilities?: string[];
+  };
 }
 
 declare namespace BedType {
-  interface Default {
+  interface Base {
     id: string;
     name: string;
+  }
+
+  interface Addition {
     rooms_count: number;
     can_delete: boolean;
   }
 
-  type Create = Omit<Default, "id">;
-  type Update = Partial<Default>;
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id">;
+  type Update = Partial<Base>;
 }
 
 declare namespace RoomFacility {
-  interface Default {
+  interface Base {
     id: string;
     room_id: string;
     room?: Room.Default;
@@ -87,12 +100,14 @@ declare namespace RoomFacility {
     facility?: Facility.Default;
   }
 
-  type Create = Omit<Default, "id" | "room" | "facility">;
-  type Update = Partial<Omit<Default, "room" | "facility">>;
+  interface Addition {}
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "room" | "facility">;
+  type Update = Partial<Omit<Base, "room" | "facility">>;
 }
 
 declare namespace RoomTypeFacility {
-  interface Default {
+  interface Base {
     id: string;
     room_type_id: string;
     room_type?: RoomType.Default;
@@ -100,25 +115,31 @@ declare namespace RoomTypeFacility {
     facility?: Facility.Default;
   }
 
-  type Create = Omit<Default, "id" | "room_type" | "facility">;
-  type Update = Partial<Omit<Default, "room_type" | "facility">>;
+  interface Addition {}
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "room_type" | "facility">;
+  type Update = Partial<Omit<Base, "room_type" | "facility">>;
 }
 
 declare namespace Facility {
-  interface Default {
+  interface Base {
     id: string;
     name: string;
     description?: string;
+  }
+
+  interface Addition {
     rooms_count: number;
     can_delete: boolean;
   }
 
-  type Create = Omit<Default, "id">;
-  type Update = Partial<Default>;
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id">;
+  type Update = Partial<Base>;
 }
 
 declare namespace Customer {
-  interface Default {
+  interface Base {
     id: string;
     user_id: string;
     user?: User.Default;
@@ -129,37 +150,43 @@ declare namespace Customer {
     profession?: string;
     nationality?: string;
     address?: string;
+  }
+
+  interface Addition {
+    name?: string;
     formatted_birthdate?: string;
     formatted_gender?: string;
   }
 
-  type Create = {
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "user" | "user_id"> & {
     name: string;
     email: string;
-  } & Omit<Default, "id" | "user">;
-
-  type Update = Partial<
-    Omit<Default, "user"> & {
-      name?: string;
-      email?: string;
-    }
-  >;
+  };
+  type Update = Partial<Omit<Base, "user">> & {
+    name?: string;
+    email?: string;
+  };
 }
 
 declare namespace Department {
-  interface Default {
+  interface Base {
     id: string;
     name: string;
     employees_count: number;
-    can_delete: boolean;
   }
 
-  type Create = Omit<Default, "id">;
-  type Update = Partial<Default>;
+  interface Addition {
+    can_delete?: boolean;
+  }
+
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id">;
+  type Update = Partial<Base>;
 }
 
 declare namespace Employee {
-  interface Default {
+  interface Base {
     id: string;
     user_id: string;
     user?: User.Default;
@@ -170,22 +197,23 @@ declare namespace Employee {
     address?: string;
     hire_date: Date | string;
     salary?: number | "";
+  }
+
+  interface Addition {
     formatted_hire_date?: string;
     formatted_gender?: string;
   }
 
-  type Create = {
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "user" | "department"> & {
     name: string;
     email: string;
     password: string;
-  } & Omit<Default, "id" | "user" | "department">;
-
-  type Update = Partial<
-    Omit<Default, "user" | "department"> & {
-      name?: string;
-      email?: string;
-    }
-  >;
+  };
+  type Update = Partial<Omit<Base, "user" | "department">> & {
+    name?: string;
+    email?: string;
+  };
 }
 
 declare namespace User {
@@ -204,15 +232,15 @@ declare namespace User {
 }
 
 declare namespace Reservation {
-  interface Default {
+  interface Base {
     id: string;
     booking_number: number | "";
     adults: number | "";
     people_count: number | "";
     length_of_stay: number | "";
-    check_in?: Date | string;
-    check_out?: Date | string;
     total_price: number | "";
+    start_date: Date | string;
+    end_date?: Date | string | null;
     room_id: string;
     room?: Room.Default;
     customer_id: string;
@@ -234,18 +262,27 @@ declare namespace Reservation {
     remarks?: string;
     advance_remarks?: string;
     advance_amount?: number | "";
-    formatted_check_in?: string;
-    formatted_check_out?: string;
-    formatted_total_price?: string;
-    created_at?: Date | string;
   }
 
-  type Create = Omit<Default, "id">;
-  type Update = Partial<Omit<Default, "room" | "customer" | "employee">>;
+  interface Addition {
+    check_in?: CheckIn.Default;
+    check_out?: CheckOut.Default;
+    is_check_in?: boolean;
+    is_check_out?: boolean;
+    room_status?: Enum.RoomStatus;
+    formatted_check_in?: string;
+    formatted_check_out?: string;
+    formatted_created_at?: string;
+    formatted_updated_at?: string;
+  }
+
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "room" | "customer" | "employee"> & Customer.Create;
+  type Update = Partial<Omit<Base, "room" | "customer" | "employee">>;
 }
 
 declare namespace CheckIn {
-  interface Default {
+  interface Base {
     id: string;
     reservation_id: string;
     reservation?: Reservation.Default;
@@ -255,8 +292,10 @@ declare namespace CheckIn {
     notes?: string;
   }
 
-  type Create = Omit<Default, "id" | "reservation" | "employee">;
-  type Update = Partial<Omit<Default, "reservation" | "employee">>;
+  interface Addition {}
+  interface Default extends Base, Addition {}
+  type Create = Omit<Base, "id" | "reservation" | "employee" | "employee_id">;
+  type Update = Partial<Omit<Base, "reservation" | "employee">>;
 }
 
 declare namespace CheckOut {
@@ -271,14 +310,17 @@ declare namespace CheckOut {
     notes?: string;
   }
 
-  type Create = Omit<Default, "id" | "reservation" | "employee">;
+  type Create = Omit<Default, "id" | "reservation" | "employee" | "employee_id">;
   type Update = Partial<Omit<Default, "reservation" | "employee">>;
 }
 
 declare namespace Enum {
   export type BookingType = "direct" | "online" | "walk in" | "travel" | "other";
+
   export type RoomStatus = "OCC" | "VC" | "HU" | "OO" | "CO" | "CI" | "CIP" | "PDU" | "DU" | "ONL" | "SO" | "DD";
+
   export type RoomCondition = "ready" | "booked" | "cleaning" | "maintenance" | "booked cleaning" | "unclean" | "blocked" | "unreserved";
+
   export type RoomPackage =
     | "bed and breakfast"
     | "half board"
@@ -288,8 +330,12 @@ declare namespace Enum {
     | "romantic gateway"
     | "business package"
     | "other";
+
   export type VisitPurpose = "vacation" | "business" | "study" | "family" | "seminar" | "other";
+
   export type Role = "admin" | "manager" | "employee" | "customer";
+
   export type Gender = "male" | "female";
+
   export type Payment = "cash" | "bank transfer" | "debit card" | "digital wallet" | "credit card" | "voucher" | "direct billing" | "other";
 }

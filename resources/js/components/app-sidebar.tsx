@@ -9,12 +9,10 @@ import {
   BedSingleIcon,
   BriefcaseIcon,
   CalendarCheckIcon,
-  ClockArrowDownIcon,
-  ClockArrowUpIcon,
   LayoutGrid,
   Package2Icon,
   ShieldUserIcon,
-  UsersIcon,
+  UsersIcon
 } from "lucide-react";
 import AppLogo from "./app-logo";
 
@@ -69,8 +67,6 @@ const adminMenuItems: Record<string, NavItem[]> = {
       href: route("dashboard"),
       icon: LayoutGrid,
     },
-  ],
-  Layanan: [
     {
       title: "Kamar",
       href: route("room.index"),
@@ -101,25 +97,11 @@ const employeeMenuItems: Record<string, NavItem[]> = {
       href: route("dashboard"),
       icon: LayoutGrid,
     },
-  ],
-  Reservasi: [
     {
       title: "Reservasi",
       href: route("reservation.index"),
       icon: CalendarCheckIcon,
     },
-    {
-      title: "Check In",
-      href: route("checkin.index"),
-      icon: ClockArrowUpIcon,
-    },
-    {
-      title: "Check Out",
-      href: route("checkout.index"),
-      icon: ClockArrowDownIcon,
-    },
-  ],
-  Kamar: [
     {
       title: "Status Kamar",
       href: route("room.status.index"),
@@ -140,7 +122,7 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      variant="inset"
+      variant="sidebar"
     >
       <SidebarHeader>
         <SidebarMenu>

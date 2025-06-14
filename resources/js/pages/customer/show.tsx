@@ -1,11 +1,10 @@
 import { DataList } from "@/components/data-list";
 import { DataTable, DataTableControls } from "@/components/data-table";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/react";
-import { ColumnDef } from "@tanstack/react-table";
+import { Head } from "@inertiajs/react";
+import { reservationColumns } from "../reservation";
 
 export default function CustomerShow(props: { customer: Customer.Default; reservations: Reservation.Default[] }) {
   const { customer, reservations } = props;
@@ -22,7 +21,7 @@ export default function CustomerShow(props: { customer: Customer.Default; reserv
     },
   ];
 
-  // define data list
+  // define data list for customer detail
   const dataList = [
     { label: "Nama", value: customer.user?.name },
     { label: "NIK/Passport", value: customer.nik_passport },
@@ -35,56 +34,6 @@ export default function CustomerShow(props: { customer: Customer.Default; reserv
     { label: "Alamat", value: customer.address },
   ];
 
-  // define data table columns
-  const columns: ColumnDef<Reservation.Default>[] = [
-    {
-      id: "booking_number",
-      header: "No. Reservasi",
-      accessorKey: "booking_number",
-    },
-    {
-      id: "room",
-      header: "Kamar",
-      accessorKey: "room.room_number",
-    },
-    {
-      id: "check_in",
-      header: "Check In",
-      accessorKey: "check_in",
-    },
-    {
-      id: "check_out",
-      header: "Check Out",
-      accessorKey: "check_out",
-    },
-    {
-      id: "length_of_stay",
-      header: "Durasi",
-      accessorKey: "length_of_stay",
-    },
-    {
-      id: "total_price",
-      header: "Total Harga",
-      accessorKey: "total_price",
-    },
-    {
-      id: "status",
-      header: "Status",
-      accessorKey: "status",
-    },
-    {
-      id: "action",
-      cell: ({ row }) => (
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-        >
-          <Link href={route("reservation.show", { id: row.original.id })}>Detail</Link>
-        </Button>
-      ),
-    },
-  ];
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Detail Customer" />
@@ -99,13 +48,14 @@ export default function CustomerShow(props: { customer: Customer.Default; reserv
           />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <h2 className="text-xl font-bold">Riwayat Reservasi Customer</h2>
         </CardHeader>
         <CardContent>
           <DataTable
-            columns={columns}
+            columns={reservationColumns}
             data={reservations}
           >
             {({ table }) => <DataTableControls table={table} />}

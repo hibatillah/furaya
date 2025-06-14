@@ -12,6 +12,11 @@ class Customer extends BaseModel
         'formatted_gender',
     ];
 
+    public function getNameAttribute()
+    {
+        return $this->user->name;
+    }
+
     public function getFormattedGenderAttribute()
     {
         return $this->gender === 'male' ? 'Pria' : 'Wanita';
@@ -23,6 +28,9 @@ class Customer extends BaseModel
         return Carbon::parse($this->birthdate)->translatedFormat('j F, Y');
     }
 
+    /**
+     * table relations
+     */
     public function user()
     {
         return $this->belongsTo(User::class);

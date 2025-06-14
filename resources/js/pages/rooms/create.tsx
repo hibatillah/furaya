@@ -10,7 +10,7 @@ import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { Loader2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,13 +27,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function RoomsCreate(props: {
   roomTypes: RoomType.Default[];
   bedTypes: BedType.Default[];
-  statusOptions: Enum.RoomStatus[];
   roomConditions: Enum.RoomCondition[];
   facilities: Facility.Default[];
 }) {
-  const { roomTypes, bedTypes, statusOptions, roomConditions, facilities } = props;
-
-  const [selectedFacilities, setSelectedFacilities] = useState<Option[]>([]);
+  const { roomTypes, bedTypes, roomConditions, facilities } = props;
 
   // define facility options for multiselect
   const facilityOptions = useMemo(() => {
@@ -46,6 +43,9 @@ export default function RoomsCreate(props: {
   // refine initial data
   const initialCondition = roomConditions.find((e) => e === "ready") as Enum.RoomCondition;
 
+  // declare form
+  const [selectedFacilities, setSelectedFacilities] = useState<Option[]>([]);
+  const [selectedRoomType, setSelectedRoomType] = useState<RoomType.Default | null>(null);
   const { data, setData, post, processing, errors } = useForm<Room.Create>({
     room_number: "",
     floor_number: "",
@@ -56,8 +56,24 @@ export default function RoomsCreate(props: {
     room_type_id: "",
     bed_type_id: "",
     facilities: [],
+    image: null,
   });
 
+  // handle change room type
+  useEffect(() => {
+    if (selectedRoomType) {
+      setData("price", selectedRoomType.base_rate || "");
+      setData("capacity", selectedRoomType.capacity || "");
+      setSelectedFacilities(
+        selectedRoomType.facility?.map((item) => ({
+          value: item.id,
+          label: item.name,
+        })) ?? [],
+      );
+    }
+  }, [selectedRoomType]);
+
+  // handle create room
   function handleCreateRoom(e: React.FormEvent) {
     e.preventDefault();
 
@@ -87,6 +103,7 @@ export default function RoomsCreate(props: {
             onSubmit={handleCreateRoom}
             className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2"
           >
+            {/* room number */}
             <div className="grid gap-2">
               <Label htmlFor="room_number">Nomor Kamar</Label>
               <Input
@@ -101,11 +118,15 @@ export default function RoomsCreate(props: {
               <InputError message={errors.room_number} />
             </div>
 
+            {/* room type */}
             <div className="grid gap-2">
               <Label htmlFor="room_type_id">Tipe Kamar</Label>
               <Select
                 value={data.room_type_id}
-                onValueChange={(value) => setData("room_type_id", value)}
+                onValueChange={(value) => {
+                  setData("room_type_id", value);
+                  setSelectedRoomType(roomTypes.find((type) => type.id === value) ?? null);
+                }}
               >
                 <SelectTrigger id="room_type_id">
                   <SelectValue placeholder="Pilih Tipe Kamar">
@@ -127,6 +148,7 @@ export default function RoomsCreate(props: {
               <InputError message={errors.room_type_id} />
             </div>
 
+            {/* floor number */}
             <div className="grid gap-2">
               <Label htmlFor="floor_number">Nomor Lantai</Label>
               <Input
@@ -141,6 +163,7 @@ export default function RoomsCreate(props: {
               <InputError message={errors.floor_number} />
             </div>
 
+            {/* bed type */}
             <div className="grid gap-2">
               <Label htmlFor="bed_type_id">Tipe Bed</Label>
               <Select
@@ -167,6 +190,7 @@ export default function RoomsCreate(props: {
               <InputError message={errors.bed_type_id} />
             </div>
 
+            {/* price */}
             <div className="grid gap-2">
               <Label htmlFor="price">Harga</Label>
               <Input
@@ -181,6 +205,7 @@ export default function RoomsCreate(props: {
               <InputError message={errors.price} />
             </div>
 
+            {/* condition */}
             <div className="grid gap-2">
               <Label htmlFor="condition">Kondisi</Label>
               <Select
@@ -207,6 +232,7 @@ export default function RoomsCreate(props: {
               <InputError message={errors.condition} />
             </div>
 
+            {/* capacity */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="capacity">Kapasitas</Label>
               <Input
@@ -221,6 +247,21 @@ export default function RoomsCreate(props: {
               <InputError message={errors.capacity} />
             </div>
 
+            {/* view */}
+            <div className="grid gap-2">
+              <Label htmlFor="view">View</Label>
+              <Input
+                id="view"
+                type="text"
+                value={data.view}
+                placeholder="View"
+                onChange={(e) => setData("view", e.target.value)}
+                required
+              />
+              <InputError message={errors.view} />
+            </div>
+
+            {/* facilities */}
             <div className="grid gap-2">
               <Label htmlFor="facilities">Fasilitas</Label>
               <Multiselect
@@ -238,6 +279,21 @@ export default function RoomsCreate(props: {
               <InputError message={errors.facilities} />
             </div>
 
+            {/* image */}
+            <div className="grid gap-2">
+              <Label htmlFor="image">Gambar</Label>
+              <Input
+                id="image"
+                type="file"
+                placeholder="Gambar"
+                accept="image/*"
+                onChange={(e) => setData("image", e.target.files?.[0] ?? null)}
+                required
+              />
+              <InputError message={errors.image} />
+            </div>
+
+            {/* submit */}
             <Button
               type="submit"
               disabled={processing}

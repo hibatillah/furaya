@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
+import { RoleBadgeColor } from "@/static/user";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -25,7 +27,6 @@ import { EllipsisVerticalIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import UserDelete from "./delete";
-import { RoleBadgeColor } from "./utils";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -156,6 +157,7 @@ export default function UserIndex(props: { users: User.Default[]; roles: Enum.Ro
                     </DropdownMenuRadioGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
+                <DropdownMenuSeparator />
                 <DialogTrigger asChild>
                   <DropdownMenuItem variant="destructive">Hapus</DropdownMenuItem>
                 </DialogTrigger>

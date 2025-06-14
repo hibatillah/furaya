@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiselect";
 import { useForm } from "@inertiajs/react";
-import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -125,14 +124,22 @@ export default function RoomTypeEdit(props: { data: RoomType.Default; facilities
           <InputError message={errors.facilities} />
         </div>
 
-        <Button
-          type="submit"
-          disabled={processing}
-          className="w-full"
-        >
-          {processing && <Loader2 className="size-4 animate-spin" />}
-          Perbarui Tipe Kamar
-        </Button>
+        {/* submit button */}
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+          >
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            disabled={processing}
+          >
+            Perbarui
+          </Button>
+        </div>
       </form>
     </>
   );

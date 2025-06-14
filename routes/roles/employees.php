@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Reservations\ReservationController;
 use App\Http\Controllers\Reservations\CheckInController;
 use App\Http\Controllers\Reservations\CheckOutController;
 use App\Http\Controllers\Rooms\RoomStatusController;

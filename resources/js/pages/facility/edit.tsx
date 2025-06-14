@@ -71,8 +71,9 @@ export default function FacilityEdit(props: { data: Facility.Default; onClose: (
 
         <div className="grid gap-3 lg:grid-cols-2">
           <Button
-            variant="outline"
+            variant="secondary"
             type="button"
+            onClick={onClose}
           >
             Batal
           </Button>

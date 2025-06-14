@@ -17,7 +17,7 @@ export default function AppSidebarLayout({
       <AppSidebar />
       <AppContent variant="sidebar" className="flex flex-col min-h-screen">
         <AppSidebarHeader breadcrumbs={breadcrumbs} />
-        <div className={cn("flex flex-col flex-auto gap-4 p-10", className)}>
+        <div className={cn("flex flex-col flex-auto gap-4 p-6", className)}>
           <TooltipProvider>{children}</TooltipProvider>
         </div>
       </AppContent>

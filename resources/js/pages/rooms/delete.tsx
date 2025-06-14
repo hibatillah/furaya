@@ -30,10 +30,10 @@ export default function RoomDelete(props: { id: string; onClose: () => void }) {
         <DialogTitle>Hapus Kamar</DialogTitle>
         <DialogDescription>Apakah anda yakin ingin menghapus kamar ini?</DialogDescription>
       </DialogHeader>
-      <Alert variant="destructive">
+      <Alert>
         <AlertOctagonIcon className="size-4" />
-        <AlertTitle>Peringatan</AlertTitle>
-        <AlertDescription>Data Kamar yang ....</AlertDescription>
+        <AlertTitle>Perhatian</AlertTitle>
+        <AlertDescription>Menghapus kamar tidak akan menghapus data reservasi terkait.</AlertDescription>
       </Alert>
       <div className="flex items-center justify-end gap-2">
         <DialogClose asChild>

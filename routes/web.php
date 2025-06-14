@@ -10,22 +10,26 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
-    /** reservation resource routes */
-    Route::middleware("role:manager,employee")->group(function () {
-        Route::get("reservasi/tambah", [ReservationController::class, "create"])->name("reservation.create");
-        Route::resource("reservasi", ReservationController::class)
-            ->except(["create", "destroy"])
-            ->parameters(["reservasi" => "id"])
-            ->names([
-                "index" => "reservation.index",
-                "store" => "reservation.store",
-                "show" => "reservation.show",
-                "edit" => "reservation.edit",
-                "update" => "reservation.update",
-            ]);
-    });
+    /** add new reservations for employees only */
+    Route::get("reservasi/tambah", [ReservationController::class, "create"])
+        ->name("reservation.create")
+        ->middleware("role:employee");
+
+    // add other reservation routes for managers and employees
+    Route::resource("reservasi", ReservationController::class)
+        ->except(["create", "destroy"])
+        ->parameters(["reservasi" => "id"])
+        ->names([
+            "index" => "reservation.index",
+            "store" => "reservation.store",
+            "show" => "reservation.show",
+            "edit" => "reservation.edit",
+            "update" => "reservation.update",
+        ])
+        ->middleware("role:manager,employee");
 
     // IMPORTANT: This fallback route MUST be the very last route
     Route::fallback(function () {
