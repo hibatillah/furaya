@@ -1,5 +1,20 @@
 import { badgeColor } from ".";
 
+export const roomStatusOptions = {
+  "OCC": "Occupied",
+  "VC": "Vacant",
+  "HU": "House Use",
+  "OO": "Out of Order",
+  "CO": "Check Out",
+  "CI": "Check In",
+  "CIP": "Check In Pagi",
+  "PDU": "Part Day Use",
+  "DU": "Day Use",
+  "ONL": "OCC No Luggage",
+  "SO": "Sleep Out",
+  "DD": "Do Not Disturb",
+}
+
 export const roomConditionBadgeColor = [
   "ready",
   "booked",
@@ -21,18 +36,18 @@ export const roomConditionBadgeColor = [
 }, {} as Record<Enum.RoomCondition, string>);
 
 export const roomStatusBadgeColor = [
-  "OCC",
-  "VC",
-  "HU",
-  "OO",
-  "CO",
-  "CI",
-  "CIP",
-  "PDU",
-  "DU",
-  "ONL",
-  "SO",
-  "DD",
+  "Occupied",
+  "Vacant",
+  "House Use",
+  "Out of Order",
+  "Check Out",
+  "Check In",
+  "Check In Pagi",
+  "Part Day Use",
+  "Day Use",
+  "OCC No Luggage",
+  "Sleep Out",
+  "Do Not Disturb",
 ].reduce((acc, roomStatus, index) => {
   acc[roomStatus as Enum.RoomStatus] = badgeColor[index];
   return acc;

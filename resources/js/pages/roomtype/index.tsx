@@ -4,16 +4,17 @@ import { HelpTooltip } from "@/components/help-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
+import { cn, formatCurrency } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
+import RoomTypeCreate from "./create";
 import RoomTypeDelete from "./delete";
 import RoomTypeEdit from "./edit";
-import RoomTypeCreate from "./create";
 import RoomTypeShow from "./show";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,11 +24,15 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; facilities: Facility.Default[] }) {
-  const { roomTypes, facilities } = props;
+export default function RoomTypeIndex(props: {
+  roomTypes: RoomType.Default[];
+  facilities: Facility.Default[];
+  rateTypes: RateType.Default[];
+}) {
+  const { roomTypes, facilities, rateTypes } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"detail" |"delete" | "edit" | null>(null);
+  const [dialogType, setDialogType] = useState<"detail" | "delete" | "edit" | null>(null);
   const [selectedRow, setSelectedRow] = useState<RoomType.Default | null>(null);
 
   function handleDialog(type: "detail" | "delete" | "edit", row: RoomType.Default) {
@@ -44,6 +49,10 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; fa
 
   const columns: ColumnDef<RoomType.Default>[] = [
     {
+      accessorKey: "code",
+      header: "Kode",
+    },
+    {
       accessorKey: "name",
       header: "Nama",
     },
@@ -54,6 +63,10 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; fa
     {
       accessorKey: "base_rate",
       header: "Tarif Dasar",
+      cell: ({ row }) => {
+        const baseRate = row.original.base_rate as number;
+        return formatCurrency(baseRate);
+      },
     },
     {
       accessorKey: "facilities_count",
@@ -113,7 +126,7 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; fa
             {({ table }) => (
               <DataTableControls table={table}>
                 <DataTableFilter table={table} />
-                <RoomTypeCreate facilities={facilities} />
+                <RoomTypeCreate facilities={facilities} rateTypes={rateTypes} />
               </DataTableControls>
             )}
           </DataTable>
@@ -124,8 +137,12 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; fa
         onOpenChange={setDialogOpen}
       >
         <DialogContent
-          className="w-120"
+          className={cn({
+            "w-120": dialogType === "detail" || dialogType === "delete",
+            "!max-w-200": dialogType === "edit",
+          })}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onFocus={(e) => e.preventDefault()}
           noClose
         >
           {dialogType === "detail" && selectedRow && (
@@ -145,6 +162,7 @@ export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; fa
             <RoomTypeEdit
               data={selectedRow}
               facilities={facilities}
+              rateTypes={rateTypes}
               onClose={handleDialogClose}
             />
           )}

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Guests\GuestController;
 use App\Http\Controllers\Reservations\ReservationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,11 +15,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('dashboard');
 
     /** add new reservations for employees only */
-    Route::get("reservasi/tambah", [ReservationController::class, "create"])
-        ->name("reservation.create")
-        ->middleware("role:employee");
+    Route::middleware("role:employee")->group(function () {
+        Route::get("reservasi/tambah", [ReservationController::class, "create"])
+            ->name("reservation.create");
+        Route::get('/reservasi/kamar/tersedia', [ReservationController::class, 'availableRooms'])
+            ->name('reservation.available-rooms');
+        Route::get('/reservasi/guest', [ReservationController::class, 'getGuest'])
+            ->name('reservation.guest');
+    });
 
-    // add other reservation routes for managers and employees
+    /** add other reservation routes for managers and employees */
     Route::resource("reservasi", ReservationController::class)
         ->except(["create", "destroy"])
         ->parameters(["reservasi" => "id"])
@@ -30,6 +36,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             "update" => "reservation.update",
         ])
         ->middleware("role:manager,employee");
+
+    /** guest resource routes for managers and admins */
+    Route::resource("tamu", GuestController::class)
+        ->except(["create", "destroy"])
+        ->parameters(["tamu" => "id"])
+        ->names([
+            "index" => "guest.index",
+            "store" => "guest.store",
+            "show" => "guest.show",
+            "edit" => "guest.edit",
+            "update" => "guest.update",
+        ])
+        ->middleware("role:manager,admin");
 
     // IMPORTANT: This fallback route MUST be the very last route
     Route::fallback(function () {

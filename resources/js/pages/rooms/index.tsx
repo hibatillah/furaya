@@ -7,7 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { roomStatusBadgeColor } from "@/static/room";
+import { roomConditionBadgeColor, roomStatusBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -27,8 +27,9 @@ export default function RoomsIndex(props: {
   roomTypes: RoomType.Default[];
   bedTypes: BedType.Default[];
   roomConditions: Enum.RoomCondition[];
+  roomStatuses: Enum.RoomStatus[];
 }) {
-  const { rooms, roomTypes, bedTypes, roomConditions } = props;
+  const { rooms, roomTypes, bedTypes, roomConditions, roomStatuses } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
@@ -51,26 +52,19 @@ export default function RoomsIndex(props: {
     {
       id: "room_number",
       accessorKey: "room_number",
-      header: "Nomor Kamar",
-    },
-    {
-      id: "floor_number",
-      accessorKey: "floor_number",
-      header: "Lantai",
-      filterFn: "checkbox" as FilterFnOption<Room.Default>,
+      header: "No. Kamar",
     },
     {
       id: "status",
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        return !status ? (
-          "-"
-        ) : (
+        const status = row.getValue("status") as Enum.RoomStatus;
+
+        return (
           <Badge
-            variant="default"
-            className={cn("rounded-full capitalize", roomStatusBadgeColor[status as Enum.RoomStatus])}
+            variant="outline"
+            className={cn("rounded-full font-medium capitalize", roomStatusBadgeColor[status])}
           >
             {status}
           </Badge>
@@ -87,7 +81,7 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="secondary"
-            className="text-sm"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
           >
             {roomType}
           </Badge>
@@ -104,9 +98,27 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="secondary"
-            className="text-sm"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
           >
             {bedType}
+          </Badge>
+        );
+      },
+      filterFn: "checkbox" as FilterFnOption<Room.Default>,
+    },
+    {
+      id: "condition",
+      accessorKey: "condition",
+      header: "Kondisi",
+      cell: ({ row }) => {
+        const condition = row.getValue("condition") as Enum.RoomCondition;
+
+        return (
+          <Badge
+            variant="outline"
+            className={cn("rounded-full font-medium capitalize", roomConditionBadgeColor[condition])}
+          >
+            {condition}
           </Badge>
         );
       },
@@ -169,8 +181,9 @@ export default function RoomsIndex(props: {
                   table={table}
                   extend={[
                     {
-                      id: "floor_number",
-                      label: "Lantai",
+                      id: "status",
+                      label: "Status Kamar",
+                      data: roomStatuses,
                     },
                     {
                       id: "room_type",

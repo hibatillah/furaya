@@ -20,6 +20,8 @@ export function ChartCountBedType({ data }: { data: Record<string, number> }) {
     return Object.fromEntries(Object.keys(data).map((bedType) => [bedType.toLowerCase(), { label: bedType }]));
   }, [data]) satisfies ChartConfig;
 
+  const totalType = Object.keys(data).length;
+
   const total = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + Number(curr.count), 0);
   }, [chartData]);
@@ -27,8 +29,8 @@ export function ChartCountBedType({ data }: { data: Record<string, number> }) {
   return (
     <Card className="flex flex-col gap-2">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Jumlah Kasur</CardTitle>
-        <CardDescription>Pembagian Kasur Berdasarkan Tipe</CardDescription>
+        <CardTitle>Jumlah Penggunaan Kasur</CardTitle>
+        <CardDescription className="text-center text-pretty">Pembagian Penggunaan Tipe Kasur Berdasarkan Kamar</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -61,8 +63,10 @@ export function ChartCountBedType({ data }: { data: Record<string, number> }) {
         </ChartContainer>
       </CardContent>
       <CardFooter className="text-muted-foreground flex justify-center gap-2">
-        <span className="text-foreground font-bold">{total.toLocaleString()}</span>
-        <span>Total Kasur</span>
+        <span className="text-foreground font-bold">{totalType}</span>
+        <span>Tipe kasur pada</span>
+        <span className="text-foreground font-semibold">{total.toLocaleString()}</span>
+        <span>kamar.</span>
       </CardFooter>
     </Card>
   );

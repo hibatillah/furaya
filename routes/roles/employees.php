@@ -1,22 +1,10 @@
 <?php
 
-use App\Http\Controllers\Reservations\ReservationController;
 use App\Http\Controllers\Reservations\CheckInController;
 use App\Http\Controllers\Reservations\CheckOutController;
-use App\Http\Controllers\Rooms\RoomStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "verified", "role:employee"])->group(function () {
-  /** room status routes */
-  Route::resource("status/kamar", RoomStatusController::class)
-    ->except(["create", "store", "show", "destroy"])
-    ->parameters(["status/kamar" => "id"])
-    ->names([
-      "index" => "room.status.index",
-      "edit" => "room.status.edit",
-      "update" => "room.status.update",
-    ]);
-
   /** check in routes */
   Route::get("check-in/tambah", [CheckInController::class, "create"])->name("checkin.create");
   Route::resource("check-in", CheckInController::class)

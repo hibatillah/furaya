@@ -4,7 +4,8 @@ import { ImageContainer } from "@/components/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import { roomConditionBadgeColor, roomStatusBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { useMemo } from "react";
@@ -31,7 +32,7 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
     return (
       <Badge
         variant="secondary"
-        className={cn("text-sm", className)}
+        className={cn("border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium", className)}
       >
         {children}
       </Badge>
@@ -47,13 +48,16 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
   const dataList = [
     { label: "Nomor Kamar", value: room.room_number },
     { label: "Lantai", value: room.floor_number },
-    { label: "Harga", value: room.price },
-    { label: "Kapasitas", value: room.capacity },
+    { label: "Harga", value: formatCurrency(room.price || 0) },
+    { label: "Kapasitas", value: `${room.capacity} orang` },
     { label: "View", value: room.view ?? "-" },
+    { label: "Status Kamar", value: <BadgeData className={roomStatusBadgeColor[room.status as Enum.RoomStatus]}>{room.status}</BadgeData> },
+    {
+      label: "Kondisi",
+      value: <BadgeData className={cn("capitalize", roomConditionBadgeColor[room.condition as Enum.RoomCondition])}>{room.condition}</BadgeData>,
+    },
     { label: "Tipe Kamar", value: <BadgeData>{room.room_type?.name}</BadgeData> },
     { label: "Tipe Tempat Tidur", value: <BadgeData>{room.bed_type?.name}</BadgeData> },
-    { label: "Status Kamar", value: <BadgeData>{room.room_status?.status}</BadgeData> },
-    { label: "Kondisi", value: <BadgeData className="capitalize">{room.condition}</BadgeData> },
     { label: "Jumlah Fasilitas", value: room.count_facility ?? 0 },
     { label: "Fasilitas", value: getFacilityList },
   ];
@@ -70,7 +74,7 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
             data={dataList}
             className="h-fit *:data-[label=Fasilitas]:col-span-full *:data-[value=Fasilitas]:col-span-full"
           />
-          <dd className="[&_dt]:text-foreground/70 xl:col-span-2">
+          <dl className="[&_dt]:text-foreground/70 xl:col-span-2">
             <div className="flex flex-col gap-2">
               <dt>Foto Kamar</dt>
               <dd className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -84,7 +88,7 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
                 ))}
               </dd>
             </div>
-          </dd>
+          </dl>
         </CardContent>
       </Card>
 

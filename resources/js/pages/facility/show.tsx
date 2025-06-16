@@ -24,7 +24,7 @@ export default function FacilityShow(props: { data: Facility.Default; onClose: (
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Detail Fasilitas</DialogTitle>-
+        <DialogTitle>Detail Fasilitas</DialogTitle>
       </DialogHeader>
       <Separator />
       <DataList

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Rooms;
 
 use App\Http\Controllers\Controller;
-use App\Models\RoomTypeFacility;
+use App\Models\Rooms\RoomTypeFacility;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;

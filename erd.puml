@@ -1,0 +1,280 @@
+@startuml ERD
+!theme plain
+
+' Entity Definitions
+
+entity "users" {
+  * id : integer <<PK>>
+  --
+  * name : string
+  * email : string
+  * password : string
+}
+
+entity "departments" {
+  * id : string <<PK>>
+  --
+  * name : string
+}
+
+entity "employees" {
+  * id : string <<PK>>
+  --
+  user_id : integer <<FK>>
+  * department_id : string <<FK>
+  --
+  * gender : enum
+  phone : string
+  address : string
+  hire_date : datetime
+  salary : float
+}
+
+entity "guests" {
+  * id : string <<PK>>
+  --
+  user_id : integer <<FK>>
+  --
+  * nik_passport : string <<UNIQUE>>
+  birthdate : datetime
+  gender : enum
+  phone : string <<UNIQUE>>
+  profession : string
+  nationality : string
+  address : string
+}
+
+entity "room_types" {
+  * id : string <<PK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+  * capacity : integer
+  base_rate : float
+}
+
+entity "bed_types" {
+  * id : string <<PK>>
+  --
+  * name : string <<UNIQUE>>
+}
+
+entity "rate_types" {
+  * id : string <<PK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+  * rate : float
+}
+
+entity "rooms" {
+  * id : string <<PK>>
+  --
+  * room_type_id : string <<FK>>
+  * bed_type_id : string <<FK>>
+  * rate_type_id : string <<FK>>
+  * meal_id : string <<FK>>
+  --
+  * room_number : integer <<UNIQUE>>
+  * floor_number : integer
+  view : string
+  * condition : enum
+  * status : enum
+  * price : float
+  * capacity : integer
+}
+
+entity "facilities" {
+  * id : string <<PK>>
+  --
+  * name : string <<UNIQUE>>
+  description : string
+}
+
+entity "room_type_facilities" {
+  * id : string <<PK>>
+  --
+  * room_type_id : string <<FK>>
+  * facility_id : string <<FK>>
+}
+
+entity "room_facilities" {
+  * id : string <<PK>>
+  --
+  * room_id : string <<FK>>
+  * facility_id : string <<FK>>
+}
+
+entity "reservations" {
+  * id : string <<PK>>
+  --
+  * employee_id : string <<FK>>
+  --
+  * start_date : datetime
+  * end_date : datetime
+  * booking_number : integer <<UNIQUE>>
+  * length_of_stay : integer
+  arrival_from : string
+  * pax : integer
+  * adults : integer
+  children : integer
+  * total_price : float
+  * guest_type : enum
+  * employee_name : string
+  * booking_type : enum
+  * visit_purpose : enum
+  * room_package : enum
+  * payment_method : enum
+  * status_acc : enum
+  discount : float
+  discount_reason : string
+  commission_percentage : float
+  commission_amount : float
+  remarks : string
+  advance_remarks : string
+  advance_amount : float
+}
+
+entity "reservation_guests" {
+  * id : string <<PK>>
+  --
+  * reservation_id : string <<FK>>
+  guest_id : string <<FK>>
+  --
+  * nik_passport : string <<UNIQUE>>
+  * name : string
+  * phone : string
+  email : string
+  address : string
+  nationality : string
+  geography : string
+  country : string
+}
+
+entity "reservation_rooms" {
+  * id : string <<PK>>
+  --
+  * reservation_id : string <<FK>>
+  room_id : string <<FK>>
+  --
+  * room_number : string
+  * room_type : string
+  * room_rate : string
+  * bed_type : string
+  meal : string
+  view : string
+}
+
+entity "reservation_transactions" {
+  * id : string <<PK>>
+  --
+  * reservation_id : string <<FK>>
+  --
+  * date : datetime
+  * description : string
+  * amount : float
+}
+
+entity "check_ins" {
+  * id : string <<PK>>
+  --
+  * reservation_id : string <<FK>>
+  * employee_id : string <<FK>>
+  --
+  * checked_in_at : datetime
+  notes : string
+}
+
+entity "check_outs" {
+  * id : string <<PK>>
+  --
+  * reservation_id : string <<FK>>
+  * employee_id : string <<FK>>
+  --
+  * checked_out_at : datetime
+  * final_total : float
+  notes : string
+}
+
+entity "guest_types" {
+  * id : string <<PK>>
+  --
+  * created_by : string <<FK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+}
+
+entity "nationalities" {
+  * id : string <<PK>>
+  --
+  * created_by : string <<FK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+}
+
+entity "geographies" {
+  * id : string <<PK>>
+  --
+  * created_by : string <<FK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+}
+
+entity "countries" {
+  * id : string <<PK>>
+  --
+  * created_by : string <<FK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+}
+
+entity "meals" {
+  * id : string <<PK>>
+  --
+  * created_by : string <<FK>>
+  --
+  * code : string <<UNIQUE>>
+  * name : string <<UNIQUE>>
+}
+
+' Entity Relationships
+departments||--o{ employees : has
+
+employees||--o{ reservations : create
+employees||--o{ check_ins : create
+employees||--o{ check_outs : create
+
+users||--o| employees : has
+users||--o| guests : has
+
+guests||--o{ reservation_guests : has
+
+rooms||--o{ reservation_rooms : has
+rooms }o--|| bed_types : has
+rooms }o--|| rate_types : has
+rooms }o--|| meals : has
+rooms }o--o{ room_facilities : has
+
+room_types }o--|| rooms : has
+room_types }o--o{ room_type_facilities
+
+facilities }o--o{ room_facilities : has
+facilities }o--o{ room_type_facilities : has
+
+reservations||--||reservation_guests : has
+reservations||--||reservation_rooms : has
+reservations||--||reservation_transactions : has
+reservations||--||check_ins : has
+reservations||--||check_outs : has
+
+countries }|--|| employees : create
+geographies }|--|| employees : create
+nationalities }|--|| employees : create
+guest_types }|--|| employees : create
+meals }|--|| employees : create
+
+@enduml

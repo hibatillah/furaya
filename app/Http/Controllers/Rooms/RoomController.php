@@ -6,17 +6,18 @@ use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rooms\RoomRequest;
-use App\Models\BedType;
-use App\Models\Facility;
-use App\Models\Room;
-use App\Models\RoomFacility;
-use App\Models\RoomType;
-use App\Models\Reservation;
+use App\Models\Rooms\BedType;
+use App\Models\Rooms\Facility;
+use App\Models\Rooms\Room;
+use App\Models\Rooms\RoomFacility;
+use App\Models\Rooms\RoomType;
+use App\Models\Rooms\RateType;
+use App\Models\Rooms\Meal;
+use App\Models\Reservations\Reservation;
 use App\Utils\DateHelper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -24,15 +25,27 @@ use Inertia\Inertia;
 
 class RoomController extends Controller
 {
+    protected $dateISO;
     protected $roomTypes;
     protected $bedTypes;
-    protected $dateISO;
+    protected $roomConditions;
+    protected $roomStatusLabels;
+    protected $roomStatusValues;
+    protected $rateTypes;
+    protected $mealTypes;
+    protected $facilities;
 
     public function __construct()
     {
+        $this->dateISO = DateHelper::getISO();
         $this->roomTypes = RoomType::all();
         $this->bedTypes = BedType::all();
-        $this->dateISO = DateHelper::getISO();
+        $this->roomConditions = RoomConditionEnum::getValues();
+        $this->roomStatusLabels = RoomStatusEnum::getLabels();
+        $this->roomStatusValues = RoomStatusEnum::getValues();
+        $this->rateTypes = RateType::all();
+        $this->mealTypes = Meal::all();
+        $this->facilities = Facility::all();
     }
 
     /**
@@ -40,14 +53,16 @@ class RoomController extends Controller
      */
     public function index()
     {
-        $rooms = Room::with("roomType", "bedType")->orderBy("created_at", "desc")->get();
-        $roomConditions = RoomConditionEnum::getValues();
+        $rooms = Room::with("roomType", "bedType")
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
         return Inertia::render("rooms/index", [
             "rooms" => $rooms,
             "roomTypes" => $this->roomTypes,
             "bedTypes" => $this->bedTypes,
-            "roomConditions" => $roomConditions,
+            "roomConditions" => $this->roomConditions,
+            "roomStatuses" => $this->roomStatusValues,
         ]);
     }
 
@@ -56,17 +71,18 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $roomConditions = RoomConditionEnum::getValues();
-        $facilities = Facility::all();
-        $roomTypes = RoomType::with(['roomTypeFacility.facility', 'facility'])
-            ->orderBy('created_at', 'desc')
+        $roomTypes = RoomType::with('facility')
+            ->latest()
             ->get();
 
         return Inertia::render("rooms/create", [
             "bedTypes" => $this->bedTypes,
             "roomTypes" => $roomTypes,
-            "roomConditions" => $roomConditions,
-            "facilities" => $facilities,
+            "rateTypes" => $this->rateTypes,
+            "mealTypes" => $this->mealTypes,
+            "roomConditions" => $this->roomConditions,
+            "roomStatuses" => $this->roomStatusLabels,
+            "facilities" => $this->facilities,
         ]);
     }
 
@@ -77,26 +93,21 @@ class RoomController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['status'] = RoomStatusEnum::getKeyValues()[$validated["status"]];
 
             $result = DB::transaction(function () use ($validated) {
-                // create room
-                $room = Room::create(Arr::except($validated, ["facilities"]));
+                $facilities = $validated['facilities'];
 
-                if (count($validated["facilities"]) > 0) {
-                    // define room facilities
-                    $facilities = [];
-                    foreach ($validated['facilities'] as $facilityId) {
-                        $facilities[] = [
-                            'id' => Str::uuid(),
+                // create room
+                $room = Room::create(Arr::except($validated, ["facilities", "image"]));
+
+                if (count($facilities) > 0) {
+                    foreach ($facilities as $facilityId) {
+                        RoomFacility::create([
                             'room_id' => $room->id,
                             'facility_id' => $facilityId,
-                            'created_at' => $this->dateISO,
-                            'updated_at' => $this->dateISO,
-                        ];
+                        ]);
                     }
-
-                    // create many room facilities
-                    RoomFacility::insert($facilities);
                 }
 
                 // return result to get record id for logging
@@ -105,22 +116,10 @@ class RoomController extends Controller
                 ];
             });
 
-            Log::channel("project")->info("Room created", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
-                "record_id" => $result->room->id,
-            ]);
-
             return redirect()->route("room.show", ["id" => $result->room->id])->with("success", "Kamar berhasil ditambahkan");
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            Log::channel("project")->error("Creating room", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 "message" => $e->getMessage(),
             ]);
@@ -134,26 +133,25 @@ class RoomController extends Controller
     {
         try {
             $room = Room::with("roomType", "bedType")->findOrFail($id);
-            $reservations = Reservation::with('room', 'employee')->where('room_id', $id)->get();
+            $reservations = Reservation::with('reservationRoom')
+                ->whereHas('reservationRoom', function ($query) use ($id) {
+                    $query->where('room_id', $id);
+                })
+                ->orderBy('updated_at', 'desc')
+                ->get();
 
             return Inertia::render("rooms/show", [
                 "room" => $room,
                 "reservations" => $reservations,
             ]);
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Room not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
+            return redirect()->back()->withErrors([
+                "message" => "Kamar tidak ditemukan",
             ]);
-
-            return redirect()->back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
-            Log::channel("project")->error("Error showing room", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
+            return redirect()->back()->withErrors([
+                "message" => $e->getMessage(),
             ]);
-
-            return redirect()->back()->with("error", $e->getMessage());
         }
     }
 
@@ -161,31 +159,26 @@ class RoomController extends Controller
     {
         try {
             $room = Room::with("roomType", "bedType")->findOrFail($id);
-            $roomConditions = RoomConditionEnum::getValues();
-            $facilities = Facility::all();
-            $roomTypes = RoomType::with(['roomTypeFacility.facility', 'facility'])->orderBy('created_at', 'desc')->get();
+            $roomTypes = RoomType::with('facility')->latest()->get();
 
             return Inertia::render("rooms/edit", [
                 "room" => $room,
                 "bedTypes" => $this->bedTypes,
                 "roomTypes" => $roomTypes,
-                "roomConditions" => $roomConditions,
-                "facilities" => $facilities,
+                "rateTypes" => $this->rateTypes,
+                "mealTypes" => $this->mealTypes,
+                "roomConditions" => $this->roomConditions,
+                "roomStatuses" => $this->roomStatusLabels,
+                "facilities" => $this->facilities,
             ]);
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Room not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
+            return redirect()->back()->withErrors([
+                "message" => "Kamar tidak ditemukan",
             ]);
-
-            return redirect()->back()->with("warning", "Kamar tidak ditemukan");
         } catch (\Exception $e) {
-            Log::channel("project")->error("Showing edit room page", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
+            return redirect()->back()->withErrors([
+                "message" => $e->getMessage(),
             ]);
-
-            return redirect()->back()->with("error", $e->getMessage());
         }
     }
 
@@ -196,30 +189,54 @@ class RoomController extends Controller
     {
         try {
             $room = Room::findOrFail($id);
-            $room->update($request->validated());
+            $roomFacilities = RoomFacility::where('room_id', $room->id)->get();
 
-            Log::channel('project')->info('Room updated', [
-                'user_id' => Auth::user()->id,
-                'table' => 'rooms',
-                'record_id' => $room->id,
-            ]);
+            $validated = $request->validated();
+            $validated['status'] = RoomStatusEnum::getKeyValues()[$validated["status"]];
 
-            return redirect()->route("room.show", ["id" => $id])->with("success", "Kamar berhasil diperbarui");
+            DB::transaction(function () use ($validated, $room, $roomFacilities) {
+                // update room
+                $room->update(Arr::except($validated, ["facilities", "image"]));
+
+                // update room facility
+                $facilities = $validated['facilities'];
+
+                if (count($facilities) > 0) {
+                    // delete room facility if not exists in updated facilities
+                    foreach ($roomFacilities as $roomFacility) {
+                        if (!in_array($roomFacility->facility_id, $facilities)) {
+                            $roomFacility->delete();
+                        }
+                    }
+
+                    // create facility if not exists in room facilities
+                    foreach ($facilities as $facilityId) {
+                        if (!in_array($facilityId, $roomFacilities->pluck('facility_id')->toArray())) {
+                            RoomFacility::create([
+                                'room_id' => $room->id,
+                                'facility_id' => $facilityId,
+                            ]);
+                        }
+                    }
+                } else {
+                    /**
+                     * Delete all room facilities
+                     * if updated facilities is empty
+                     */
+                    foreach ($roomFacilities as $roomFacility) {
+                        $roomFacility->delete();
+                    }
+                }
+            });
+
+            return redirect()
+                ->route("room.show", ["id" => $id])
+                ->with("success", "Kamar berhasil diperbarui");
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Room not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
-            ]);
-
             return back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
-            Log::channel("project")->error("Updating room", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
-            ]);
-
             return back()->withErrors([
                 "message" => $e->getMessage(),
             ]);
@@ -233,31 +250,14 @@ class RoomController extends Controller
     {
         try {
             $room = Room::findOrFail($id);
-
-            Log::channel('project')->info('Room deleted', [
-                'user_id' => Auth::user()->id,
-                'table' => 'rooms',
-                'record_id' => $room->id,
-            ]);
-
             $room->delete();
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Room not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
-            ]);
-
             return redirect()->back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
-            Log::channel("project")->error("Deleting room", [
-                "user_id" => Auth::user()->id,
-                "table" => "rooms",
-            ]);
-
             return redirect()->back()->withErrors([
                 "message" => $e->getMessage(),
             ]);

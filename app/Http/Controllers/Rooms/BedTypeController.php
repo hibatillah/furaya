@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Rooms;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rooms\BedTypeRequest;
 use Inertia\Inertia;
-use App\Models\BedType;
+use App\Models\Rooms\BedType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class BedTypeController extends Controller
@@ -18,7 +16,7 @@ class BedTypeController extends Controller
      */
     public function index()
     {
-        $bedTypes = BedType::orderBy('created_at', 'desc')->get();
+        $bedTypes = BedType::latest()->get();
 
         return Inertia::render('bedtype/index', [
             'bedTypes' => $bedTypes,
@@ -36,24 +34,12 @@ class BedTypeController extends Controller
     public function store(BedTypeRequest $request)
     {
         try {
-            $bedType = BedType::create($request->validated());
-
-            Log::channel('project')->info('BedType created', [
-                'user_id' => Auth::user()->id,
-                'table' => 'bed_types',
-                'record_id' => $bedType->id,
-            ]);
+            BedType::create($request->validated());
 
             return redirect()->back();
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            Log::channel("project")->error("Creating bed type", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);
@@ -79,30 +65,13 @@ class BedTypeController extends Controller
             $bedType = BedType::findOrFail($id);
             $bedType->update($request->validated());
 
-            Log::channel('project')->info('BedType updated', [
-                'user_id' => Auth::user()->id,
-                'table' => 'bed_types',
-                'record_id' => $bedType->id,
-            ]);
-
             // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("BedType not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-            ]);
-
             return back()->withErrors([
                 'message' => 'Tipe kasur tidak ditemukan'
             ]);
         } catch (\Exception $e) {
-            Log::channel("project")->error("Updating bed type", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);
@@ -117,31 +86,14 @@ class BedTypeController extends Controller
         try {
             $bedType = BedType::findOrFail($id);
 
-            Log::channel('project')->info('BedType deleted', [
-                'user_id' => Auth::user()->id,
-                'table' => 'bed_types',
-                'record_id' => $bedType->id,
-            ]);
-
             $bedType->delete();
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("BedType not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-            ]);
-
             return back()->withErrors([
                 'message' => 'Tipe kasur tidak ditemukan'
             ]);
         } catch (\Exception $e) {
-            Log::channel("project")->error("Deleting bed type", [
-                "user_id" => Auth::user()->id,
-                "table" => "bed_types",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);

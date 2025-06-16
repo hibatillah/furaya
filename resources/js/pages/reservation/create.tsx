@@ -5,13 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AppLayout from "@/layouts/app-layout";
-import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY } from "@/static/reservation";
+import { formatCurrency } from "@/lib/utils";
+import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY, MIN_PAX } from "@/static/reservation";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
-import { addDays, addYears, differenceInDays, isAfter, isSameDay } from "date-fns";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { addDays, addYears, differenceInCalendarDays, format, isAfter, isSameDay } from "date-fns";
+import { Loader2, UserSearchIcon } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,17 +35,20 @@ export default function ReservationsCreate(props: {
   roomTypes: RoomType.Default[];
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
+  statusAccs: Enum.StatusAcc[];
+  employeeId: string;
 }) {
-  const { rooms, visitPurposes, bookingTypes, roomPackages, roomTypes, paymentMethods, genders } = props;
+  const { visitPurposes, bookingTypes, roomPackages, roomTypes, paymentMethods, genders, statusAccs, employeeId } = props;
 
   // declare form
   const initialStartDate = new Date();
   const initialEndDate = addDays(initialStartDate, 1);
-  const initialBirthdateYear = addYears(new Date(), -17); // at least 17 years old
+  const initialBirthdateYear = addYears(initialStartDate, -17); // Customer must be at least 17 years old
 
   const [startDate, setStartDate] = useState<InputDateType>(initialStartDate);
   const [endDate, setEndDate] = useState<InputDateType>(initialEndDate);
   const [selectedRoomType, setSelectedRoomType] = useState<string | undefined>(undefined);
+  const [availableRooms, setAvailableRooms] = useState<Room.Default[]>([]);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<Room.Default | undefined>(undefined);
 
   const { data, setData, post, processing, errors } = useForm<Reservation.Create>({
@@ -51,17 +56,18 @@ export default function ReservationsCreate(props: {
     length_of_stay: MIN_LENGTH_OF_STAY,
     adults: 1,
     children: 0,
-    people_count: 1,
-    total_price: "",
+    pax: MIN_PAX,
+    total_price: 0,
     start_date: startDate as Date,
     end_date: endDate as Date,
     room_id: "",
     customer_id: "",
-    employee_id: "",
+    employee_id: employeeId,
     booking_type: "" as Enum.BookingType,
     purpose: "" as Enum.VisitPurpose,
     room_package: "" as Enum.RoomPackage,
     payment_method: "" as Enum.Payment,
+    status_acc: "" as Enum.StatusAcc,
     arrival_from: "",
     booked_from: "",
     extra_bed: 0,
@@ -83,9 +89,93 @@ export default function ReservationsCreate(props: {
     address: "",
   });
 
+  /**
+   * Get customer data
+   * apply to form based on nik_passport
+   */
+  const getCustomer = useCallback(
+    async (value: string) => {
+      try {
+        toast.loading("Mencari tamu...", { id: "get-guest" });
+
+        const response = await fetch(`/reservasi/guest?nik_passport=${value}`);
+        const data = await response.json();
+        const customer = data.customer as Guest.Default;
+
+        if (customer) {
+          toast.success("Customer ditemukan", {
+            id: "get-customer",
+            description: "Data customer diterapkan ke form",
+          });
+
+          // apply customer data to form
+          setData((prev) => ({
+            ...prev,
+            name: customer.user?.name || "",
+            email: customer.user?.email || "",
+            phone: customer.phone || "",
+            gender: customer.gender || "",
+            birthdate: new Date(customer.birthdate) || "",
+            profession: customer.profession || "",
+            nationality: customer.nationality || "",
+            address: customer.address || "",
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+
+        toast.error("Customer tidak ditemukan", {
+          id: "get-customer",
+          description: "Customer belum terdaftar",
+        });
+      }
+    },
+    [data.nik_passport],
+  );
+
+  /**
+   * Get available rooms
+   * based on room type, start date, end date
+   */
+  const getAvailableRooms = useCallback(async () => {
+    try {
+      const start = format(startDate as Date, "yyyy-MM-dd");
+      const end = format(endDate as Date, "yyyy-MM-dd");
+
+      const response = await fetch(`/reservasi/kamar/tersedia?start=${start}&end=${end}`);
+      const data = await response.json();
+
+      const rooms = data.rooms as Room.Default[];
+      setAvailableRooms(rooms);
+    } catch (err) {
+      console.error("Fetch failed:", err);
+      toast.error("Gagal terhubung ke server");
+    }
+  }, [startDate, endDate]);
+
+
+  /**
+   * Calculate total price
+   * based on room rate, length of stay, discount percentage
+   * @returns string - price in currency format
+   */
+  const totalPrice = useMemo(() => {
+    const LoS = data.length_of_stay || 0;
+    const roomRate = selectedRoomNumber?.price || 0;
+    const discountPercentage = data.discount || 0;
+
+    const priceBeforeDiscount = roomRate * LoS;
+    const discount = priceBeforeDiscount * (discountPercentage / 100);
+    const priceAfterDiscount = priceBeforeDiscount - discount;
+
+    return formatCurrency(priceAfterDiscount);
+  }, [selectedRoomNumber, data.length_of_stay, data.discount]);
+
   // handle create room
   function handleCreateRoom(e: React.FormEvent) {
     e.preventDefault();
+    console.log(data);
+    return;
 
     // sent data
     toast.loading("Menambahkan reservasi...", { id: "create-reservation" });
@@ -119,23 +209,25 @@ export default function ReservationsCreate(props: {
                 mode="single"
                 value={startDate}
                 onChange={(date) => {
-                  setStartDate(date);
+                  const value = date as Date;
+                  setStartDate(value);
 
                   if (date && endDate) {
                     let newEndDate: Date = endDate as Date;
 
                     /**
                      * handle endDate
+                     *
                      * if startDate is equal or greater than endDate
                      * then set endDate to startDate + 1
                      */
-                    if (isAfter(date as Date, endDate as Date) || isSameDay(date as Date, endDate as Date)) {
-                      newEndDate = addDays(date as Date, 1);
+                    if (isAfter(value, endDate as Date) || isSameDay(value, endDate as Date)) {
+                      newEndDate = addDays(value, 1);
                       setEndDate(newEndDate);
                     }
 
                     // handle length of stay
-                    const diffDays = differenceInDays(newEndDate, date as Date);
+                    const diffDays = differenceInCalendarDays(newEndDate, value);
                     setData("length_of_stay", diffDays as number | "");
                   }
                 }}
@@ -156,7 +248,7 @@ export default function ReservationsCreate(props: {
 
                   // handle length of stay
                   if (date && startDate) {
-                    const diffDays = differenceInDays(date as Date, startDate as Date);
+                    const diffDays = differenceInCalendarDays(date as Date, startDate as Date);
                     setData("length_of_stay", diffDays as number | "");
                   }
                 }}
@@ -169,24 +261,30 @@ export default function ReservationsCreate(props: {
             {/* length of stay */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="length_of_stay">Length of Stay</Label>
-              <Input
-                type="number"
-                min={MIN_LENGTH_OF_STAY}
-                max={MAX_LENGTH_OF_STAY}
-                value={data.length_of_stay}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setData("length_of_stay", value);
+              <div className="relative">
+                <Input
+                  type="number"
+                  min={MIN_LENGTH_OF_STAY}
+                  max={MAX_LENGTH_OF_STAY}
+                  value={data.length_of_stay}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    setData("length_of_stay", value);
 
-                  // handle end date
-                  if (value && startDate) {
-                    const newEndDate = addDays(startDate as Date, value);
-                    setEndDate(newEndDate);
-                  }
-                }}
-                className="w-full"
-                disableHandle
-              />
+                    // handle end date
+                    if (value && startDate) {
+                      const newEndDate = addDays(startDate as Date, value);
+                      setEndDate(newEndDate);
+                    }
+                  }}
+                  className="w-full"
+                  disableHandle
+                  required
+                />
+                <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-1 flex items-center px-2 text-sm select-none">
+                  hari
+                </span>
+              </div>
               <InputError message={errors.length_of_stay} />
             </div>
 
@@ -199,6 +297,7 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("arrival_from", e.target.value)}
                 className="w-full"
                 placeholder="Input Asal Kedatangan"
+                required
               />
               <InputError message={errors.arrival_from} />
             </div>
@@ -209,6 +308,7 @@ export default function ReservationsCreate(props: {
               <Select
                 value={data.purpose}
                 onValueChange={(value) => setData("purpose", value as Enum.VisitPurpose)}
+                required
               >
                 <SelectTrigger id="purpose">
                   <SelectValue placeholder="Pilih Tujuan Kedatangan">
@@ -236,6 +336,7 @@ export default function ReservationsCreate(props: {
               <Select
                 value={data.booking_type}
                 onValueChange={(value) => setData("booking_type", value as Enum.BookingType)}
+                required
               >
                 <SelectTrigger id="booking_type">
                   <SelectValue placeholder="Pilih Tipe Reservasi">
@@ -255,6 +356,33 @@ export default function ReservationsCreate(props: {
                 </SelectContent>
               </Select>
               <InputError message={errors.booking_type} />
+            </div>
+
+            {/* status acc */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="status_acc">Status Acc</Label>
+              <Select
+                value={data.status_acc}
+                onValueChange={(value) => setData("status_acc", value as Enum.StatusAcc)}
+                required
+              >
+                <SelectTrigger id="status_acc">
+                  <SelectValue placeholder="Pilih Status Acc">
+                    <span className="capitalize">{data.status_acc}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {statusAccs.map((statusAcc) => (
+                    <SelectItem
+                      key={statusAcc}
+                      value={statusAcc}
+                      className="capitalize"
+                    >
+                      {statusAcc}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* remarks */}
@@ -283,7 +411,12 @@ export default function ReservationsCreate(props: {
               <Label htmlFor="room_type">Tipe Kamar</Label>
               <Select
                 value={selectedRoomType}
-                onValueChange={setSelectedRoomType}
+                onValueChange={(value) => {
+                  setSelectedRoomType(value);
+                  setSelectedRoomNumber(undefined);
+                  getAvailableRooms();
+                }}
+                required
               >
                 <SelectTrigger id="room_type">
                   <SelectValue placeholder="Pilih Tipe Kamar" />
@@ -307,12 +440,13 @@ export default function ReservationsCreate(props: {
             <div className="flex flex-col gap-2">
               <Label htmlFor="room_number">Nomor Kamar</Label>
               <Select
-                value={selectedRoomNumber?.id}
+                value={selectedRoomNumber?.id || ""}
                 onValueChange={(value) => {
                   setData("room_id", value);
-                  setSelectedRoomNumber(rooms.find((room) => room.id === value) ?? undefined);
+                  setSelectedRoomNumber(availableRooms.find((room) => room.id === value) ?? undefined);
                 }}
                 disabled={!selectedRoomType}
+                required
               >
                 <SelectTrigger id="room_number">
                   <SelectValue placeholder="Pilih Nomor Kamar">
@@ -320,17 +454,18 @@ export default function ReservationsCreate(props: {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {rooms
-                    .filter((room) => room.room_type_id === selectedRoomType)
-                    .map((room) => (
-                      <SelectItem
-                        key={room.id}
-                        value={room.id}
-                        className="capitalize"
-                      >
-                        {room.room_number}
-                      </SelectItem>
-                    ))}
+                  {availableRooms.length > 0 &&
+                    availableRooms
+                      .filter((room) => room.room_type_id === selectedRoomType)
+                      .map((room) => (
+                        <SelectItem
+                          key={room.id}
+                          value={room.id}
+                          className="capitalize"
+                        >
+                          {room.room_number}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
               <InputError message={errors.room_id} />
@@ -339,23 +474,32 @@ export default function ReservationsCreate(props: {
             {/* room rate */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="room_rate">Harga Kamar</Label>
-              <Input
-                type="number"
-                className="w-full"
-                step={25000}
-                min={100000}
-                placeholder="Input Harga Kamar"
-                disabled={!selectedRoomNumber}
-                value={selectedRoomNumber?.price}
-                onChange={(e) => {
-                  if (selectedRoomNumber) {
-                    setSelectedRoomNumber({
-                      ...selectedRoomNumber,
-                      price: Number(e.target.value),
-                    });
-                  }
-                }}
-              />
+              <div className="relative">
+                <Input
+                  type="number"
+                  className="w-full ps-9"
+                  step={25000}
+                  min={100000}
+                  placeholder="Input Harga Kamar"
+                  disabled={!selectedRoomNumber}
+                  value={selectedRoomNumber?.price || ""}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+
+                    if (selectedRoomNumber) {
+                      setSelectedRoomNumber({
+                        ...selectedRoomNumber,
+                        price: value,
+                      });
+                    }
+                  }}
+                  disableHandle
+                  required
+                />
+                <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-1 flex items-center px-2 text-sm select-none">
+                  Rp
+                </span>
+              </div>
             </div>
 
             {/* room package */}
@@ -367,6 +511,7 @@ export default function ReservationsCreate(props: {
                   setData("room_package", value as Enum.RoomPackage);
                 }}
                 disabled={!selectedRoomNumber}
+                required
               >
                 <SelectTrigger id="room_package">
                   <SelectValue placeholder="Pilih Paket Kamar">
@@ -388,6 +533,22 @@ export default function ReservationsCreate(props: {
               <InputError message={errors.room_package} />
             </div>
 
+            {/* pax */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="pax">Pax</Label>
+              <Input
+                type="number"
+                className="w-full"
+                min={1}
+                placeholder="Input Jumlah Pax"
+                value={data.pax}
+                disableHandle
+                required
+                readOnly
+              />
+              <InputError message={errors.pax} />
+            </div>
+
             {/* adult */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="adults">Dewasa</Label>
@@ -398,7 +559,13 @@ export default function ReservationsCreate(props: {
                 placeholder="Input Jumlah Dewasa"
                 disabled={!selectedRoomNumber}
                 value={data.adults}
-                onChange={(e) => setData("adults", Number(e.target.value))}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setData("adults", value);
+                  setData("pax", value + Number(data.children));
+                }}
+                disableHandle
+                required
               />
               <InputError message={errors.adults} />
             </div>
@@ -413,7 +580,12 @@ export default function ReservationsCreate(props: {
                 placeholder="Input Jumlah Anak"
                 disabled={!selectedRoomNumber}
                 value={data.children}
-                onChange={(e) => setData("children", Number(e.target.value))}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setData("children", value);
+                  setData("pax", Number(data.adults) + value);
+                }}
+                disableHandle
               />
               <InputError message={errors.children} />
             </div>
@@ -429,13 +601,30 @@ export default function ReservationsCreate(props: {
             {/* nik passport */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="nik_passport">NIK/Passport</Label>
-              <Input
-                type="text"
-                value={data.nik_passport}
-                onChange={(e) => setData("nik_passport", e.target.value)}
-                className="w-full"
-                placeholder="Input NIK/Passport"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={data.nik_passport}
+                  onChange={(e) => setData("nik_passport", e.target.value)}
+                  placeholder="Input NIK/Passport"
+                  className="w-full"
+                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="border-input absolute inset-y-0 right-0 rounded-s-none border-s"
+                      onClick={() => getCustomer(data.nik_passport)}
+                    >
+                      <UserSearchIcon className="h-4 w-4" />
+                      <span className="sr-only">Cari Customer</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Cek Customer</TooltipContent>
+                </Tooltip>
+              </div>
               <InputError message={errors.nik_passport} />
             </div>
 
@@ -448,6 +637,8 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("name", e.target.value)}
                 className="w-full"
                 placeholder="Input Nama Lengkap"
+                autoComplete="off"
+                required
               />
               <InputError message={errors.name} />
             </div>
@@ -461,6 +652,8 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("phone", e.target.value)}
                 className="w-full"
                 placeholder="Input No. HP"
+                autoComplete="off"
+                required
               />
             </div>
 
@@ -484,6 +677,7 @@ export default function ReservationsCreate(props: {
               <Select
                 value={data.gender}
                 onValueChange={(value) => setData("gender", value as Enum.Gender)}
+                required
               >
                 <SelectTrigger id="gender">
                   <SelectValue placeholder="Pilih Jenis Kelamin">
@@ -514,6 +708,7 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("email", e.target.value)}
                 className="w-full"
                 placeholder="Input Email"
+                autoComplete="off"
               />
               <InputError message={errors.email} />
             </div>
@@ -527,6 +722,7 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("profession", e.target.value)}
                 className="w-full"
                 placeholder="Input Profesi"
+                autoComplete="off"
               />
               <InputError message={errors.profession} />
             </div>
@@ -540,6 +736,7 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("nationality", e.target.value)}
                 className="w-full"
                 placeholder="Input Kewarganegaraan"
+                autoComplete="off"
               />
               <InputError message={errors.nationality} />
             </div>
@@ -553,6 +750,7 @@ export default function ReservationsCreate(props: {
                 onChange={(e) => setData("address", e.target.value)}
                 className="w-full"
                 placeholder="Input Alamat"
+                autoComplete="off"
               />
               <InputError message={errors.address} />
             </div>
@@ -568,16 +766,22 @@ export default function ReservationsCreate(props: {
             {/* discount */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="discount">Discount (%)</Label>
-              <Input
-                type="number"
-                className="w-full"
-                step={5}
-                min={0}
-                max={100}
-                placeholder="Input Discount (%)"
-                value={data.discount}
-                onChange={(e) => setData("discount", Number(e.target.value))}
-              />
+              <div className="relative">
+                <Input
+                  type="number"
+                  className="w-full"
+                  step={5}
+                  min={0}
+                  max={100}
+                  placeholder="Input Discount (%)"
+                  value={data.discount}
+                  onChange={(e) => setData("discount", Number(e.target.value))}
+                  disableHandle
+                />
+                <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-1 flex items-center px-2 text-sm select-none">
+                  %
+                </span>
+              </div>
               <InputError message={errors.discount} />
             </div>
 
@@ -597,15 +801,22 @@ export default function ReservationsCreate(props: {
             {/* advance amount */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="advance_amount">Advance Amount</Label>
-              <Input
-                type="number"
-                className="w-full"
-                step={25000}
-                min={MIN_ADVANCE_AMOUNT}
-                placeholder="Input Advance Amount"
-                value={data.advance_amount}
-                onChange={(e) => setData("advance_amount", Number(e.target.value))}
-              />
+              <div className="relative">
+                <Input
+                  type="number"
+                  className="w-full ps-9"
+                  step={25000}
+                  min={MIN_ADVANCE_AMOUNT}
+                  placeholder="Input Advance Amount"
+                  value={data.advance_amount}
+                  onChange={(e) => setData("advance_amount", Number(e.target.value))}
+                  disableHandle
+                  required
+                />
+                <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-1 flex items-center px-2 text-sm select-none">
+                  Rp
+                </span>
+              </div>
               <InputError message={errors.advance_amount} />
             </div>
 
@@ -625,16 +836,22 @@ export default function ReservationsCreate(props: {
             {/* commission percentage */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="commission_percentage">Commission (%)</Label>
-              <Input
-                type="number"
-                className="w-full"
-                step={5}
-                min={0}
-                max={100}
-                placeholder="Input Commission (%)"
-                value={data.commission_percentage}
-                onChange={(e) => setData("commission_percentage", Number(e.target.value))}
-              />
+              <div className="relative">
+                <Input
+                  type="number"
+                  className="w-full"
+                  step={5}
+                  min={0}
+                  max={100}
+                  placeholder="Input Commission (%)"
+                  value={data.commission_percentage}
+                  onChange={(e) => setData("commission_percentage", Number(e.target.value))}
+                  disableHandle
+                />
+                <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-1 flex items-center px-2 text-sm select-none">
+                  %
+                </span>
+              </div>
               <InputError message={errors.commission_percentage} />
             </div>
 
@@ -659,6 +876,7 @@ export default function ReservationsCreate(props: {
               <Select
                 value={data.payment_method}
                 onValueChange={(value) => setData("payment_method", value as Enum.Payment)}
+                required
               >
                 <SelectTrigger id="payment_method">
                   <SelectValue placeholder="Pilih Metode Pembayaran">
@@ -684,13 +902,12 @@ export default function ReservationsCreate(props: {
             <div className="flex flex-col gap-2">
               <Label htmlFor="total_price">Total Harga</Label>
               <Input
-                type="number"
+                type="text"
                 className="w-full"
-                step={25000}
-                min={100000}
                 placeholder="Input Total Harga"
-                value={data.total_price}
-                onChange={(e) => setData("total_price", Number(e.target.value))}
+                value={totalPrice}
+                readOnly
+                required
               />
               <InputError message={errors.total_price} />
             </div>

@@ -1,15 +1,16 @@
 import InputError from "@/components/input-error";
 import Multiselect from "@/components/multiselect";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiselect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppLayout from "@/layouts/app-layout";
+import { formatCurrency } from "@/lib/utils";
+import { roomStatusOptions } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
-import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -19,9 +20,12 @@ export default function RoomsEdit(props: {
   bedTypes: BedType.Default[];
   roomConditions: Enum.RoomCondition[];
   facilities: Facility.Default[];
+  roomStatuses: Enum.RoomStatus[];
+  rateTypes: RateType.Default[];
+  mealTypes: Meal.Default[];
 }) {
-  const { room, roomTypes, bedTypes, roomConditions, facilities } = props;
-  const { room_type, bed_type, room_status, facility: roomFacility, ...rest } = room;
+  const { room, roomTypes, bedTypes, roomConditions, facilities, roomStatuses, rateTypes, mealTypes } = props;
+  const { room_type, bed_type, rate_type, meal, facility: roomFacility, count_facility, image_url, ...rest } = room;
 
   // define breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -58,8 +62,9 @@ export default function RoomsEdit(props: {
   const [selectedRoomType, setSelectedRoomType] = useState<RoomType.Default | null>(room_type ?? null);
   const isFirstRender = useRef(true);
 
-  const { data, setData, post, processing, errors } = useForm<Room.Update>({
+  const { data, setData, put, processing, errors } = useForm<Room.Update>({
     ...rest,
+    status: Object.entries(roomStatusOptions).find(([_, value]) => value === room.status)?.[0] as Enum.RoomStatus,
     facilities: initialFacilities.map((item) => item.value),
   });
 
@@ -89,7 +94,7 @@ export default function RoomsEdit(props: {
     // sent data
     toast.loading("Mengubah kamar...", { id: "update-room" });
 
-    post(route("room.update", { id: room.id }), {
+    put(route("room.update", { id: room.id }), {
       onError: (errors) => {
         console.log(errors);
         toast.warning("Kamar gagal diubah", {
@@ -110,7 +115,7 @@ export default function RoomsEdit(props: {
         <CardContent>
           <form
             onSubmit={handleUpdateRoom}
-            className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2"
+            className="grid gap-x-8 gap-y-6 lg:grid-cols-2 xl:grid-cols-3"
           >
             {/* room number */}
             <div className="grid gap-2">
@@ -121,10 +126,27 @@ export default function RoomsEdit(props: {
                 min={1}
                 value={data.room_number}
                 onChange={(e) => setData("room_number", parseInt(e.target.value))}
-                required
                 placeholder="Nomor Kamar"
+                disableHandle
+                required
               />
               <InputError message={errors.room_number} />
+            </div>
+
+            {/* floor number */}
+            <div className="grid gap-2">
+              <Label htmlFor="floor_number">Nomor Lantai</Label>
+              <Input
+                id="floor_number"
+                type="number"
+                min={1}
+                value={data.floor_number}
+                onChange={(e) => setData("floor_number", parseInt(e.target.value))}
+                disableHandle
+                required
+                placeholder="Nomor Lantai"
+              />
+              <InputError message={errors.floor_number} />
             </div>
 
             {/* room type */}
@@ -133,9 +155,22 @@ export default function RoomsEdit(props: {
               <Select
                 value={data.room_type_id}
                 onValueChange={(value) => {
+                  const roomType = roomTypes.find((type) => type.id === value);
+
                   setData("room_type_id", value);
-                  setSelectedRoomType(roomTypes.find((type) => type.id === value) ?? null);
+                  setData("rate_type_id", roomType?.rate_type_id || "");
+                  setSelectedRoomType(roomType ?? null);
+
+                  // assign facilities
+                  setData("facilities", roomType?.facility?.map((item) => item.id) ?? []);
+                  setSelectedFacilities(
+                    roomType?.facility?.map((item) => ({
+                      value: item.id,
+                      label: item.name,
+                    })) ?? [],
+                  );
                 }}
+                disabled={roomTypes.length === 0}
               >
                 <SelectTrigger id="room_type_id">
                   <SelectValue placeholder="Pilih Tipe Kamar">
@@ -157,30 +192,16 @@ export default function RoomsEdit(props: {
               <InputError message={errors.room_type_id} />
             </div>
 
-            {/* floor number */}
-            <div className="grid gap-2">
-              <Label htmlFor="floor_number">Nomor Lantai</Label>
-              <Input
-                id="floor_number"
-                type="number"
-                min={1}
-                value={data.floor_number}
-                onChange={(e) => setData("floor_number", parseInt(e.target.value))}
-                required
-                placeholder="Nomor Lantai"
-              />
-              <InputError message={errors.floor_number} />
-            </div>
-
             {/* bed type */}
             <div className="grid gap-2">
-              <Label htmlFor="bed_type_id">Tipe Bed</Label>
+              <Label htmlFor="bed_type_id">Tipe Kasur</Label>
               <Select
                 value={data.bed_type_id}
                 onValueChange={(value) => setData("bed_type_id", value)}
+                disabled={bedTypes.length === 0}
               >
                 <SelectTrigger id="bed_type_id">
-                  <SelectValue placeholder="Pilih Tipe Bed">
+                  <SelectValue placeholder="Pilih Tipe Kasur">
                     <span className="capitalize">{bedTypes.find((type) => type.id === data.bed_type_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -199,18 +220,82 @@ export default function RoomsEdit(props: {
               <InputError message={errors.bed_type_id} />
             </div>
 
+            {/* rate type */}
+            <div className="grid gap-2">
+              <Label htmlFor="rate_type_id">Tipe Tarif</Label>
+              <Select
+                value={data.rate_type_id}
+                onValueChange={(value) => {
+                  setData("rate_type_id", value);
+                  setData("price", rateTypes.find((type) => type.id === value)?.rate || "");
+                }}
+                disabled={rateTypes.length === 0}
+              >
+                <SelectTrigger id="rate_type_id">
+                  <SelectValue placeholder="Pilih Tipe Tarif">
+                    <span className="capitalize">{rateTypes.find((type) => type.id === data.rate_type_id)?.name}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {rateTypes.map((type) => (
+                    <SelectItem
+                      key={type.id}
+                      value={type.id}
+                    >
+                      {type.code} - {formatCurrency(Number(type.rate))}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.rate_type_id} />
+            </div>
+
+            {/* meal*/}
+            <div className="grid gap-2">
+              <Label htmlFor="meal_id">Tipe Makanan</Label>
+              <Select
+                value={data.meal_id}
+                onValueChange={(value) => setData("meal_id", value)}
+                disabled={mealTypes.length === 0}
+              >
+                <SelectTrigger id="meal_id">
+                  <SelectValue placeholder="Pilih Tipe Makanan">
+                    <span className="capitalize">{mealTypes.find((type) => type.id === data.meal_id)?.name}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {mealTypes.map((type) => (
+                    <SelectItem
+                      key={type.id}
+                      value={type.id}
+                      className="capitalize"
+                    >
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.meal_id} />
+            </div>
+
             {/* price */}
             <div className="grid gap-2">
               <Label htmlFor="price">Harga</Label>
-              <Input
-                id="price"
-                type="number"
-                min={1}
-                value={data.price}
-                onChange={(e) => setData("price", parseInt(e.target.value))}
-                required
-                placeholder="Harga"
-              />
+              <div className="relative">
+                <Input
+                  id="price"
+                  type="number"
+                  min={1}
+                  step="any"
+                  value={data.price}
+                  onChange={(e) => setData("price", parseInt(e.target.value))}
+                  className="ps-8"
+                  placeholder="Harga"
+                  disableHandle
+                  required
+                />
+                <span className="text-muted-foreground absolute inset-y-0 start-2 flex items-center text-sm">Rp</span>
+              </div>
               <InputError message={errors.price} />
             </div>
 
@@ -244,16 +329,47 @@ export default function RoomsEdit(props: {
             {/* capacity */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="capacity">Kapasitas</Label>
-              <Input
-                id="capacity"
-                type="number"
-                min={1}
-                value={data.capacity}
-                onChange={(e) => setData("capacity", parseInt(e.target.value))}
-                required
-                placeholder="Kapasitas"
-              />
+              <div className="relative">
+                <Input
+                  id="capacity"
+                  type="number"
+                  min={1}
+                  value={data.capacity}
+                  onChange={(e) => setData("capacity", parseInt(e.target.value))}
+                  disableHandle
+                  required
+                  placeholder="Kapasitas"
+                />
+                <span className="text-muted-foreground absolute inset-y-0 end-3 flex items-center text-sm">Orang</span>
+              </div>
               <InputError message={errors.capacity} />
+            </div>
+
+            {/* status */}
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={data.status}
+                onValueChange={(value) => setData("status", value as Enum.RoomStatus)}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Pilih Status">
+                    <span className="uppercase">{data.status}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {roomStatuses.map((status) => (
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="uppercase"
+                    >
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.condition} />
             </div>
 
             {/* view */}
@@ -265,9 +381,22 @@ export default function RoomsEdit(props: {
                 value={data.view}
                 placeholder="View"
                 onChange={(e) => setData("view", e.target.value)}
-                required
+                disableHandle
               />
               <InputError message={errors.view} />
+            </div>
+
+            {/* image */}
+            <div className="grid gap-2">
+              <Label htmlFor="image">Gambar</Label>
+              <Input
+                id="image"
+                type="file"
+                placeholder="Gambar"
+                accept="image/*"
+                onChange={(e) => setData("image", e.target.files?.[0] ?? null)}
+              />
+              <InputError message={errors.image} />
             </div>
 
             {/* facilities */}
@@ -288,21 +417,15 @@ export default function RoomsEdit(props: {
               <InputError message={errors.facilities} />
             </div>
 
-            {/* submit button */}
-            <Button
-              type="submit"
+            {/* submit */}
+            <SubmitButton
               disabled={processing}
-              className="col-span-2 col-start-1 w-fit place-self-end"
+              loading={processing}
+              loadingText="Menyimpan..."
+              className="w-full lg:col-span-full lg:w-fit lg:place-self-end"
             >
-              {processing ? (
-                <div className="inline-flex items-center">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan perubahan...
-                </div>
-              ) : (
-                "Simpan perubahan"
-              )}
-            </Button>
+              Simpan
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>

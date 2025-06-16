@@ -2,6 +2,7 @@ import { DataList } from "@/components/data-list";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { formatCurrency } from "@/lib/utils";
 
 export default function RoomTypeShow(props: { data: RoomType.Default; onClose: () => void }) {
   const { data, onClose } = props;
@@ -13,19 +14,23 @@ export default function RoomTypeShow(props: { data: RoomType.Default; onClose: (
     },
     {
       label: "Kapasitas",
-      value: data.capacity,
+      value: `${data.capacity} orang`,
+    },
+    {
+      label: "Tipe Tarif",
+      value: data.rate_type?.name ?? "-",
     },
     {
       label: "Tarif Dasar",
-      value: data.base_rate,
+      value: data.base_rate ? formatCurrency(data.base_rate as number) : "-",
     },
     {
       label: "Jumlah Digunakan",
-      value: data.rooms_count,
+      value: data.rooms_count ? `${data.rooms_count} kamar` : "-",
     },
     {
       label: "Jumlah Fasilitas",
-      value: data.facilities_count,
+      value: `${data.facilities_count} jenis`,
     },
     {
       label: "Fasilitas",
@@ -41,7 +46,7 @@ export default function RoomTypeShow(props: { data: RoomType.Default; onClose: (
       <Separator />
       <DataList
         data={dataList}
-        className="*:data-[value=Fasilitas]:text-wrap *:data-[value=Fasilitas]:col-span-2 *:data-[label=Fasilitas]:col-span-2"
+        className="*:data-[label=Fasilitas]:col-span-2 *:data-[value=Fasilitas]:col-span-2 *:data-[value=Fasilitas]:text-wrap"
       />
       <div className="flex justify-end gap-2">
         <Button

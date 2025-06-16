@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Guests\CountryController;
+use App\Http\Controllers\Guests\GeographyController;
+use App\Http\Controllers\Guests\GuestController;
+use App\Http\Controllers\Guests\NationalityController;
+use App\Http\Controllers\Reservations\GuestTypeController;
+use App\Http\Controllers\Rooms\RateTypeController;
 use App\Http\Controllers\Rooms\RoomController;
 use App\Http\Controllers\Rooms\RoomTypeController;
 use App\Http\Controllers\Rooms\BedTypeController;
@@ -54,6 +60,21 @@ Route::middleware(["auth", "verified", "role:admin"])->group(function () {
         "update" => "bedtype.update",
         "destroy" => "bedtype.destroy",
       ]);
+
+    /**
+     * rate type routes
+     * `/tipe/tarif`
+     */
+    Route::resource("tarif", RateTypeController::class)
+      ->except(["create", "show"])
+      ->parameters(["tarif" => "id"])
+      ->names([
+        "index" => "rate.type.index",
+        "store" => "rate.type.store",
+        "edit" => "rate.type.edit",
+        "update" => "rate.type.update",
+        "destroy" => "rate.type.destroy",
+      ]);
   });
 
   /** facility for room routes */
@@ -66,5 +87,61 @@ Route::middleware(["auth", "verified", "role:admin"])->group(function () {
       "edit" => "facility.edit",
       "update" => "facility.update",
       "destroy" => "facility.destroy",
+    ]);
+
+  /** guest resource routes */
+  Route::resource("tamu", GuestController::class)
+    ->except(["create", "destroy"])
+    ->parameters(["tamu" => "id"])
+    ->names([
+      "index" => "guest.index",
+      "store" => "guest.store",
+      "show" => "guest.show",
+      "edit" => "guest.edit",
+      "update" => "guest.update",
+    ]);
+
+  /** nationality resource routes */
+  Route::resource("kewarganegaraan", NationalityController::class)
+    ->except(["create", "show", "edit"])
+    ->parameters(["kewarganegaraan" => "id"])
+    ->names([
+      "index" => "nationality.index",
+      "store" => "nationality.store",
+      "update" => "nationality.update",
+      "destroy" => "nationality.destroy",
+    ]);
+
+  /** country resource routes */
+  Route::resource("negara", CountryController::class)
+    ->except(["create", "show", "edit"])
+    ->parameters(["negara" => "id"])
+    ->names([
+      "index" => "country.index",
+      "store" => "country.store",
+      "update" => "country.update",
+      "destroy" => "country.destroy",
+    ]);
+
+  /** geography resource routes */
+  Route::resource("geografi", GeographyController::class)
+    ->except(["create", "show", "edit"])
+    ->parameters(["geografi" => "id"])
+    ->names([
+      "index" => "geography.index",
+      "store" => "geography.store",
+      "update" => "geography.update",
+      "destroy" => "geography.destroy",
+    ]);
+
+  /** guest_type resource routes */
+  Route::resource("tipe-tamu", GuestTypeController::class)
+    ->except(["create", "show", "edit"])
+    ->parameters(["tipe-tamu" => "id"])
+    ->names([
+      "index" => "guest.type.index",
+      "store" => "guest.type.store",
+      "update" => "guest.type.update",
+      "destroy" => "guest.type.destroy",
     ]);
 });

@@ -3,22 +3,20 @@
 namespace App\Http\Controllers\Rooms;
 
 use App\Http\Controllers\Controller;
-use App\Models\Facility;
+use App\Models\Rooms\Facility;
 use App\Http\Requests\Rooms\FacilityRequest;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class FacilityController extends Controller
 {
     /**
      * Display a listing of the resource.
-\     */
+     */
     public function index()
     {
-        $facilities = Facility::orderBy('created_at', 'desc')->get();
+        $facilities = Facility::latest()->get();
 
         return Inertia::render('facility/index', [
             'facilities' => $facilities,
@@ -37,25 +35,13 @@ class FacilityController extends Controller
     {
         try {
             $validated = $request->validated();
-            $facility = Facility::create($validated);
-
-            Log::channel('project')->info('Facility created', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'record_id' => $facility->id,
-            ]);
+            Facility::create($validated);
 
             // handle message in frontend
             return redirect()->back();
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            Log::channel('project')->error('Creating facility', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'error' => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage(),
             ])->withInput();
@@ -79,36 +65,17 @@ class FacilityController extends Controller
     {
         try {
             $facility = Facility::findOrFail($id);
-
             $facility->update($request->validated());
-
-            Log::channel('project')->info('Facility updated', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'record_id' => $facility->id,
-            ]);
 
             // handle message in frontend
             return redirect()->back();
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
-            Log::channel('project')->error('Facility not found', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'error' => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => 'Fasilitas tidak ditemukan',
             ]);
         } catch (\Exception $e) {
-            Log::channel('project')->error('Updating facility', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'error' => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage(),
             ])->withInput();
@@ -122,34 +89,15 @@ class FacilityController extends Controller
     {
         try {
             $facility = Facility::findOrFail($id);
-
-            Log::channel('project')->info('Facility deleted', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'record_id' => $facility->id,
-            ]);
-
             $facility->delete();
 
             // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel('project')->error('Facility not found', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'error' => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => 'Fasilitas tidak ditemukan',
             ]);
         } catch (\Exception $e) {
-            Log::channel('project')->error('Deleting facility', [
-                'user_id' => Auth::user()->id,
-                'table' => 'facilities',
-                'error' => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage(),
             ]);

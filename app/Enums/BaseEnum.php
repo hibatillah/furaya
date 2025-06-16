@@ -33,4 +33,14 @@ abstract class BaseEnum
   {
     return static::$labels;
   }
+
+  /**
+   * Get the value for a given label.
+   * @param string $label
+   * @return string
+   */
+  public static function getValue(string $label): string
+  {
+    return array_search($label, static::$labels);
+  }
 }

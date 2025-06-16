@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
+use App\Models\Rooms\Room;
 use App\Models\User;
 use Inertia\Inertia;
 

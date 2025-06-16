@@ -14,6 +14,7 @@ import { useState } from "react";
 import FacilityCreate from "./create";
 import FacilityDelete from "./delete";
 import FacilityEdit from "./edit";
+import FacilityShow from "./show";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -55,11 +56,6 @@ export default function FacilityIndex(props: { facilities: Facility.Default[] })
         </div>
       ),
     },
-    // {
-    //   accessorKey: "description",
-    //   header: "Deskripsi",
-    //   cell: ({ row }) => <div className="truncate">{row.original.description}</div>,
-    // },
     {
       id: "actions",
       cell: ({ row }) => (
@@ -75,6 +71,7 @@ export default function FacilityIndex(props: { facilities: Facility.Default[] })
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleDialog("show", row.original)}>Detail</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -127,6 +124,12 @@ export default function FacilityIndex(props: { facilities: Facility.Default[] })
           )}
           {dialogType === "edit" && selectedRow && (
             <FacilityEdit
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
+          {dialogType === "show" && selectedRow && (
+            <FacilityShow
               data={selectedRow}
               onClose={handleDialogClose}
             />

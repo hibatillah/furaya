@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Rooms;
 
 use App\Enums\RoomConditionEnum;
+use App\Enums\RoomStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
@@ -39,9 +40,12 @@ class RoomRequest extends FormRequest
             'capacity' => ['required', 'integer', 'min:1'],
             'room_type_id' => ['required', Rule::exists("room_types", "id")],
             'bed_type_id' => ['required', Rule::exists("bed_types", "id")],
-            'room_status_id' => ['nullable', Rule::exists("room_status", "id")],
+            'rate_type_id' => ['required', Rule::exists("rate_types", "id")],
+            'meal_id' => ['nullable', Rule::exists("meals", "id")],
+            'status' => ['required', Rule::in(RoomStatusEnum::getLabels())],
             'facilities' => ['nullable', 'array'],
             'facilities.*' => ['nullable', 'string', Rule::exists("facilities", "id")],
+            'image' => ['nullable', 'image', 'max:2048'],
         ];
     }
 
@@ -67,8 +71,11 @@ class RoomRequest extends FormRequest
             'room_type_id.exist' => 'Tipe kamar yang dipilih tidak ditemukan.',
             'bed_type_id.required' => 'Tipe kasur wajib dipilih.',
             'bed_type_id.exist' => 'Tipe kasur yang dipilih tidak ditemukan.',
-            'room_status_id.required' => 'Status kamar wajib dipilih.',
-            'room_status_id.exist' => 'Status kamar yang dipilih tidak ditemukan.',
+            'rate_type_id.required' => 'Tipe tarif wajib dipilih.',
+            'rate_type_id.exist' => 'Tipe tarif yang dipilih tidak ditemukan.',
+            'meal_id.exist' => 'Tipe makanan yang dipilih tidak ditemukan.',
+            'status.required' => 'Status kamar wajib dipilih.',
+            'status.in' => 'Status kamar yang dipilih tidak valid.',
         ];
     }
 }

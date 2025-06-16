@@ -20,10 +20,12 @@ interface InputDateProps {
   disabled?: boolean;
   disabledDate?: Matcher | Matcher[] | undefined;
   defaultMonth?: Date;
+  readOnly?: boolean;
+  align?: "start" | "center" | "end";
 }
 
 export function InputDate(props: InputDateProps) {
-  const { mode, value: date, onChange, popoverState, className, disabled, disabledDate, defaultMonth } = props;
+  const { mode, value: date, onChange, popoverState, className, disabled, disabledDate, defaultMonth, readOnly, align = "start" } = props;
 
   const _popoverState = useState<boolean>(false);
   const [open, setOpen] = popoverState ?? _popoverState;
@@ -59,7 +61,7 @@ export function InputDate(props: InputDateProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        align="start"
+        align={align}
         className="w-auto overflow-hidden p-0"
       >
         {mode === "single" && (

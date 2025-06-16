@@ -6,15 +6,23 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function navigate(
-  url: string,
+export function formatCurrency(
+  value: number,
   {
-    options,
-    delay = 2000,
+    locales,
+    currency,
   }: {
-    options?: Parameters<typeof router.visit>[1];
-    delay?: number;
-  } = {},
-) {
-  setTimeout(() => router.visit(url, options), delay);
+    locales?: string;
+    currency?: string;
+  } = { locales: "id-ID", currency: "IDR" },
+): string {
+  const formatter = new Intl.NumberFormat(locales, {
+    style: "currency",
+    currency: currency,
+    maximumFractionDigits: 0,
+    compactDisplay: "short"
+  });
+
+  const formatted = formatter.format(value);
+  return formatted;
 }

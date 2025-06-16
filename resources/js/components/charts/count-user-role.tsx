@@ -13,7 +13,7 @@ export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }
       { role: "manajer", count: data.manager, fill: chartColors[0] },
       { role: "admin", count: data.admin, fill: chartColors[1] },
       { role: "karyawan", count: data.employee, fill: chartColors[2] },
-      { role: "customer", count: data.customer, fill: chartColors[3] },
+      { role: "tamu", count: data.guest, fill: chartColors[3] },
     ],
     [data],
   );
@@ -24,7 +24,7 @@ export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }
       manajer: { label: "Manajer" },
       admin: { label: "Admin" },
       karyawan: { label: "Karyawan" },
-      customer: { label: "Customer" },
+      tamu: { label: "Tamu" },
     }),
     [],
   ) satisfies ChartConfig;

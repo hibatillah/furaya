@@ -3,6 +3,7 @@ import { badgeColor } from ".";
 export const MIN_LENGTH_OF_STAY = 1;
 export const MAX_LENGTH_OF_STAY = 30;
 export const MIN_ADVANCE_AMOUNT = 100000;
+export const MIN_PAX = 1;
 
 export const bookingTypeBadgeColor = [
   "direct",

@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Roles\CustomerController;
-use App\Http\Controllers\Roles\DepartmentController;
-use App\Http\Controllers\Roles\EmployeeController;
-use App\Http\Controllers\Roles\AdminController;
-use App\Http\Controllers\Roles\UserController;
+use App\Http\Controllers\Guests\GuestController;
+use App\Http\Controllers\Managements\DepartmentController;
+use App\Http\Controllers\Managements\EmployeeController;
+use App\Http\Controllers\Managements\AdminController;
+use App\Http\Controllers\Managements\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "verified", "role:manager"])->group(function () {
@@ -24,18 +24,6 @@ Route::middleware(["auth", "verified", "role:manager"])->group(function () {
             "index" => "admin.index",
             "update" => "admin.update",
             "destroy" => "admin.destroy",
-        ]);
-
-    /** customer resource routes */
-    Route::resource("customer", CustomerController::class)
-        ->except(["create", "destroy"])
-        ->parameters(["customer" => "id"])
-        ->names([
-            "index" => "customer.index",
-            "store" => "customer.store",
-            "show" => "customer.show",
-            "edit" => "customer.edit",
-            "update" => "customer.update",
         ]);
 
     /** employee resource routes */

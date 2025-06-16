@@ -4,15 +4,19 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { SharedData, type NavItem } from "@/types";
 import { Link, usePage } from "@inertiajs/react";
 import {
-  BadgeCheckIcon,
-  BedDoubleIcon,
   BedSingleIcon,
   BriefcaseIcon,
   CalendarCheckIcon,
+  CircleDollarSignIcon,
+  FlagIcon,
+  HotelIcon,
   LayoutGrid,
+  MapIcon,
   Package2Icon,
   ShieldUserIcon,
-  UsersIcon
+  SquareUserIcon,
+  TagIcon,
+  UsersIcon,
 } from "lucide-react";
 import AppLogo from "./app-logo";
 
@@ -31,8 +35,8 @@ const managerMenuItems: Record<string, NavItem[]> = {
       icon: CalendarCheckIcon,
     },
     {
-      title: "Customer",
-      href: route("customer.index"),
+      title: "Tamu",
+      href: route("guest.index"),
       icon: UsersIcon,
     },
   ],
@@ -67,25 +71,59 @@ const adminMenuItems: Record<string, NavItem[]> = {
       href: route("dashboard"),
       icon: LayoutGrid,
     },
+  ],
+  Kamar: [
     {
       title: "Kamar",
       href: route("room.index"),
-      icon: BedSingleIcon,
+      icon: HotelIcon,
     },
     {
       title: "Tipe Kamar",
       href: route("roomtype.index"),
-      icon: BedDoubleIcon,
+      icon: TagIcon,
+    },
+    {
+      title: "Tipe Tarif",
+      href: route("rate.type.index"),
+      icon: CircleDollarSignIcon,
     },
     {
       title: "Tipe Kasur",
       href: route("bedtype.index"),
-      icon: BedDoubleIcon,
+      icon: BedSingleIcon,
     },
     {
       title: "Fasilitas",
       href: route("facility.index"),
       icon: Package2Icon,
+    },
+  ],
+  Tamu: [
+    {
+      title: "Tamu",
+      href: route("guest.index"),
+      icon: UsersIcon,
+    },
+    {
+      title: "Tipe Tamu",
+      href: route("guest.type.index"),
+      icon: SquareUserIcon,
+    },
+    {
+      title: "Geografi",
+      href: route("geography.index"),
+      icon: MapIcon,
+    },
+    {
+      title: "Negara",
+      href: route("country.index"),
+      icon: FlagIcon,
+    },
+    {
+      title: "Kewarganegaraan",
+      href: route("nationality.index"),
+      icon: FlagIcon,
     },
   ],
 };
@@ -101,11 +139,6 @@ const employeeMenuItems: Record<string, NavItem[]> = {
       title: "Reservasi",
       href: route("reservation.index"),
       icon: CalendarCheckIcon,
-    },
-    {
-      title: "Status Kamar",
-      href: route("room.status.index"),
-      icon: BadgeCheckIcon,
     },
   ],
 };
