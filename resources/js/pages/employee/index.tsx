@@ -54,16 +54,6 @@ export default function EmployeeIndex(props: { employees: Employee.Default[]; de
       header: "Email",
     },
     {
-      id: "department",
-      accessorFn: (row) => row.department?.name,
-      header: "Departemen",
-      cell: ({ row }) => {
-        const department = row.getValue("department") as string;
-        return <Badge variant="outline" className="text-sm">{department}</Badge>;
-      },
-      filterFn: "checkbox" as FilterFnOption<Employee.Default>,
-    },
-    {
       id: "phone",
       accessorKey: "phone",
       header: "No. HP",
@@ -73,12 +63,38 @@ export default function EmployeeIndex(props: { employees: Employee.Default[]; de
       },
     },
     {
+      id: "department",
+      accessorFn: (row) => row.department?.name,
+      header: "Departemen",
+      cell: ({ row }) => {
+        const department = row.getValue("department") as string;
+
+        return (
+          <Badge
+            variant="secondary"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
+          >
+            {department}
+          </Badge>
+        );
+      },
+      filterFn: "checkbox" as FilterFnOption<Employee.Default>,
+    },
+    {
       id: "gender",
       accessorKey: "formatted_gender",
       header: "Gender",
       cell: ({ row }) => {
-        const gender = row.getValue("gender") as string;
-        return <Badge variant="outline" className="text-sm">{gender}</Badge>;
+        const gender = row.getValue("gender") as Enum.Gender;
+
+        return (
+          <Badge
+            variant="secondary"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
+          >
+            {gender}
+          </Badge>
+        );
       },
       filterFn: "radio" as FilterFnOption<Employee.Default>,
     },

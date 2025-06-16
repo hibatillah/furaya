@@ -5,10 +5,10 @@ namespace App\Models\Managements;
 use App\Models\BaseModel;
 use App\Models\Guests\Country;
 use App\Models\Guests\Geography;
-use App\Models\Guests\GuestType;
 use App\Models\Guests\Nationality;
 use App\Models\Reservations\CheckIn;
 use App\Models\Reservations\CheckOut;
+use App\Models\Reservations\GuestType;
 use App\Models\Rooms\Meal;
 use App\Models\Reservations\Reservation;
 use App\Models\User;
@@ -16,7 +16,10 @@ use Carbon\Carbon;
 
 class Employee extends BaseModel
 {
-    protected $appends = ['formatted_hire_date', 'formatted_gender'];
+    protected $appends = [
+        'formatted_hire_date',
+        'formatted_gender'
+    ];
 
     public function getFormattedGenderAttribute()
     {

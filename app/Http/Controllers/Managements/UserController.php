@@ -8,9 +8,6 @@ use App\Http\Requests\UserRequest;
 use Inertia\Inertia;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 
 class UserController extends Controller
 {
@@ -22,7 +19,7 @@ class UserController extends Controller
         $roles = RoleEnum::getValues();
         $users = User::withTrashed()
             ->orderBy('deleted_at', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->get();
 
         return Inertia::render('user/index', [
@@ -58,36 +55,14 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-
             $user->update($request->validated());
-            $user->refresh();
-
-            $method = Request::getMethod();
-
-            Log::channel('project')->info('User updated', [
-                'user_id' => Auth::user()->id,
-                'table' => 'users',
-                'record_id' => $user->id,
-                'method' => $method,
-            ]);
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("User not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "users",
-            ]);
-
             return back()->withErrors([
                 'message' => 'User tidak ditemukan'
             ]);
         } catch (\Exception $e) {
-            Log::channel("project")->error("Updating user", [
-                "user_id" => Auth::user()->id,
-                "table" => "users",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);
@@ -101,32 +76,14 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-
-            Log::channel('project')->info('User deleted', [
-                'user_id' => Auth::user()->id,
-                'table' => 'users',
-                'record_id' => $user->id,
-            ]);
-
             $user->delete();
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("User not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "users",
-            ]);
-
             return back()->withErrors([
                 'message' => 'User tidak ditemukan'
             ]);
         } catch (\Exception $e) {
-            Log::channel("project")->error("Deleting user", [
-                "user_id" => Auth::user()->id,
-                "table" => "users",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);

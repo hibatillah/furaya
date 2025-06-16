@@ -5,14 +5,15 @@ import { LabelList, Pie, PieChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartColors } from "./utils";
+import { cn } from "@/lib/utils";
+import { pieChartColors } from "./utils";
 
-export function ChartCountBedType({ data }: { data: Record<string, number> }) {
+export function ChartCountBedType({ data, className }: { data: Record<string, number>; className?: string }) {
   const chartData = React.useMemo(() => {
     return Object.entries(data).map(([bedType, count], index) => ({
       bedType,
       count,
-      fill: chartColors[index % chartColors.length],
+      fill: pieChartColors[index % pieChartColors.length],
     }));
   }, [data]);
 
@@ -27,7 +28,7 @@ export function ChartCountBedType({ data }: { data: Record<string, number> }) {
   }, [chartData]);
 
   return (
-    <Card className="flex flex-col gap-2">
+    <Card className={cn("flex flex-col gap-2", className)}>
       <CardHeader className="items-center pb-0">
         <CardTitle>Jumlah Penggunaan Kasur</CardTitle>
         <CardDescription className="text-center text-pretty">Pembagian Penggunaan Tipe Kasur Berdasarkan Kamar</CardDescription>

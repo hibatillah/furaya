@@ -15,7 +15,7 @@ import DepartmentEdit from "./edit";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
-    title: "Department",
+    title: "Departemen",
     href: route("department.index"),
   },
 ];
@@ -113,7 +113,7 @@ export default function DepartmentIndex(props: { departments: Department.Default
           {dialogType === "delete" && selectedRow && (
             <DepartmentDelete
               id={selectedRow.id}
-              canDelete={selectedRow.can_delete}
+              canDelete={selectedRow.can_delete!}
               onClose={handleDialogClose}
             />
           )}

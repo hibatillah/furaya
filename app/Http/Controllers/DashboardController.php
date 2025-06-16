@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rooms\Room;
+use App\Models\Rooms\RoomFacility;
 use App\Models\User;
 use Inertia\Inertia;
 
@@ -10,11 +11,28 @@ class DashboardController extends Controller
 {
     public function index()
     {
+
         return Inertia::render('dashboard', [
             'userRoleCount' => $this->getUserRoleCount(),
             'roomTypeCount' => $this->getRoomTypeCount(),
             'bedTypeCount' => $this->getBedTypeCount(),
+            'mostUsedFacilityByRoom' => $this->getMostUsedFacilityByRoom(),
         ]);
+    }
+
+    /**
+     * Get most used facility in room
+     */
+    private function getMostUsedFacilityByRoom()
+    {
+        $mostUsedFacilityInRoom = RoomFacility::with('facility')
+            ->get()
+            ->groupBy('facility.name')
+            ->map(fn($group) => $group->count())
+            ->sortByDesc(fn($count) => $count)
+            ->take(7);
+
+        return $mostUsedFacilityInRoom;
     }
 
     /**
@@ -37,7 +55,8 @@ class DashboardController extends Controller
         $roomTypeCount = Room::with('roomType')
             ->get()
             ->groupBy('roomType.name')
-            ->map(fn($group) => $group->count());
+            ->map(fn($group) => $group->count())
+            ->take(5);
 
         return $roomTypeCount;
     }

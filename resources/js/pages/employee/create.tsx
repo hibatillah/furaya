@@ -1,5 +1,5 @@
 import InputError from "@/components/input-error";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ export default function EmployeeCreate(props: { departments: Department.Default[
   // handle create employee
   function handleCreateEmployee(e: React.FormEvent) {
     e.preventDefault();
+    console.log(data);
 
     toast.loading("Menambahkan karyawan...", {
       id: `create-employee`,
@@ -37,6 +38,7 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
     post(route("employee.store"), {
       onError: (error) => {
+        console.log(error);
         toast.error("Karyawan gagal ditambahkan", {
           id: `create-employee`,
           description: error.message,
@@ -59,6 +61,7 @@ export default function EmployeeCreate(props: { departments: Department.Default[
             onSubmit={handleCreateEmployee}
             className="grid grid-cols-2 gap-6"
           >
+            {/* name */}
             <div className="grid gap-2">
               <Label htmlFor="name">Nama</Label>
               <Input
@@ -66,12 +69,14 @@ export default function EmployeeCreate(props: { departments: Department.Default[
                 type="text"
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
-                required
                 placeholder="Nama"
+                autoComplete="off"
+                required
               />
               <InputError message={errors.name} />
             </div>
 
+            {/* email */}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -79,12 +84,14 @@ export default function EmployeeCreate(props: { departments: Department.Default[
                 type="email"
                 value={data.email}
                 onChange={(e) => setData("email", e.target.value)}
-                required
                 placeholder="Email"
+                autoComplete="off"
+                required
               />
               <InputError message={errors.email} />
             </div>
 
+            {/* phone */}
             <div className="grid gap-2">
               <Label htmlFor="phone">Nomor Telepon</Label>
               <Input
@@ -93,10 +100,13 @@ export default function EmployeeCreate(props: { departments: Department.Default[
                 value={data.phone}
                 onChange={(e) => setData("phone", e.target.value)}
                 placeholder="Nomor Telepon"
+                autoComplete="off"
+                required
               />
               <InputError message={errors.phone} />
             </div>
 
+            {/* password */}
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -105,16 +115,19 @@ export default function EmployeeCreate(props: { departments: Department.Default[
                 value={data.password}
                 onChange={(e) => setData("password", e.target.value)}
                 placeholder="Password"
+                autoComplete="off"
                 required
               />
               <InputError message={errors.password} />
             </div>
 
+            {/* gender */}
             <div className="grid gap-2">
               <Label htmlFor="gender">Gender</Label>
               <Select
                 value={data.gender}
                 onValueChange={(value) => setData("gender", value as Enum.Gender)}
+                required
               >
                 <SelectTrigger id="gender">
                   <SelectValue placeholder="Pilih Gender">
@@ -139,11 +152,13 @@ export default function EmployeeCreate(props: { departments: Department.Default[
               <InputError message={errors.gender} />
             </div>
 
+            {/* department */}
             <div className="grid gap-2">
               <Label htmlFor="department_id">Departemen</Label>
               <Select
                 value={data.department_id}
                 onValueChange={(value) => setData("department_id", value)}
+                required
               >
                 <SelectTrigger id="department_id">
                   <SelectValue placeholder="Pilih Departemen">
@@ -164,6 +179,7 @@ export default function EmployeeCreate(props: { departments: Department.Default[
               <InputError message={errors.department_id} />
             </div>
 
+            {/* hire date */}
             <div className="grid gap-2">
               <Label htmlFor="hire_date">Tanggal Bergabung</Label>
               <DatePicker
@@ -174,18 +190,27 @@ export default function EmployeeCreate(props: { departments: Department.Default[
               <InputError message={errors.hire_date} />
             </div>
 
+            {/* salary */}
             <div className="grid gap-2">
               <Label htmlFor="salary">Gaji</Label>
-              <Input
-                id="salary"
-                type="number"
-                value={data.salary}
-                onChange={(e) => setData("salary", Number(e.target.value))}
-                placeholder="Gaji"
-              />
+              <div className="relative">
+                <Input
+                  id="salary"
+                  type="number"
+                  value={data.salary}
+                  onChange={(e) => setData("salary", Number(e.target.value))}
+                  placeholder="Gaji"
+                  className="ps-9"
+                  disableHandle
+                  autoComplete="off"
+                  required
+                />
+                <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-3 flex items-center text-sm select-none">Rp</span>
+              </div>
               <InputError message={errors.salary} />
             </div>
 
+            {/* address */}
             <div className="grid gap-2">
               <Label htmlFor="address">Alamat</Label>
               <Input
@@ -194,17 +219,20 @@ export default function EmployeeCreate(props: { departments: Department.Default[
                 value={data.address}
                 onChange={(e) => setData("address", e.target.value)}
                 placeholder="Alamat"
+                autoComplete="off"
               />
               <InputError message={errors.address} />
             </div>
 
-            <div className="col-span-2 flex justify-end gap-2">
-              <Button
-                type="submit"
+            <div className="col-span-full flex justify-end gap-2">
+              <SubmitButton
                 disabled={processing}
+                loading={processing}
+                loadingText="Membuat karyawan..."
+                className="w-fit"
               >
-                Tambah Karyawan
-              </Button>
+                Tambah
+              </SubmitButton>
             </div>
           </form>
         </CardContent>

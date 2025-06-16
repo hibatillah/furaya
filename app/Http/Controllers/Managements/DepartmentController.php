@@ -7,8 +7,6 @@ use App\Http\Requests\Managements\DepartmentRequest;
 use Inertia\Inertia;
 use App\Models\Managements\Department;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class DepartmentController extends Controller
@@ -18,7 +16,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::orderBy('created_at', 'desc')->get();
+        $departments = Department::latest()->get();
 
         return Inertia::render('department/index', [
             'departments' => $departments,
@@ -36,25 +34,12 @@ class DepartmentController extends Controller
     public function store(DepartmentRequest $request)
     {
         try {
-            $department = Department::create($request->validated());
+            Department::create($request->validated());
 
-            Log::channel('project')->info('Department created', [
-                'user_id' => Auth::user()->id,
-                'table' => 'departments',
-                'record_id' => $department->id,
-            ]);
-
-            // handle message in frontend
             return redirect()->back();
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            Log::channel("project")->error("Creating department", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);
@@ -80,28 +65,14 @@ class DepartmentController extends Controller
             $department = Department::findOrFail($id);
             $department->update($request->validated());
 
-            Log::channel('project')->info('Department updated', [
-                'user_id' => Auth::user()->id,
-                'table' => 'departments',
-                'record_id' => $department->id,
-            ]);
-
-            // handle message in frontend
             return redirect()->back();
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Department not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
+            return redirect()->back()->withErrors([
+                'message' => 'Departemen tidak ditemukan'
             ]);
-
-            return redirect()->back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
-            Log::channel("project")->error("Updating department", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);
@@ -115,31 +86,14 @@ class DepartmentController extends Controller
     {
         try {
             $department = Department::findOrFail($id);
-
-            Log::channel('project')->info('Department deleted', [
-                'user_id' => Auth::user()->id,
-                'table' => 'departments',
-                'record_id' => $department->id,
-            ]);
-
             $department->delete();
 
-            // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
-            Log::channel("project")->error("Department not found", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
+            return redirect()->back()->withErrors([
+                'message' => 'Departemen tidak ditemukan'
             ]);
-
-            return redirect()->back()->with('warning', 'Departemen tidak ditemukan');
         } catch (\Exception $e) {
-            Log::channel("project")->error("Deleting department", [
-                "user_id" => Auth::user()->id,
-                "table" => "departments",
-                "error" => $e->getMessage(),
-            ]);
-
             return back()->withErrors([
                 'message' => $e->getMessage()
             ]);

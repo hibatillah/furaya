@@ -89,18 +89,6 @@ Route::middleware(["auth", "verified", "role:admin"])->group(function () {
       "destroy" => "facility.destroy",
     ]);
 
-  /** guest resource routes */
-  Route::resource("tamu", GuestController::class)
-    ->except(["create", "destroy"])
-    ->parameters(["tamu" => "id"])
-    ->names([
-      "index" => "guest.index",
-      "store" => "guest.store",
-      "show" => "guest.show",
-      "edit" => "guest.edit",
-      "update" => "guest.update",
-    ]);
-
   /** nationality resource routes */
   Route::resource("kewarganegaraan", NationalityController::class)
     ->except(["create", "show", "edit"])

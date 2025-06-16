@@ -59,7 +59,7 @@ export function DataTableControls<T>(props: DataTableControls<T>) {
             ref={inputRef}
             type="search"
             placeholder="Cari data"
-            className="bg-card border-border z-10 w-44 ps-8 pe-6 @3xl:w-60"
+            className="bg-card border-input z-10 w-44 ps-8 pe-6 @3xl:w-60"
             onChange={(e) => table.setGlobalFilter(String(e.target.value))}
           />
           <div className="text-muted-foreground pointer-events-none absolute inset-y-0 start-2.5 flex items-center">

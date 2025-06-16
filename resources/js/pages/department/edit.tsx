@@ -1,4 +1,5 @@
 import InputError from "@/components/input-error";
+import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
 
-export default function DepartmentEdit(props: { data: Department.Default, onClose: () => void }) {
+export default function DepartmentEdit(props: { data: Department.Default; onClose: () => void }) {
   const { data: dataDepartment, onClose } = props;
 
   const { data, setData, put, errors, processing } = useForm<Department.Update>(dataDepartment);
@@ -64,12 +65,14 @@ export default function DepartmentEdit(props: { data: Department.Default, onClos
           >
             Batal
           </Button>
-          <Button
-            type="submit"
+          <SubmitButton
             disabled={processing}
+            loading={processing}
+            loadingText="Memperbarui..."
+            className="w-full"
           >
             Perbarui
-          </Button>
+          </SubmitButton>
         </div>
       </form>
     </>

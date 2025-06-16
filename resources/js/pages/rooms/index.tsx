@@ -64,7 +64,7 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="outline"
-            className={cn("rounded-full font-medium capitalize", roomStatusBadgeColor[status])}
+            className={cn("font-medium capitalize", roomStatusBadgeColor[status])}
           >
             {status}
           </Badge>
@@ -81,7 +81,7 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="secondary"
-            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 font-medium"
           >
             {roomType}
           </Badge>
@@ -98,7 +98,7 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="secondary"
-            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 font-medium"
           >
             {bedType}
           </Badge>
@@ -116,7 +116,7 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="outline"
-            className={cn("rounded-full font-medium capitalize", roomConditionBadgeColor[condition])}
+            className={cn("font-medium capitalize", roomConditionBadgeColor[condition])}
           >
             {condition}
           </Badge>

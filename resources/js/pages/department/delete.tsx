@@ -22,6 +22,7 @@ export default function DepartmentDelete(props: { id: string; canDelete: boolean
       return;
     }
 
+    // handle delete department
     toast.loading("Menghapus departemen...", { id: `delete-department-${id}` });
 
     form.delete(route("department.destroy", { id }), {

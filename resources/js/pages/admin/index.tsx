@@ -25,7 +25,7 @@ export default function AdminIndex({ admins }: { admins: User.Default[] }) {
       header: "Nama",
       cell: ({ row }) => {
         const name: string = row.getValue("name") ?? "Not Set";
-        return <div className="min-h-10 flex items-center">{name}</div>;
+        return <div className="flex min-h-10 items-center">{name}</div>;
       },
     },
     {
@@ -38,12 +38,12 @@ export default function AdminIndex({ admins }: { admins: User.Default[] }) {
       accessorKey: "role",
       header: "Role",
       cell: ({ row }) => {
-        const role: string = row.getValue("role") ?? "Not Set";
+        const role = row.getValue("role") as Enum.Role;
 
         return (
           <Badge
-            variant={role === "Not Set" ? "secondary" : "default"}
-            className={cn("font-medium capitalize", RoleBadgeColor[role.toLowerCase() as keyof typeof RoleBadgeColor])}
+            variant="outline"
+            className={cn("font-medium capitalize", RoleBadgeColor[role])}
           >
             {role}
           </Badge>

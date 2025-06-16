@@ -1,4 +1,5 @@
 import InputError from "@/components/input-error";
+import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { toast } from "sonner";
 
 export default function DepartmentCreate() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data, setData, post, errors, processing } = useForm<Department.Create>();
+  const { data, setData, post, errors, reset, processing } = useForm<Department.Create>();
 
   // handle create room type
   function handleCreateDepartment(e: React.FormEvent) {
@@ -21,6 +22,7 @@ export default function DepartmentCreate() {
 
     post(route("department.store"), {
       onSuccess: () => {
+        reset();
         setDialogOpen(false);
         toast.success("Departemen berhasil ditambahkan", {
           id: "create-department",
@@ -43,7 +45,7 @@ export default function DepartmentCreate() {
       <DialogTrigger asChild>
         <Button className="ms-auto w-fit">Tambah Departemen</Button>
       </DialogTrigger>
-      <DialogContent className="w-120">
+      <DialogContent className="w-100">
         <DialogHeader>
           <DialogTitle>Tambah Departemen</DialogTitle>
         </DialogHeader>
@@ -64,13 +66,14 @@ export default function DepartmentCreate() {
             <InputError message={errors.name} />
           </div>
 
-          <Button
-            type="submit"
+          <SubmitButton
             disabled={processing}
+            loading={processing}
+            loadingText="Membuat departemen..."
             className="w-full"
           >
             Tambah
-          </Button>
+          </SubmitButton>
         </form>
       </DialogContent>
     </Dialog>

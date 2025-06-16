@@ -14,7 +14,9 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $admins = User::whereIn("role", [RoleEnum::ADMIN, RoleEnum::MANAGER])->orderBy("created_at", "desc")->get();
+        $admins = User::whereIn("role", [RoleEnum::ADMIN, RoleEnum::MANAGER])
+            ->latest()
+            ->get();
 
         return Inertia::render('admin/index', [
             'admins' => $admins,

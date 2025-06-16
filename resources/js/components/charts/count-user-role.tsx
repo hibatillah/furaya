@@ -5,15 +5,16 @@ import { LabelList, Pie, PieChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartColors } from "./utils";
+import { cn } from "@/lib/utils";
+import { pieChartColors } from "./utils";
 
-export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }) {
+export function ChartCountUserRole({ data, className }: { data: Record<Enum.Role, number>; className?: string }) {
   const chartData = React.useMemo(
     () => [
-      { role: "manajer", count: data.manager, fill: chartColors[0] },
-      { role: "admin", count: data.admin, fill: chartColors[1] },
-      { role: "karyawan", count: data.employee, fill: chartColors[2] },
-      { role: "tamu", count: data.guest, fill: chartColors[3] },
+      { role: "manajer", count: data.manager, fill: pieChartColors[0] },
+      { role: "admin", count: data.admin, fill: pieChartColors[1] },
+      { role: "karyawan", count: data.employee, fill: pieChartColors[2] },
+      { role: "tamu", count: data.guest, fill: pieChartColors[3] },
     ],
     [data],
   );
@@ -34,7 +35,7 @@ export function ChartCountUserRole({ data }: { data: Record<Enum.Role, number> }
   }, [chartData]);
 
   return (
-    <Card className="flex flex-col gap-2">
+    <Card className={cn("flex flex-col gap-2", className)}>
       <CardHeader className="items-center pb-0">
         <CardTitle>Jumlah Pengguna</CardTitle>
         <CardDescription>Pembagian Pengguna Berdasarkan Role</CardDescription>

@@ -14,7 +14,7 @@ export default function EmployeeDelete(props: { employee: Employee.Default; onCl
 
     toast.loading("Menghapus karyawan...", { id: `delete-employee-${employee.id}` });
 
-    form.delete(route("employee.destroy", { id: employee.user_id }), {
+    form.delete(route("employee.destroy", { id: employee.id }), {
       onSuccess: () => {
         toast.success("Karyawan berhasil dihapus", {
           id: `delete-employee-${employee.id}`,

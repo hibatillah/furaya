@@ -55,12 +55,12 @@ export default function UserIndex(props: { users: User.Default[]; roles: Enum.Ro
       header: "Role",
       accessorFn: (row) => row.role,
       cell: ({ row }) => {
-        const role: string = row.getValue("role") ?? "Not Set";
+        const role = row.getValue("role") as Enum.Role;
 
         return (
           <Badge
-            variant={role === "Not Set" ? "secondary" : "default"}
-            className={cn("font-medium capitalize", RoleBadgeColor[role.toLowerCase() as keyof typeof RoleBadgeColor])}
+            variant="outline"
+            className={cn("font-medium capitalize", RoleBadgeColor[role])}
           >
             {role}
           </Badge>
@@ -83,7 +83,7 @@ export default function UserIndex(props: { users: User.Default[]; roles: Enum.Ro
         const status = row.getValue("status");
         return (
           <Badge
-            variant={!status ? "secondary" : "outline"}
+            variant="outline"
             className="font-medium capitalize"
           >
             {!status ? "Aktif" : "Tidak Aktif"}

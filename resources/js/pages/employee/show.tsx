@@ -1,7 +1,9 @@
 import { DataList } from "@/components/data-list";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { formatCurrency } from "@/lib/utils";
 
 export default function EmployeeShow(props: { data: Employee.Default; onClose: () => void }) {
   const { data, onClose } = props;
@@ -21,11 +23,25 @@ export default function EmployeeShow(props: { data: Employee.Default; onClose: (
     },
     {
       label: "Gender",
-      value: data.formatted_gender,
+      value: (
+        <Badge
+          variant="secondary"
+          className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
+        >
+          {data.formatted_gender}
+        </Badge>
+      ),
     },
     {
       label: "Departemen",
-      value: data.department?.name,
+      value: (
+        <Badge
+          variant="secondary"
+          className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium"
+        >
+          {data.department?.name}
+        </Badge>
+      ),
     },
     {
       label: "Tanggal Bergabung",
@@ -33,7 +49,7 @@ export default function EmployeeShow(props: { data: Employee.Default; onClose: (
     },
     {
       label: "Gaji",
-      value: data.salary,
+      value: data.salary ? formatCurrency(data.salary) : "-",
     },
     {
       label: "Alamat",
