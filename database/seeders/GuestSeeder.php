@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Enums\RoleEnum;
 use App\Models\Guests\Country;
 use App\Models\Guests\Geography;
+use App\Models\Guests\Guest;
 use App\Models\Reservations\GuestType;
 use App\Models\Guests\Nationality;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +21,7 @@ class GuestSeeder extends Seeder
     DB::table('countries')->truncate();
     DB::table('geographies')->truncate();
     DB::table('nationalities')->truncate();
+    DB::table('guests')->truncate();
 
     // define data options
     $guestTypes = ["vip", "regular", "business man", "family", "couple", "single", "group", "other"];
@@ -45,6 +49,15 @@ class GuestSeeder extends Seeder
     foreach ($countries as $country) {
       Nationality::factory()->create([
         "name" => $country,
+      ]);
+    }
+
+    // create guest data from existing user with guest role
+    $users = User::where("role", RoleEnum::GUEST)->get();
+
+    foreach ($users as $user) {
+      Guest::factory()->create([
+        "user_id" => $user->id,
       ]);
     }
   }

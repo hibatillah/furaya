@@ -48,6 +48,7 @@ return new class extends Migration
             $table->string('phone')->unique()->nullable();
             $table->string("profession")->nullable();
             $table->string("nationality")->nullable();
+            $table->string("country")->nullable();
             $table->string("address")->nullable();
             $table->timestamps();
             $table->softDeletes();

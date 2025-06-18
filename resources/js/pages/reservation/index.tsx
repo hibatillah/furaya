@@ -1,17 +1,16 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
+import { ReservationRangeType, SelectReservationRange } from "@/components/select-reservations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
+import { cn } from "@/lib/utils";
+import { bookingTypeBadgeColor, paymentMethodBadgeColor } from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, usePage } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
-import { useState } from "react";
-import CheckIn from "./check-in";
-import CheckOut from "./check-out";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -25,47 +24,49 @@ export const reservationColumns: ColumnDef<Reservation.Default>[] = [
   {
     id: "booking_number",
     accessorKey: "booking_number",
-    header: "Nomor Reservasi",
+    header: "No. Booking",
   },
   {
-    id: "customer",
-    accessorKey: "customer.name",
-    header: "Customer",
+    id: "guest_name",
+    accessorFn: (row) => row.reservation_guest?.name,
+    header: "Nama Tamu",
   },
   {
     id: "room_number",
-    accessorKey: "room.room_number",
+    accessorFn: (row) => row.reservation_room?.room_number,
     header: "Kamar",
   },
   {
-    id: "room_status",
-    accessorKey: "room_status",
-    header: "Status Kamar",
+    id: "room_type",
+    accessorFn: (row) => row.reservation_room?.room_type,
+    header: "Tipe Kamar",
     cell: ({ row }) => {
-      const roomStatus = row.getValue("room_status") as Enum.RoomStatus;
-
-      return (
-        <Badge
-          variant="secondary"
-          className="text-sm capitalize"
-        >
-          {roomStatus}
-        </Badge>
-      );
+      const roomType = row.getValue("room_type") as string;
+      return <Badge variant="outline">{roomType}</Badge>;
     },
     filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
   },
   {
+    id: "start_date",
+    accessorFn: (row) => row.formatted_start_date,
+    header: "Masuk",
+  },
+  {
+    id: "end_date",
+    accessorFn: (row) => row.formatted_end_date,
+    header: "Keluar",
+  },
+  {
     id: "booking_type",
     accessorKey: "booking_type",
-    header: "Tipe Reservasi",
+    header: "Tipe Booking",
     cell: ({ row }) => {
       const bookingType = row.getValue("booking_type") as Enum.BookingType;
 
       return (
         <Badge
-          variant="secondary"
-          className="text-sm capitalize"
+          variant="outline"
+          className={cn("capitalize", bookingTypeBadgeColor[bookingType])}
         >
           {bookingType}
         </Badge>
@@ -74,14 +75,22 @@ export const reservationColumns: ColumnDef<Reservation.Default>[] = [
     filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
   },
   {
-    id: "check_in",
-    accessorKey: "formatted_check_in",
-    header: "Check In",
-  },
-  {
-    id: "check_out",
-    accessorKey: "formatted_check_out",
-    header: "Check Out",
+    id: "payment_method",
+    accessorKey: "payment_method",
+    header: "Pembayaran",
+    cell: ({ row }) => {
+      const paymentMethod = row.getValue("payment_method") as Enum.Payment;
+
+      return (
+        <Badge
+          variant="outline"
+          className={cn("capitalize", paymentMethodBadgeColor[paymentMethod])}
+        >
+          {paymentMethod}
+        </Badge>
+      );
+    },
+    filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
   },
   {
     id: "actions",
@@ -110,80 +119,11 @@ export const reservationColumns: ColumnDef<Reservation.Default>[] = [
   },
 ];
 
-export default function ReservationsIndex(props: { reservations: Reservation.Default[] }) {
-  const { reservations } = props;
+export default function ReservationsIndex(props: { reservations: Reservation.Default[]; type: ReservationRangeType }) {
+  const { reservations, type } = props;
 
   const { auth } = usePage<SharedData>().props;
   const isManager = auth.user.role === "manager";
-
-  // handle checkIn dialog
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"check_in" | "check_out" | null>(null);
-  const [selectedRow, setSelectedRow] = useState<Reservation.Default | null>(null);
-
-  function handleDialog(type: "check_in" | "check_out", row: Reservation.Default) {
-    setDialogType(type);
-    setSelectedRow(row);
-    setDialogOpen(true);
-  }
-
-  function handleDialogClose() {
-    setDialogOpen(false);
-    setDialogType(null);
-    setSelectedRow(null);
-  }
-
-  // customize actions column
-  const customReservationActions: ColumnDef<Reservation.Default>[] = [
-    ...reservationColumns.slice(0, -1), // remove default actions column
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        const isCheckIn = row.original.is_check_in;
-        const isCheckOut = row.original.is_check_out;
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8"
-              >
-                <EllipsisVerticalIcon className="size-4" />
-                <span className="sr-only">Aksi</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {!isCheckIn && (
-                <DropdownMenuItem
-                  onClick={() => handleDialog("check_in", row.original)}
-                  disabled={isCheckOut}
-                >
-                  Check In
-                </DropdownMenuItem>
-              )}
-              {!isCheckOut && (
-                <DropdownMenuItem
-                  onClick={() => handleDialog("check_out", row.original)}
-                  disabled={isCheckIn}
-                >
-                  Check Out
-                </DropdownMenuItem>
-              )}
-              {(!isCheckIn || !isCheckOut) && <DropdownMenuSeparator />}
-              <DropdownMenuItem asChild>
-                <Link href={route("reservation.show", { id: row.original.id })}>Detail</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={route("reservation.edit", { id: row.original.id })}>Edit</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
-  ];
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -194,11 +134,12 @@ export default function ReservationsIndex(props: { reservations: Reservation.Def
         </CardHeader>
         <CardContent>
           <DataTable
-            columns={customReservationActions}
+            columns={reservationColumns}
             data={reservations}
           >
             {({ table }) => (
               <DataTableControls table={table}>
+                <SelectReservationRange type={type} />
                 {!isManager && (
                   <Button
                     className="ms-auto"
@@ -212,31 +153,6 @@ export default function ReservationsIndex(props: { reservations: Reservation.Def
           </DataTable>
         </CardContent>
       </Card>
-
-      {/* dialog */}
-      <Dialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      >
-        <DialogContent
-          className="w-120"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          noClose
-        >
-          {dialogType === "check_in" && selectedRow && (
-            <CheckIn
-              reservationId={selectedRow.id}
-              onClose={handleDialogClose}
-            />
-          )}
-          {dialogType === "check_out" && selectedRow && (
-            <CheckOut
-              reservationId={selectedRow.id}
-              onClose={handleDialogClose}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </AppLayout>
   );
 }

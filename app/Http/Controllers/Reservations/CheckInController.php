@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Reservations;
 
 use App\Http\Controllers\Controller;
+use App\Models\Reservations\Reservation;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CheckInController extends Controller
 {
@@ -12,7 +14,11 @@ class CheckInController extends Controller
      */
     public function index()
     {
-        //
+        $reservations = Reservation::all();
+
+        return Inertia::render("check-in/index", [
+            "reservations" => $reservations,
+        ]);
     }
 
     /**

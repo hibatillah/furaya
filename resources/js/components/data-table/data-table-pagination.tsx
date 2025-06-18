@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 import { router } from "@inertiajs/react";
+import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 
 export function DataTablePaginations<TData>(props: { table: Table<TData>; pagination?: Pagination<TData> }) {
   const { table, pagination } = props;
@@ -113,7 +113,7 @@ export function DataTablePaginations<TData>(props: { table: Table<TData>; pagina
               <Button
                 size="icon"
                 variant="outline"
-                className="cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+                className="cursor-pointer disabled:pointer-events-none disabled:opacity-50 max-sm:hidden"
                 onClick={firstPage}
                 disabled={isFirstPage()}
                 aria-label="Go to first page"
@@ -167,7 +167,7 @@ export function DataTablePaginations<TData>(props: { table: Table<TData>; pagina
               <Button
                 size="icon"
                 variant="outline"
-                className="cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+                className="cursor-pointer disabled:pointer-events-none disabled:opacity-50 max-sm:hidden"
                 onClick={lastPage}
                 disabled={isLastPage()}
                 aria-label="Go to last page"

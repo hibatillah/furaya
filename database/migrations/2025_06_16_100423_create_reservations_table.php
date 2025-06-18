@@ -93,7 +93,6 @@ return new class extends Migration
             $table->foreignUuid("reservation_id")
                 ->constrained("reservations")
                 ->cascadeOnDelete();
-            $table->datetime("date");
             $table->string("description");
             $table->float("amount", 10, 3);
             $table->timestamps();

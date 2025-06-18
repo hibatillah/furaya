@@ -19,7 +19,6 @@ class UserSeeder extends Seeder
 
     // truncate existing data to avoid duplicates
     DB::table('users')->truncate();
-    DB::table('guests')->truncate();
     DB::table('employees')->truncate();
     DB::table('departments')->truncate();
 
@@ -63,21 +62,10 @@ class UserSeeder extends Seeder
       'hire_date' => $dateISO,
     ]);
 
-    // define guest user data
-    $guest = User::create([
-      'name' => 'guest',
-      'email' => 'guest@gmail.com',
+    // create user data as guest
+    User::factory()->count(10)->create([
       'password' => $password,
       'role' => RoleEnum::GUEST,
-    ],);
-
-    $guest->guest()->create([
-      'nik_passport' => '1234567890',
-      'gender' => GenderEnum::MALE,
-      'birthdate' => $dateISO,
-      'phone' => '081234567890',
-      'profession' => 'Software Engineer',
-      'nationality' => 'Indonesia',
     ]);
   }
 }

@@ -7,7 +7,6 @@ use App\Models\Rooms\Facility;
 use App\Models\Rooms\RateType;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
-use Database\Factories\Rooms\RateTypeFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -17,6 +16,7 @@ class RoomSeeder extends Seeder
   {
     // truncate existing data to avoid duplicates
     DB::table('bed_types')->truncate();
+    DB::table('rate_types')->truncate();
     DB::table('room_types')->truncate();
     DB::table('facilities')->truncate();
     DB::table('rooms')->truncate();

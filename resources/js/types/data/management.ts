@@ -9,6 +9,7 @@ declare namespace Guest {
     phone?: string;
     profession?: string;
     nationality?: string;
+    country?: string;
     address?: string;
   }
 

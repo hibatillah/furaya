@@ -18,9 +18,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware("role:employee")->group(function () {
         Route::get("reservasi/tambah", [ReservationController::class, "create"])
             ->name("reservation.create");
-        Route::get('/reservasi/kamar/tersedia', [ReservationController::class, 'availableRooms'])
+        Route::get('/reservasi/kamar/tersedia', [ReservationController::class, 'getAvailableRooms'])
             ->name('reservation.available-rooms');
-        Route::get('/reservasi/guest', [ReservationController::class, 'getGuest'])
+        Route::get('/reservasi/tamu', [ReservationController::class, 'getGuest'])
             ->name('reservation.guest');
     });
 

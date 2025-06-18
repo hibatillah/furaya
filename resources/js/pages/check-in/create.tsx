@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@inertiajs/react";
 import { toast } from "sonner";
 
-export default function CheckIn(props: { reservationId: string; onClose: () => void }) {
+export default function CheckInCreate(props: { reservationId: string; onClose: () => void }) {
   const { reservationId, onClose } = props;
 
   // declare form

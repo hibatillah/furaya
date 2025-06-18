@@ -2,7 +2,7 @@ import { ChartCountBedType } from "@/components/charts/count-bed-type";
 import { ChartCountRoomType } from "@/components/charts/count-room-type";
 import { ChartCountUserRole } from "@/components/charts/count-user-role";
 import { ChartMostUsedFacility } from "@/components/charts/most-used-facility";
-import DashboardTabs, { DashboardTabsData } from "@/components/dashobard-tabs";
+import DashboardTabs, { DashboardTabsData } from "@/components/dashboard-tabs";
 import { InputDate } from "@/components/input-date";
 import AppLayout from "@/layouts/app-layout";
 import { SharedData, type BreadcrumbItem } from "@/types";
@@ -19,6 +19,8 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
+type mode = "month" | "year";
+
 export default function Dashboard({
   userRoleCount,
   roomTypeCount,
@@ -33,6 +35,10 @@ export default function Dashboard({
   const { auth } = usePage<SharedData>().props;
   const role = auth.user?.role as Enum.Role;
 
+  // set mode how data will be shown
+  const [mode, setMode] = useState<mode>("month");
+
+  // set date range based on mode
   const firstDateMonth = startOfMonth(new Date());
   const lastDateMonth = endOfMonth(new Date());
   const [dateRange, setDateRange] = useState<DateRange>({

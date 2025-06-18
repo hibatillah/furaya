@@ -28,17 +28,31 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ReservationsCreate(props: {
-  rooms: Room.Default[];
+  roomTypes: RoomType.Default[];
+  guestTypes: GuestType.Default[];
+  nationalities: Nationality.Default[];
+  countries: Country.Default[];
   visitPurposes: Enum.VisitPurpose[];
   bookingTypes: Enum.BookingType[];
   roomPackages: Enum.RoomPackage[];
-  roomTypes: RoomType.Default[];
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
   statusAccs: Enum.StatusAcc[];
-  employeeId: string;
+  employee: Employee.Default;
 }) {
-  const { visitPurposes, bookingTypes, roomPackages, roomTypes, paymentMethods, genders, statusAccs, employeeId } = props;
+  const {
+    visitPurposes,
+    bookingTypes,
+    roomPackages,
+    roomTypes,
+    paymentMethods,
+    genders,
+    statusAccs,
+    employee,
+    guestTypes,
+    nationalities,
+    countries,
+  } = props;
 
   // declare form
   const initialStartDate = new Date();
@@ -52,25 +66,25 @@ export default function ReservationsCreate(props: {
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<Room.Default | undefined>(undefined);
 
   const { data, setData, post, processing, errors } = useForm<Reservation.Create>({
+    // reservation data
     booking_number: 0,
-    length_of_stay: MIN_LENGTH_OF_STAY,
-    adults: 1,
-    children: 0,
-    pax: MIN_PAX,
-    total_price: 0,
     start_date: startDate as Date,
     end_date: endDate as Date,
-    room_id: "",
-    customer_id: "",
-    employee_id: employeeId,
+    length_of_stay: MIN_LENGTH_OF_STAY,
+    adults: 1,
+    pax: MIN_PAX,
+    total_price: 0,
+    children: 0,
+    extra_bed: 0,
+    arrival_from: "",
+    guest_type: "",
+    employee_name: employee.user?.name || "",
+    employee_id: employee.id,
     booking_type: "" as Enum.BookingType,
-    purpose: "" as Enum.VisitPurpose,
+    visit_purpose: "" as Enum.VisitPurpose,
     room_package: "" as Enum.RoomPackage,
     payment_method: "" as Enum.Payment,
     status_acc: "" as Enum.StatusAcc,
-    arrival_from: "",
-    booked_from: "",
-    extra_bed: 0,
     discount: "",
     discount_reason: "",
     commission_percentage: "",
@@ -78,15 +92,27 @@ export default function ReservationsCreate(props: {
     remarks: "",
     advance_remarks: "",
     advance_amount: MIN_ADVANCE_AMOUNT,
-    nik_passport: "",
+
+    // guest data
     name: "",
     email: "",
+    nik_passport: "",
+    phone: "",
     gender: "" as Enum.Gender,
     birthdate: "",
-    phone: "",
     profession: "",
     nationality: "",
     address: "",
+    country: "",
+
+    // room data
+    room_id: "",
+    room_number: "",
+    room_type: "",
+    room_rate: "",
+    bed_type: "",
+    meal: "",
+    view: "",
   });
 
   /**
@@ -96,37 +122,41 @@ export default function ReservationsCreate(props: {
   const getCustomer = useCallback(
     async (value: string) => {
       try {
-        toast.loading("Mencari tamu...", { id: "get-guest" });
+        toast.loading("Mencari data tamu tersedia...", { id: "get-guest" });
 
-        const response = await fetch(`/reservasi/guest?nik_passport=${value}`);
+        const response = await fetch(`/reservasi/tamu?nik_passport=${value}`);
         const data = await response.json();
-        const customer = data.customer as Guest.Default;
+        const guest = data.guest as Guest.Default;
 
-        if (customer) {
-          toast.success("Customer ditemukan", {
-            id: "get-customer",
-            description: "Data customer diterapkan ke form",
+        if (guest) {
+          toast.success("Tamu ditemukan", {
+            id: "get-guest",
+            description: "Data tamu diterapkan ke form",
           });
 
-          // apply customer data to form
+          // apply guest data to form
           setData((prev) => ({
             ...prev,
-            name: customer.user?.name || "",
-            email: customer.user?.email || "",
-            phone: customer.phone || "",
-            gender: customer.gender || "",
-            birthdate: new Date(customer.birthdate) || "",
-            profession: customer.profession || "",
-            nationality: customer.nationality || "",
-            address: customer.address || "",
+            name: guest.user?.name || "",
+            email: guest.user?.email || "",
+            phone: guest.phone || "",
+            gender: guest.gender || "",
+            birthdate: new Date(guest.birthdate) || "",
+            profession: guest.profession || "",
+            nationality: guest.nationality || "",
+            address: guest.address || "",
+            country: guest.country || "",
           }));
+        } else {
+          toast.warning("Tamu tidak ditemukan", {
+            id: "get-guest",
+            description: "Buat data tamu baru",
+          });
         }
       } catch (error) {
-        console.error(error);
-
-        toast.error("Customer tidak ditemukan", {
-          id: "get-customer",
-          description: "Customer belum terdaftar",
+        toast.error("Tamu tidak ditemukan", {
+          id: "get-guest",
+          description: error instanceof Error ? error.message : "Terjadi kesalahan",
         });
       }
     },
@@ -142,17 +172,46 @@ export default function ReservationsCreate(props: {
       const start = format(startDate as Date, "yyyy-MM-dd");
       const end = format(endDate as Date, "yyyy-MM-dd");
 
-      const response = await fetch(`/reservasi/kamar/tersedia?start=${start}&end=${end}`);
-      const data = await response.json();
+      const response = await fetch(`/reservasi/kamar/tersedia?start=${start}&end=${end}&room_type_id=${selectedRoomType || ""}`);
+      const { rooms, error } = await response.json();
 
-      const rooms = data.rooms as Room.Default[];
-      setAvailableRooms(rooms);
+      if (!error) {
+        setAvailableRooms(rooms as Room.Default[]);
+      } else {
+        toast.warning("Kamar tidak tersedia", {
+          id: "get-available-rooms",
+          description: error,
+        });
+      }
     } catch (err) {
-      console.error("Fetch failed:", err);
-      toast.error("Gagal terhubung ke server");
+      toast.error("Gagal terhubung ke server", {
+        id: "get-available-rooms",
+        description: err instanceof Error ? err.message : "Terjadi kesalahan",
+      });
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, selectedRoomType]);
 
+  /**
+   * Set room data
+   * based on selected room
+   */
+  const setRoomData = useCallback(
+    (room: Room.Default) => {
+      const meal = room.meal?.name || "";
+
+      setData((prev: Reservation.Create) => ({
+        ...prev,
+        room_id: room.id,
+        room_number: room.room_number,
+        room_type: room.room_type?.name || "",
+        room_rate: room.price,
+        bed_type: room.bed_type?.name || "",
+        view: room.view || "",
+        meal,
+      }));
+    },
+    [selectedRoomNumber, data.room_id],
+  );
 
   /**
    * Calculate total price
@@ -174,8 +233,6 @@ export default function ReservationsCreate(props: {
   // handle create room
   function handleCreateRoom(e: React.FormEvent) {
     e.preventDefault();
-    console.log(data);
-    return;
 
     // sent data
     toast.loading("Menambahkan reservasi...", { id: "create-reservation" });
@@ -306,13 +363,13 @@ export default function ReservationsCreate(props: {
             <div className="flex flex-col gap-2">
               <Label htmlFor="visit_purpose">Tujuan Kedatangan</Label>
               <Select
-                value={data.purpose}
-                onValueChange={(value) => setData("purpose", value as Enum.VisitPurpose)}
+                value={data.visit_purpose}
+                onValueChange={(value) => setData("visit_purpose", value as Enum.VisitPurpose)}
                 required
               >
                 <SelectTrigger id="purpose">
                   <SelectValue placeholder="Pilih Tujuan Kedatangan">
-                    <span className="capitalize">{data.purpose}</span>
+                    <span className="capitalize">{data.visit_purpose}</span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -327,7 +384,7 @@ export default function ReservationsCreate(props: {
                   ))}
                 </SelectContent>
               </Select>
-              <InputError message={errors.purpose} />
+              <InputError message={errors.visit_purpose} />
             </div>
 
             {/* booking type */}
@@ -358,6 +415,34 @@ export default function ReservationsCreate(props: {
               <InputError message={errors.booking_type} />
             </div>
 
+            {/* guest type */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="guest_type">Tipe Tamu</Label>
+              <Select
+                value={data.guest_type}
+                onValueChange={(value) => setData("guest_type", value as string)}
+                required
+              >
+                <SelectTrigger id="guest_type">
+                  <SelectValue placeholder="Pilih Tipe Tamu">
+                    <span className="capitalize">{guestTypes.find((type) => type.id === data.guest_type)?.name || ""}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {guestTypes.map((type) => (
+                    <SelectItem
+                      key={type.id}
+                      value={type.id}
+                      className="capitalize"
+                    >
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.guest_type} />
+            </div>
+
             {/* status acc */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="status_acc">Status Acc</Label>
@@ -372,15 +457,17 @@ export default function ReservationsCreate(props: {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {statusAccs.map((statusAcc) => (
-                    <SelectItem
-                      key={statusAcc}
-                      value={statusAcc}
-                      className="capitalize"
-                    >
-                      {statusAcc}
-                    </SelectItem>
-                  ))}
+                  {statusAccs
+                    .toSorted((a, b) => a.localeCompare(b))
+                    .map((statusAcc) => (
+                      <SelectItem
+                        key={statusAcc}
+                        value={statusAcc}
+                        className="capitalize"
+                      >
+                        {statusAcc}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -412,6 +499,10 @@ export default function ReservationsCreate(props: {
               <Select
                 value={selectedRoomType}
                 onValueChange={(value) => {
+                  if (!startDate || !endDate) {
+                    toast.error("Pilih tanggal masuk dan keluar terlebih dahulu");
+                    return;
+                  }
                   setSelectedRoomType(value);
                   setSelectedRoomNumber(undefined);
                   getAvailableRooms();
@@ -434,6 +525,9 @@ export default function ReservationsCreate(props: {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-muted-foreground text-sm text-pretty">
+                Opsi <span className="italic">disabled</span> menunjukkan tidak ada kamar tersedia.
+              </p>
             </div>
 
             {/* room number */}
@@ -443,7 +537,13 @@ export default function ReservationsCreate(props: {
                 value={selectedRoomNumber?.id || ""}
                 onValueChange={(value) => {
                   setData("room_id", value);
-                  setSelectedRoomNumber(availableRooms.find((room) => room.id === value) ?? undefined);
+
+                  const selectedRoom = availableRooms.find((room) => room.id === value);
+
+                  if (selectedRoom) {
+                    setSelectedRoomNumber(selectedRoom);
+                    setRoomData(selectedRoom);
+                  }
                 }}
                 disabled={!selectedRoomType}
                 required
@@ -454,18 +554,15 @@ export default function ReservationsCreate(props: {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {availableRooms.length > 0 &&
-                    availableRooms
-                      .filter((room) => room.room_type_id === selectedRoomType)
-                      .map((room) => (
-                        <SelectItem
-                          key={room.id}
-                          value={room.id}
-                          className="capitalize"
-                        >
-                          {room.room_number}
-                        </SelectItem>
-                      ))}
+                  {availableRooms.map((room) => (
+                    <SelectItem
+                      key={room.id}
+                      value={room.id}
+                      className="capitalize"
+                    >
+                      {room.room_number}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <InputError message={errors.room_id} />
@@ -625,6 +722,9 @@ export default function ReservationsCreate(props: {
                   <TooltipContent>Cek Customer</TooltipContent>
                 </Tooltip>
               </div>
+              <p className="text-muted-foreground text-sm text-pretty">
+                Isi data manual jika tamu belum tersedia.
+              </p>
               <InputError message={errors.nik_passport} />
             </div>
 
@@ -730,15 +830,61 @@ export default function ReservationsCreate(props: {
             {/* nationality */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="nationality">Kewarganegaraan</Label>
-              <Input
-                type="text"
+              <Select
                 value={data.nationality}
-                onChange={(e) => setData("nationality", e.target.value)}
-                className="w-full"
-                placeholder="Input Kewarganegaraan"
-                autoComplete="off"
-              />
+                onValueChange={(value) => setData("nationality", value)}
+                required
+              >
+                <SelectTrigger id="nationality">
+                  <SelectValue placeholder="Pilih Kewarganegaraan">
+                    <span className="capitalize">
+                      {nationalities.find((nationality) => nationality.id === data.nationality)?.name || ""}
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {nationalities.map((nationality) => (
+                    <SelectItem
+                      key={nationality.id}
+                      value={nationality.id}
+                      className="capitalize"
+                    >
+                      {nationality.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <InputError message={errors.nationality} />
+            </div>
+
+            {/* country */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="country">Negara</Label>
+              <Select
+                value={data.country}
+                onValueChange={(value) => setData("country", value)}
+                required
+              >
+                <SelectTrigger id="country">
+                  <SelectValue placeholder="Pilih Negara">
+                    <span className="capitalize">
+                      {countries.find((country) => country.id === data.country)?.name || ""}
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem
+                      key={country.id}
+                      value={country.id}
+                      className="capitalize"
+                    >
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.country} />
             </div>
 
             {/* address */}
@@ -866,6 +1012,7 @@ export default function ReservationsCreate(props: {
                 placeholder="Input Commission Amount"
                 value={data.commission_amount}
                 onChange={(e) => setData("commission_amount", Number(e.target.value))}
+                disableHandle
               />
               <InputError message={errors.commission_amount} />
             </div>

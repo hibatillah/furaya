@@ -2,27 +2,24 @@ declare namespace Reservation {
   interface Base {
     id: string;
     booking_number: number | "";
-    adults: number | "";
-    pax: number | "";
-    length_of_stay: number | "";
-    total_price: number | "";
     start_date: Date | string;
     end_date?: Date | string | null;
-    room_id: string;
-    room?: Room.Default;
-    customer_id: string;
-    customer?: Guest.Default;
+    length_of_stay: number | "";
+    adults: number | "";
+    pax: number | "";
+    total_price: number | "";
+    children?: number | "";
+    extra_bed?: number | "";
+    arrival_from?: string;
+    guest_type?: string;
+    employee_name: string;
     employee_id: string;
     employee?: Employee.Default;
     booking_type: Enum.BookingType;
-    purpose: Enum.VisitPurpose;
+    visit_purpose: Enum.VisitPurpose;
     room_package: Enum.RoomPackage;
     payment_method: Enum.Payment;
     status_acc: Enum.StatusAcc;
-    arrival_from?: string;
-    booked_from?: string;
-    children?: number | "";
-    extra_bed?: number | "";
     discount?: number | "";
     discount_reason?: string;
     commission_percentage?: number | "";
@@ -33,6 +30,13 @@ declare namespace Reservation {
   }
 
   interface Addition {
+    reservation_guest?: ReservationGuest.Default;
+    reservation_room?: ReservationRoom.Default;
+    reservation_transaction?: ReservationTransaction.Default;
+    formatted_start_date?: string;
+    formatted_end_date?: string;
+
+
     check_in?: CheckIn.Default;
     check_out?: CheckOut.Default;
     is_check_in?: boolean;
@@ -45,8 +49,8 @@ declare namespace Reservation {
   }
 
   interface Default extends Base, Addition {}
-  type Create = Omit<Base, "id" | "room" | "customer" | "employee"> & Guest.Create;
-  type Update = Partial<Omit<Base, "room" | "customer" | "employee">>;
+  type Create = Omit<Base, "id" | "employee"> & ReservationRoom.Create & Guest.Create;
+  type Update = Partial<Omit<Base, "employee">>;
 }
 
 declare namespace ReservationGuest {
@@ -54,7 +58,7 @@ declare namespace ReservationGuest {
     id: string;
     reservation_id: string;
     reservation?: Reservation.Default;
-    guest_id: string;
+    guest_id?: string;
     guest?: Guest.Default;
     nik_passport: string;
     name: string;
@@ -67,7 +71,7 @@ declare namespace ReservationGuest {
 
   interface Addition {}
   interface Default extends Base, Addition {}
-  type Create = Omit<Base, "id" | "reservation" | "guest">;
+  type Create = Omit<Base, "id" | "reservation" | "guest" | "guest_id" | "reservation_id">;
   type Update = Partial<Omit<Base, "reservation" | "guest">>;
 }
 
@@ -88,7 +92,7 @@ declare namespace ReservationRoom {
 
   interface Addition {}
   interface Default extends Base, Addition {}
-  type Create = Omit<Base, "id" | "reservation" | "room">;
+  type Create = Omit<Base, "id" | "reservation_id" | "reservation" | "room">;
   type Update = Partial<Omit<Base, "reservation" | "room">>;
 }
 
