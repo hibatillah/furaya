@@ -9,26 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AppLayout from "@/layouts/app-layout";
 import { formatCurrency } from "@/lib/utils";
-import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY, MIN_PAX } from "@/static/reservation";
+import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY } from "@/static/reservation";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
-import { addDays, addYears, differenceInCalendarDays, format, isAfter, isSameDay } from "date-fns";
+import { addDays, addYears, format } from "date-fns";
 import { Loader2, UserSearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: "Reservasi",
-    href: route("reservation.index"),
-  },
-  {
-    title: "Tambah",
-    href: route("reservation.create"),
-  },
-];
-
 export default function ReservationsCreate(props: {
+  reservation: Reservation.Default;
   guestTypes: GuestType.Default[];
   nationalities: Nationality.Default[];
   countries: Country.Default[];
@@ -38,75 +28,60 @@ export default function ReservationsCreate(props: {
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
   statusAccs: Enum.StatusAcc[];
-  employee: Employee.Default;
 }) {
-  const { visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, statusAccs, employee, guestTypes, nationalities, countries } = props;
+  const { reservation, visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, statusAccs, guestTypes, nationalities, countries } = props;
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: "Reservasi",
+      href: route("reservation.index"),
+    },
+    {
+      title: "Edit",
+      href: route("reservation.edit", { id: reservation.id }),
+    },
+  ];
 
   // declare form
-  const initialStartDate = new Date();
-  const initialEndDate = addDays(initialStartDate, 1);
-  const initialBirthdateYear = addYears(initialStartDate, -17); // Customer must be at least 17 years old
+  const { start_date, end_date, employee, reservation_guest, reservation_room, ...initialReservationData } = reservation;
 
-  const [startDate, setStartDate] = useState<InputDateType>(initialStartDate);
-  const [endDate, setEndDate] = useState<InputDateType>(initialEndDate);
+  const [birthdate, setBirthdate] = useState<InputDateType>(new Date(reservation_guest?.guest?.birthdate as string));
+  const [startDate, setStartDate] = useState<InputDateType>(new Date(start_date as string));
+  const [endDate, setEndDate] = useState<InputDateType>(new Date(end_date as string));
   const [selectedRoomType, setSelectedRoomType] = useState<string | undefined>(undefined);
   const [availableRoomTypes, setAvailableRoomTypes] = useState<RoomType.Default[]>([]);
   const [availableRooms, setAvailableRooms] = useState<Room.Default[]>([]);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<Room.Default | undefined>(undefined);
-  const [selectedGuestType, setSelectedGuestType] = useState<string | undefined>(undefined);
-  const [selectedNationality, setSelectedNationality] = useState<string | undefined>(undefined);
-  const [selectedCountry, setSelectedCountry] = useState<string | undefined>(undefined);
 
-  const { data, setData, post, processing, errors } = useForm<Reservation.Create>({
+  const { data, setData, post, processing, errors } = useForm<Reservation.Update>({
     // reservation data
-    booking_number: 0,
-    start_date: startDate as Date,
-    end_date: endDate as Date,
-    length_of_stay: MIN_LENGTH_OF_STAY,
-    adults: 1,
-    status: "pending" as Enum.ReservationStatus,
-    pax: MIN_PAX,
-    total_price: 0,
-    children: 0,
-    extra_bed: 0,
-    arrival_from: "",
-    guest_type: "",
-    employee_name: employee.user?.name || "",
-    employee_id: employee.id,
-    booking_type: "" as Enum.BookingType,
-    visit_purpose: "" as Enum.VisitPurpose,
-    room_package: "" as Enum.RoomPackage,
-    payment_method: "" as Enum.Payment,
-    status_acc: "" as Enum.StatusAcc,
-    discount: "",
-    discount_reason: "",
-    commission_percentage: "",
-    commission_amount: "",
-    remarks: "",
-    advance_remarks: "",
-    advance_amount: MIN_ADVANCE_AMOUNT,
+    ...initialReservationData,
+    start_date,
+    end_date,
 
     // guest data
-    name: "",
-    email: "",
-    nik_passport: "",
-    phone: "",
-    gender: "" as Enum.Gender,
-    birthdate: "",
-    profession: "",
-    nationality: "",
-    address: "",
-    country: "",
+    name: reservation_guest?.name || "",
+    email: reservation_guest?.email || "",
+    nik_passport: reservation_guest?.nik_passport || "",
+    phone: reservation_guest?.phone || "",
+    gender: reservation_guest?.guest?.gender || ("" as Enum.Gender),
+    birthdate,
+    profession: reservation_guest?.guest?.profession || "",
+    nationality: reservation_guest?.guest?.nationality || "",
+    address: reservation_guest?.guest?.address || "",
+    country: reservation_guest?.guest?.country || "",
 
     // room data
-    room_id: "",
-    room_number: "",
-    room_type: "",
-    room_rate: "",
-    bed_type: "",
-    meal: "",
-    view: "",
+    room_id: reservation_room?.room_id || "",
+    room_number: reservation_room?.room_number || "",
+    room_type: reservation_room?.room?.room_type?.id || "",
+    room_rate: reservation_room?.room_rate || "",
+    bed_type: reservation_room?.room?.bed_type?.id || "",
+    meal: reservation_room?.room?.meal?.id || "",
+    view: reservation_room?.room?.view || "",
   });
+
+  console.log({ data });
 
   /**
    * Get customer data
@@ -199,6 +174,8 @@ export default function ReservationsCreate(props: {
       const response = await fetch(`/reservasi/tipe-kamar/tersedia?start=${start}&end=${end}`);
       const data = await response.json();
 
+      console.log({ data, start, end });
+
       if (!data.error) {
         setAvailableRoomTypes(data.roomTypes as RoomType.Default[]);
       } else {
@@ -223,7 +200,7 @@ export default function ReservationsCreate(props: {
     (room: Room.Default) => {
       const meal = room.meal?.name || "";
 
-      setData((prev: Reservation.Create) => ({
+      setData((prev: Reservation.Update) => ({
         ...prev,
         room_id: room.id,
         room_number: room.room_number,
@@ -263,6 +240,7 @@ export default function ReservationsCreate(props: {
 
     post(route("reservation.store"), {
       onError: (errors) => {
+        console.log(errors);
         toast.warning("Reservasi gagal ditambahkan", {
           id: "create-reservation",
           description: errors.message,
@@ -283,8 +261,8 @@ export default function ReservationsCreate(props: {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Tambah Reservasi" />
-      <h1 className="text-2xl font-bold">Tambah Reservasi</h1>
+      <Head title="Edit Reservasi" />
+      <h1 className="text-2xl font-bold">Edit Reservasi</h1>
       <form className="flex flex-col gap-6 *:data-[slot=card]:gap-4 **:data-[slot=card-content]:grid **:data-[slot=card-content]:gap-5 **:data-[slot=card-content]:lg:grid-cols-2 **:data-[slot=card-content]:xl:grid-cols-4">
         {/* reservation details */}
         <Card>
@@ -301,28 +279,9 @@ export default function ReservationsCreate(props: {
                 onChange={(date) => {
                   const value = date as Date;
                   setStartDate(value);
-
-                  if (date && endDate) {
-                    let newEndDate: Date = endDate as Date;
-
-                    /**
-                     * handle endDate
-                     *
-                     * if startDate is equal or greater than endDate
-                     * then set endDate to startDate + 1
-                     */
-                    if (isAfter(value, endDate as Date) || isSameDay(value, endDate as Date)) {
-                      newEndDate = addDays(value, 1);
-                      setEndDate(newEndDate);
-                    }
-
-                    // handle length of stay
-                    const diffDays = differenceInCalendarDays(newEndDate, value);
-                    setData("length_of_stay", diffDays as number | "");
-                  }
                 }}
                 className="w-full"
-                disabledDate={{ before: initialStartDate }}
+                disabled
               />
               <InputError message={errors.start_date} />
             </div>
@@ -335,15 +294,10 @@ export default function ReservationsCreate(props: {
                 value={endDate}
                 onChange={(date) => {
                   setEndDate(date);
-
-                  // handle length of stay
-                  if (date && startDate) {
-                    const diffDays = differenceInCalendarDays(date as Date, startDate as Date);
-                    setData("length_of_stay", diffDays as number | "");
-                  }
                 }}
                 className="w-full"
-                disabledDate={{ before: addDays((startDate as Date) ?? initialStartDate, 1) }}
+                disabledDate={{ before: addDays(startDate as Date, 1) }}
+                disabled
               />
               <InputError message={errors.end_date} />
             </div>
@@ -357,19 +311,10 @@ export default function ReservationsCreate(props: {
                   min={MIN_LENGTH_OF_STAY}
                   max={MAX_LENGTH_OF_STAY}
                   value={data.length_of_stay}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    setData("length_of_stay", value);
-
-                    // handle end date
-                    if (value && startDate) {
-                      const newEndDate = addDays(startDate as Date, value);
-                      setEndDate(newEndDate);
-                    }
-                  }}
                   className="w-full"
                   disableHandle
                   required
+                  readOnly
                 />
                 <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-1 flex items-center px-2 text-sm select-none">
                   hari
@@ -452,16 +397,13 @@ export default function ReservationsCreate(props: {
             <div className="flex flex-col gap-2">
               <Label htmlFor="guest_type">Tipe Tamu</Label>
               <Select
-                value={selectedGuestType}
-                onValueChange={(value) => {
-                  setSelectedGuestType(value);
-                  setData("guest_type", guestTypes.find((type) => type.id === value)?.name || "");
-                }}
+                value={data.guest_type}
+                onValueChange={(value) => setData("guest_type", value as string)}
                 required
               >
                 <SelectTrigger id="guest_type">
                   <SelectValue placeholder="Pilih Tipe Tamu">
-                    <span className="capitalize">{data.guest_type}</span>
+                    <span className="capitalize">{guestTypes.find((type) => type.id === data.guest_type)?.name || ""}</span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -754,7 +696,7 @@ export default function ReservationsCreate(props: {
                       variant="outline"
                       size="icon"
                       className="border-input absolute inset-y-0 right-0 rounded-s-none border-s"
-                      onClick={() => getCustomer(data.nik_passport)}
+                      onClick={() => getCustomer(data.nik_passport!)}
                     >
                       <UserSearchIcon className="h-4 w-4" />
                       <span className="sr-only">Cari Customer</span>
@@ -802,10 +744,10 @@ export default function ReservationsCreate(props: {
               <InputDate
                 mode="single"
                 className="w-full"
-                value={data.birthdate as Date}
-                onChange={(date) => setData("birthdate", date as Date)}
+                value={birthdate}
+                onChange={(date) => setBirthdate(date as Date)}
                 disabledDate={{ after: new Date() }}
-                defaultMonth={initialBirthdateYear}
+                defaultMonth={addYears(new Date(), -17)}
               />
               <InputError message={errors.birthdate} />
             </div>
@@ -870,16 +812,13 @@ export default function ReservationsCreate(props: {
             <div className="flex flex-col gap-2">
               <Label htmlFor="nationality">Kewarganegaraan</Label>
               <Select
-                value={selectedNationality}
-                onValueChange={(value) => {
-                  setSelectedNationality(value);
-                  setData("nationality", nationalities.find((nationality) => nationality.id === value)?.name || "");
-                }}
+                value={data.nationality}
+                onValueChange={(value) => setData("nationality", value)}
                 required
               >
                 <SelectTrigger id="nationality">
                   <SelectValue placeholder="Pilih Kewarganegaraan">
-                    <span className="capitalize">{data.nationality}</span>
+                    <span className="capitalize">{nationalities.find((nationality) => nationality.id === data.nationality)?.name || ""}</span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -901,16 +840,13 @@ export default function ReservationsCreate(props: {
             <div className="flex flex-col gap-2">
               <Label htmlFor="country">Negara</Label>
               <Select
-                value={selectedCountry}
-                onValueChange={(value) => {
-                  setSelectedCountry(value);
-                  setData("country", countries.find((country) => country.id === value)?.name || "");
-                }}
+                value={data.country}
+                onValueChange={(value) => setData("country", value)}
                 required
               >
                 <SelectTrigger id="country">
                   <SelectValue placeholder="Pilih Negara">
-                    <span className="capitalize">{data.country}</span>
+                    <span className="capitalize">{countries.find((country) => country.id === data.country)?.name || ""}</span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>

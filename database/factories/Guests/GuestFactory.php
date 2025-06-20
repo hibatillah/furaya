@@ -4,8 +4,6 @@ namespace Database\Factories\Guests;
 
 use App\Enums\GenderEnum;
 use App\Models\Guests\Nationality;
-use App\Models\User;
-use App\Enums\RoleEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,7 +23,7 @@ class GuestFactory extends Factory
             "nik_passport" => $this->faker->unique()->word(10),
             "birthdate" => $this->faker->dateTimeBetween('-50 years', '-17 years'),
             "gender" => $this->faker->randomElement(GenderEnum::getValues()),
-            "phone" => $this->faker->unique()->numerify('+62##########'),
+            "phone" => $this->faker->unique()->numerify('+628#########'),
             "profession" => $this->faker->jobTitle,
             "nationality" => Nationality::all()->random()->name,
             "address" => $this->faker->address,

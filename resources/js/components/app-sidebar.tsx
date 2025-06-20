@@ -10,6 +10,7 @@ import {
   CircleDollarSignIcon,
   ClockArrowDownIcon,
   ClockArrowUpIcon,
+  ClockFadingIcon,
   FlagIcon,
   HotelIcon,
   LayoutGrid,
@@ -143,14 +144,9 @@ const employeeMenuItems: Record<string, NavItem[]> = {
       icon: CalendarCheckIcon,
     },
     {
-      title: "Check In",
+      title: "Check In - Out",
       href: route("checkin.index"),
-      icon: ClockArrowUpIcon,
-    },
-    {
-      title: "Check Out",
-      href: route("checkout.index"),
-      icon: ClockArrowDownIcon,
+      icon: ClockFadingIcon,
     },
   ],
 };

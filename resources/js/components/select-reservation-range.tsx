@@ -3,7 +3,7 @@ import { dateConfig } from "@/static";
 import { router } from "@inertiajs/react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { Calendar1Icon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Button } from "./ui/button";
@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export type ReservationRangeType = "upcoming" | "last_30_days" | "last_3_months" | "last_6_months" | "last_year" | "custom_range";
 
-export function SelectReservationRange({ type: initialType }: { type: ReservationRangeType }) {
+export function SelectReservationRange({ type: initialType, routeName }: { type: ReservationRangeType; routeName: string }) {
   const [openSelect, setOpenSelect] = useState(false);
   const [openCalendar, setOpenCalendar] = useState(false);
   const [type, setType] = useState<ReservationRangeType>(initialType);
@@ -45,7 +45,7 @@ export function SelectReservationRange({ type: initialType }: { type: Reservatio
   const handleDataByDate = useCallback(
     (type: ReservationRangeType) => {
       router.get(
-        route("reservation.index"),
+        route(routeName),
         {
           ...(type === "custom_range" && date?.from && date?.to
             ? {
@@ -106,7 +106,7 @@ export function SelectReservationRange({ type: initialType }: { type: Reservatio
             size="icon"
             className="-ms-px rounded-s-none"
           >
-            <CalendarIcon className="size-4" />
+            <Calendar1Icon className="size-4" />
             <span className="sr-only">Pilih Rentang Tanggal</span>
           </Button>
         </PopoverTrigger>

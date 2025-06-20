@@ -106,6 +106,7 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
           </DataTable>
         </CardContent>
       </Card>
+      
       <Dialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

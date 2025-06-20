@@ -2,6 +2,7 @@
 
 use App\Enums\BookingTypeEnum;
 use App\Enums\PaymentEnum;
+use App\Enums\ReservationStatusEnum;
 use App\Enums\RoomPackageEnum;
 use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
@@ -30,6 +31,8 @@ return new class extends Migration
             $table->string("guest_type")->nullable();
             $table->string("employee_name");
             $table->foreignUuid("employee_id")->constrained("employees");
+            $table->enum("status", ReservationStatusEnum::getValues())
+                ->default(ReservationStatusEnum::BOOKED);
             $table->enum("booking_type", BookingTypeEnum::getValues())
                 ->default(BookingTypeEnum::OTHER);
             $table->enum("visit_purpose", VisitPurposeEnum::getValues())
@@ -47,6 +50,7 @@ return new class extends Migration
             $table->string("remarks")->nullable();
             $table->string("advance_remarks")->nullable();
             $table->string("advance_amount")->nullable();
+            $table->timestamp("canceled_at")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -107,6 +111,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('employees')
                 ->nullOnDelete();
+            $table->string('check_in_by');
             $table->datetime('checked_in_at');
             $table->string('notes')->nullable();
             $table->timestamps();
@@ -122,6 +127,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('employees')
                 ->nullOnDelete();
+            $table->string('check_out_by');
             $table->datetime('checked_out_at');
             $table->float('final_total', 10, 2);
             $table->string('notes')->nullable();

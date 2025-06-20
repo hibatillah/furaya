@@ -91,3 +91,22 @@ export const paymentMethodBadgeColor = [
   },
   {} as Record<Enum.Payment, string>,
 );
+
+export const reservationStatusBadgeColor = [
+  "pending",
+  "booked",
+  "checked in",
+  "checked out",
+  "no show",
+  "cancelled",
+  "overdue",
+].reduce((acc, reservationStatus, index) => {
+  acc[reservationStatus as Enum.ReservationStatus] = badgeColor[index];
+
+  // set other badge color
+  if (reservationStatus === "other") {
+    acc[reservationStatus as Enum.ReservationStatus] = badgeColor[-1];
+  }
+
+  return acc;
+}, {} as Record<Enum.ReservationStatus, string>);

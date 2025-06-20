@@ -1,12 +1,13 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
-import { ReservationRangeType, SelectReservationRange } from "@/components/select-reservations";
+import { DataTableFilter } from "@/components/data-table/data-table-filter";
+import { ReservationRangeType, SelectReservationRange } from "@/components/select-reservation-range";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { bookingTypeBadgeColor, paymentMethodBadgeColor } from "@/static/reservation";
+import { bookingTypeBadgeColor, paymentMethodBadgeColor, reservationStatusBadgeColor } from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, usePage } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -30,6 +31,24 @@ export const reservationColumns: ColumnDef<Reservation.Default>[] = [
     id: "guest_name",
     accessorFn: (row) => row.reservation_guest?.name,
     header: "Nama Tamu",
+  },
+  {
+    id: "status",
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as Enum.ReservationStatus;
+
+      return (
+        <Badge
+          variant="outline"
+          className={cn("capitalize", reservationStatusBadgeColor[status])}
+        >
+          {status}
+        </Badge>
+      );
+    },
+    filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
   },
   {
     id: "room_number",
@@ -119,8 +138,15 @@ export const reservationColumns: ColumnDef<Reservation.Default>[] = [
   },
 ];
 
-export default function ReservationsIndex(props: { reservations: Reservation.Default[]; type: ReservationRangeType }) {
-  const { reservations, type } = props;
+export default function ReservationsIndex(props: {
+  reservations: Reservation.Default[];
+  type: ReservationRangeType;
+  status: Enum.ReservationStatus[];
+  bookingType: Enum.BookingType[];
+  paymentMethod: Enum.Payment[];
+  roomType: string[];
+}) {
+  const { reservations, type, status, bookingType, paymentMethod, roomType } = props;
 
   const { auth } = usePage<SharedData>().props;
   const isManager = auth.user.role === "manager";
@@ -139,7 +165,35 @@ export default function ReservationsIndex(props: { reservations: Reservation.Def
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <SelectReservationRange type={type} />
+                <DataTableFilter
+                  table={table}
+                  extend={[
+                    {
+                      id: "status",
+                      label: "Status",
+                      data: status,
+                    },
+                    {
+                      id: "booking_type",
+                      label: "Tipe Booking",
+                      data: bookingType,
+                    },
+                    {
+                      id: "payment_method",
+                      label: "Pembayaran",
+                      data: paymentMethod,
+                    },
+                    {
+                      id: "room_type" as keyof Reservation.Default,
+                      label: "Tipe Kamar",
+                      data: roomType,
+                    },
+                  ]}
+                />
+                <SelectReservationRange
+                  type={type}
+                  routeName="reservation.index"
+                />
                 {!isManager && (
                   <Button
                     className="ms-auto"

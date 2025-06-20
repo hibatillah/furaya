@@ -5,7 +5,7 @@ namespace Database\Factories\Rooms;
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
 use App\Models\Rooms\BedType;
-use App\Models\Rooms\RateType;
+use App\Models\Rooms\Meal;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,13 +31,21 @@ class RoomFactory extends Factory
             'floor_number' => $this->faker->numberBetween(1, 10),
             'view' => $this->faker->word,
             'condition' => $this->faker->randomElement(RoomConditionEnum::getValues()),
-            'status' => $this->faker->randomElement(RoomStatusEnum::getValues()),
+            'status' => $this->faker->randomElement([
+                RoomStatusEnum::VC,
+                RoomStatusEnum::OO,
+                RoomStatusEnum::CO,
+                RoomStatusEnum::HU,
+                RoomStatusEnum::DU,
+                RoomStatusEnum::DD,
+                RoomStatusEnum::CI,
+            ]),
             'price' => $roomType->base_rate,
             'capacity' => $roomType->capacity,
             'room_type_id' => $roomType->id,
             'bed_type_id' => BedType::all()->random()->id,
             'rate_type_id' => $roomType->rate_type_id,
-            'meal_id' => null,
+            'meal_id' => Meal::all()->random()->id,
         ];
     }
 }

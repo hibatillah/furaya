@@ -5,7 +5,19 @@ declare namespace Enum {
 
   export type RoomStatus = "OCC" | "VC" | "HU" | "OO" | "CO" | "CI" | "CIP" | "PDU" | "DU" | "ONL" | "SO" | "DD";
 
-  export type RoomStatusValue = "Occupied" | "Vacant" | "House Use" | "Out of Order" | "Check Out" | "Check In" | "Check In Pagi" | "Part Day Use" | "Day Use" | "OCC No Luggage" | "Sleep Out" | "Do Not Disturb";
+  export type RoomStatusValue =
+    | "Occupied"
+    | "Vacant"
+    | "House Use"
+    | "Out of Order"
+    | "Check Out"
+    | "Check In"
+    | "Check In Pagi"
+    | "Part Day Use"
+    | "Day Use"
+    | "OCC No Luggage"
+    | "Sleep Out"
+    | "Do Not Disturb";
 
   export type RoomCondition = "ready" | "booked" | "cleaning" | "maintenance" | "booked cleaning" | "unclean" | "blocked" | "unreserved";
 
@@ -26,4 +38,6 @@ declare namespace Enum {
   export type Gender = "male" | "female";
 
   export type Payment = "cash" | "bank transfer" | "debit card" | "digital wallet" | "credit card" | "voucher" | "direct billing" | "other";
+
+  export type ReservationStatus = "pending" | "booked" | "checked in" | "checked out" | "no show" | "cancelled" | "overdue";
 }

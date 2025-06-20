@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Guests\CountryController;
 use App\Http\Controllers\Guests\GeographyController;
-use App\Http\Controllers\Guests\GuestController;
 use App\Http\Controllers\Guests\NationalityController;
 use App\Http\Controllers\Reservations\GuestTypeController;
 use App\Http\Controllers\Rooms\RateTypeController;

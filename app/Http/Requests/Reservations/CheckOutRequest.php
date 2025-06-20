@@ -25,6 +25,7 @@ class CheckOutRequest extends FormRequest
         return [
             "reservation_id" => ["required", "string", Rule::exists("reservations", "id")],
             "checked_out_at" => ["required", "datetime"],
+            "check_out_by" => ["required", "string", "max:255"],
             "employee_id" => ["required", "string", Rule::exists("employees", "id")],
             "final_total" => ["required", "numeric"],
             "notes" => ["nullable", "string", "max:255"],
@@ -39,6 +40,9 @@ class CheckOutRequest extends FormRequest
             "reservation_id.exists" => "Reservation ID tidak ditemukan.",
             "checked_out_at.required" => "Tanggal check-out wajib diisi.",
             "checked_out_at.datetime" => "Tanggal check-out harus berupa tanggal.",
+            "check_out_by.required" => "Nama pegawai wajib diisi.",
+            "check_out_by.string" => "Nama pegawai harus berupa string.",
+            "check_out_by.max" => "Nama pegawai maksimal 255 karakter.",
             "employee_id.required" => "Employee ID wajib diisi.",
             "employee_id.string" => "Employee ID harus berupa string.",
             "employee_id.exists" => "Employee ID tidak ditemukan.",

@@ -54,4 +54,9 @@ class RoomType extends BaseModel
   {
     return $this->belongsTo(RateType::class);
   }
+
+  public function room()
+  {
+    return $this->hasMany(Room::class);
+  }
 }

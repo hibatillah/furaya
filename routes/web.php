@@ -14,12 +14,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
+    /** reservation transaction history for managers and employees */
+    Route::get("reservasi/{id}/transaksi", [ReservationController::class, "transaction"])
+        ->name("reservation.transaction")
+        ->middleware("role:manager,employee");
+
     /** add new reservations for employees only */
     Route::middleware("role:employee")->group(function () {
+        Route::put("reservasi/{id}/status", [ReservationController::class, "updateStatus"])
+            ->name("reservation.update.status");
+
         Route::get("reservasi/tambah", [ReservationController::class, "create"])
             ->name("reservation.create");
+
         Route::get('/reservasi/kamar/tersedia', [ReservationController::class, 'getAvailableRooms'])
             ->name('reservation.available-rooms');
+
+        Route::get('/reservasi/tipe-kamar/tersedia', [ReservationController::class, 'getAvailableRoomTypes'])
+            ->name('reservation.available-room-types');
+
         Route::get('/reservasi/tamu', [ReservationController::class, 'getGuest'])
             ->name('reservation.guest');
     });

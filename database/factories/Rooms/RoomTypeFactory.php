@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Rooms;
 
+use App\Models\Rooms\Meal;
 use App\Models\Rooms\RateType;
 use App\Models\Rooms\RoomType;
 use Illuminate\Database\Eloquent\Factories\Factory;

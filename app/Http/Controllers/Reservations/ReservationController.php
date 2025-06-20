@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reservations;
 use App\Enums\BookingTypeEnum;
 use App\Enums\GenderEnum;
 use App\Enums\PaymentEnum;
+use App\Enums\ReservationStatusEnum;
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomPackageEnum;
 use App\Enums\RoomStatusEnum;
@@ -39,14 +40,15 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
+        // accept request params for set date range
         $type = $request->input('type', 'upcoming');
         $start = $request->input('start');
         $end = $request->input('end');
 
-        // get the date range
+        // get the date range based on the type
         [$start_date, $end_date] = $this->getDateRange($type, $start, $end);
 
-        // get the reservations
+        // get the reservations based on the date range
         $query = Reservation::with([
             'reservationRoom' => fn($q) => $q->select([
                 'id',
@@ -66,6 +68,7 @@ class ReservationController extends Controller
             'end_date',
             'booking_type',
             'payment_method',
+            'status',
         ]);
 
         // filter the reservations by date range
@@ -77,12 +80,28 @@ class ReservationController extends Controller
             $query->where('end_date', '<=', $end_date);
         }
 
-        // return the reservations
-        $reservations = $query->latest()->get();
+        // return the reservations query
+        $reservations = $query
+            ->orderBy('start_date', 'asc')
+            ->latest()
+            ->get();
+
+        // update reservation status
+        $this->updateOnGoingReservationStatus();
+
+        // get static values
+        $status = ReservationStatusEnum::getValues();
+        $bookingType = BookingTypeEnum::getValues();
+        $paymentMethod = PaymentEnum::getValues();
+        $roomType = RoomType::all()->pluck('name');
 
         return Inertia::render('reservation/index', [
             'reservations' => $reservations,
             'type' => $type,
+            'status' => $status,
+            'bookingType' => $bookingType,
+            'paymentMethod' => $paymentMethod,
+            'roomType' => $roomType,
         ]);
     }
 
@@ -91,35 +110,9 @@ class ReservationController extends Controller
      */
     public function create()
     {
-        $roomTypes = RoomType::all();
-        $guestTypes = GuestType::all();
-        $nationalities = Nationality::all();
-        $countries = Country::all();
+        $dataForm = $this->getDataForm();
 
-        $visitPurposes = VisitPurposeEnum::getValues();
-        $bookingTypes = BookingTypeEnum::getValues();
-        $roomPackages = RoomPackageEnum::getValues();
-        $paymentMethods = PaymentEnum::getValues();
-        $genders = GenderEnum::getValues();
-        $statusAccs = StatusAccEnum::getValues();
-
-        $employee = Employee::with("user")
-            ->where("user_id", Auth::user()->id)
-            ->first();
-
-        return Inertia::render("reservation/create", [
-            "roomTypes" => $roomTypes,
-            "guestTypes" => $guestTypes,
-            "nationalities" => $nationalities,
-            "countries" => $countries,
-            "visitPurposes" => $visitPurposes,
-            "bookingTypes" => $bookingTypes,
-            "roomPackages" => $roomPackages,
-            "paymentMethods" => $paymentMethods,
-            "genders" => $genders,
-            "statusAccs" => $statusAccs,
-            "employee" => $employee,
-        ]);
+        return Inertia::render("reservation/create", $dataForm);
     }
 
     /**
@@ -247,9 +240,11 @@ class ReservationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         try {
+            $status = ReservationStatusEnum::getValues();
+
             $reservation = Reservation::with(
                 "reservationRoom.room.roomType",
                 "reservationRoom.room.bedType",
@@ -263,6 +258,7 @@ class ReservationController extends Controller
 
             return Inertia::render("reservation/show", [
                 "reservation" => $reservation,
+                "status" => $status,
             ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->route("reservation.index")->with("error", "Reservasi tidak ditemukan");
@@ -277,7 +273,19 @@ class ReservationController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $dataForm = $this->getDataForm();
+        $reservation = Reservation::with(
+            "reservationRoom.room.roomType",
+            "reservationRoom.room.bedType",
+            "reservationRoom.room.meal",
+            "reservationGuest.guest.user",
+            "employee.user",
+        )->findOrFail($id);
+
+        return Inertia::render("reservation/edit", [
+            ...$dataForm,
+            "reservation" => $reservation,
+        ]);
     }
 
     /**
@@ -291,9 +299,40 @@ class ReservationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id) {}
+
+    /**
+     * Show reservation transaction history
+     */
+    public function transaction(string $id)
     {
-        //
+        $reservation = Reservation::with([
+            'reservationGuest:id,reservation_id,name',
+            'reservationRoom:id,reservation_id,room_number',
+            'reservationTransaction' => fn($q) => $q->orderBy('created_at')->select([
+                'id',
+                'reservation_id',
+                'amount',
+                'description',
+                'created_at',
+            ]),
+        ])
+            ->select([
+                'id',
+                'booking_number',
+                'start_date',
+                'end_date',
+                'length_of_stay',
+                'booking_type',
+                'payment_method',
+                'total_price',
+                'status',
+            ])
+            ->findOrFail($id);
+
+        return Inertia::render("reservation/transaction", [
+            "reservation" => $reservation,
+        ]);
     }
 
     /**
@@ -304,7 +343,7 @@ class ReservationController extends Controller
      * @param string|null $end
      * @return array [start_date, end_date]
      */
-    private function getDateRange(
+    public function getDateRange(
         string $type,
         ?string $start,
         ?string $end
@@ -351,8 +390,9 @@ class ReservationController extends Controller
         try {
             $nik_passport = $request->query("nik_passport");
 
+            // get guest data based on nik_passport
             $guest = Guest::with("user")
-                ->where("nik_passport", $nik_passport) // search by nik or passport
+                ->where("nik_passport", $nik_passport)
                 ->first();
 
             // throw exception if guest not found
@@ -381,7 +421,7 @@ class ReservationController extends Controller
 
     /**
      * Get available rooms
-     * based on room status and condition
+     * based on reservation date, room status and condition
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -397,20 +437,11 @@ class ReservationController extends Controller
                 throw new \Exception('Tanggal tidak valid');
             }
 
-            // Get reserved room IDs that overlap with the given range
-            $reservedRoomIds = Reservation::where(function ($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate)
-                    ->where('end_date', '>=', $startDate);
-            })
-                ->whereHas('reservationRoom')
-                ->pluck('id')
-                ->map(function ($reservationId) {
-                    return ReservationRoom::where('reservation_id', $reservationId)->pluck('room_id');
-                })
-                ->flatten();
+            // Get room IDs from reservation rooms that belong to overlapping reservations
+            $reservedRoomIds = $this->getReservedRoomIds($startDate, $endDate);
 
             // Get rooms that are in available status/condition and not reserved
-            $rooms = Room::with(['roomType', 'bedType', 'meal'])
+            $rooms = Room::with('roomType', 'bedType', 'meal')
                 ->whereIn('status', [
                     RoomStatusEnum::VC,
                     RoomStatusEnum::OO,
@@ -422,9 +453,7 @@ class ReservationController extends Controller
                     RoomConditionEnum::BOOKED_CLEANING,
                 ])
                 ->whereNotIn('id', $reservedRoomIds) // exclude overlapping reservations
-                ->when($roomTypeId, function ($query) use ($roomTypeId) {
-                    $query->where('room_type_id', $roomTypeId);
-                })
+                ->where('room_type_id', $roomTypeId)
                 ->get();
 
             return response()->json([
@@ -445,6 +474,164 @@ class ReservationController extends Controller
                 ],
                 500
             );
+        }
+    }
+
+    /**
+     * Get available room types
+     * based on reservation date, room status and condition
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAvailableRoomTypes(Request $request)
+    {
+        try {
+            $startDate = $request->start;
+            $endDate = $request->end;
+
+            if (!$startDate || !$endDate) {
+                throw new \Exception('Tanggal tidak valid');
+            }
+
+            // Get room IDs from reservation rooms that belong to overlapping reservations
+            $reservedRoomIds = $this->getReservedRoomIds($startDate, $endDate);
+
+            // Get room types that have available rooms
+            $roomTypes = RoomType::whereHas('room', function ($query) use ($reservedRoomIds) {
+                $query->whereIn('status', [
+                    RoomStatusEnum::VC,
+                    RoomStatusEnum::OO,
+                    RoomStatusEnum::CO,
+                    RoomStatusEnum::HU,
+                ])
+                    ->whereNotIn('condition', [
+                        RoomConditionEnum::BOOKED,
+                        RoomConditionEnum::BOOKED_CLEANING,
+                    ])
+                    ->whereNotIn('id', $reservedRoomIds);
+            })
+                ->get();
+
+            return response()->json([
+                "roomTypes" => $roomTypes,
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(
+                [
+                    'error' => 'Tipe kamar tidak ditemukan'
+                ],
+                404
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'error' => 'Gagal mendapatkan data tipe kamar',
+                    'message' => $e->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    /**
+     * Get roomIDs that are reserved
+     * based on reservation date
+     *
+     * @param string $startDate
+     * @param string $endDate
+     * @return \Illuminate\Support\Collection
+     */
+    private function getReservedRoomIds($startDate, $endDate)
+    {
+        $reservedRoomIds = ReservationRoom::whereHas('reservation', function ($query) use ($startDate, $endDate) {
+            $query->where('start_date', '<=', $endDate)
+                ->where('end_date', '>=', $startDate);
+        })->pluck('room_id');
+
+        return $reservedRoomIds;
+    }
+
+
+    /**
+     * Get data needed for reservation form
+     */
+    private function getDataForm()
+    {
+        $guestTypes = GuestType::all();
+        $nationalities = Nationality::all();
+        $countries = Country::all();
+
+        $visitPurposes = VisitPurposeEnum::getValues();
+        $bookingTypes = BookingTypeEnum::getValues();
+        $roomPackages = RoomPackageEnum::getValues();
+        $paymentMethods = PaymentEnum::getValues();
+        $genders = GenderEnum::getValues();
+        $statusAccs = StatusAccEnum::getValues();
+
+        $employee = Employee::with("user")
+            ->where("user_id", Auth::user()->id)
+            ->first();
+
+        return [
+            "guestTypes" => $guestTypes,
+            "nationalities" => $nationalities,
+            "countries" => $countries,
+            "visitPurposes" => $visitPurposes,
+            "bookingTypes" => $bookingTypes,
+            "roomPackages" => $roomPackages,
+            "paymentMethods" => $paymentMethods,
+            "genders" => $genders,
+            "statusAccs" => $statusAccs,
+            "employee" => $employee,
+        ];
+    }
+
+    /**
+     * Update reservation status automatically
+     */
+    public function updateOnGoingReservationStatus()
+    {
+        $reservations = Reservation::whereNotIn("status", [
+            ReservationStatusEnum::CHECKED_OUT,
+            ReservationStatusEnum::NO_SHOW,
+            ReservationStatusEnum::CANCELLED,
+            ReservationStatusEnum::OVERDUE,
+        ])->get();
+
+        if (!$reservations->isEmpty()) {
+            foreach ($reservations as $reservation) {
+                $reservation->updateReservationStatus();
+            }
+        }
+    }
+
+    /**
+     * Update reservation status manually
+     */
+    public function updateStatus(Request $request, string $id)
+    {
+        try {
+            $status = $request->input("status");
+
+            if (!$status) {
+                throw new \Exception("Status tidak valid");
+            }
+
+            $reservation = Reservation::findOrFail($id);
+            $reservation->update([
+                "status" => $status,
+            ]);
+
+            return back();
+        } catch (ModelNotFoundException $e) {
+            return back()->withErrors([
+                "message" => 'Reservasi tidak ditemukan',
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                "message" => $e->getMessage(),
+            ]);
         }
     }
 }

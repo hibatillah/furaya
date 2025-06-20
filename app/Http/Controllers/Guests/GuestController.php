@@ -56,20 +56,19 @@ class GuestController extends Controller
     {
         try {
             $guest = Guest::with('user')->findOrFail($id);
-            $reservations = ReservationGuest::with('reservation.room')->where('guest_id', $id)->latest()->get();
+            $reservations = ReservationGuest::with('reservation.reservationRoom.room')
+                ->where('guest_id', $id)
+                ->latest()
+                ->get();
 
             return Inertia::render('guest/show', [
                 'guest' => $guest,
                 'reservations' => $reservations,
             ]);
         } catch (ModelNotFoundException $e) {
-            return back()->withErrors([
-                'message' => 'Guest tidak ditemukan',
-            ]);
+            return back()->with('error', 'Guest tidak ditemukan');
         } catch (\Exception $e) {
-            return back()->withErrors([
-                'message' => $e->getMessage(),
-            ]);
+            return back()->with('error', $e->getMessage());
         }
     }
 

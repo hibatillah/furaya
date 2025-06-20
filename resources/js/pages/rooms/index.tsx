@@ -125,6 +125,15 @@ export default function RoomsIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
     {
+      id: "capacity",
+      accessorKey: "capacity",
+      header: "Kapasitas",
+      cell: ({ row }) => {
+        const capacity = row.getValue("capacity") as number;
+        return `${capacity} orang`;
+      },
+    },
+    {
       id: "count_facility",
       accessorKey: "count_facility",
       header: "Jumlah Fasilitas",
