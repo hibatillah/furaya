@@ -1,3 +1,4 @@
+import { DataList } from "@/components/data-list";
 import { InputDate } from "@/components/input-date";
 import InputError from "@/components/input-error";
 import { InputTime } from "@/components/input-time";
@@ -5,13 +6,37 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@inertiajs/react";
-import { getDate, getMonth, getYear, isAfter, set } from "date-fns";
+import { isAfter, set } from "date-fns";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function CheckIn(props: { data: Reservation.Default; employee: Employee.Default; onClose: () => void }) {
-  const { data: reservation, employee, onClose } = props;
+export default function CheckIn(props: {
+  data: Reservation.Default;
+  employee: Employee.Default;
+  status: Enum.RoomStatus[];
+  onClose: () => void;
+}) {
+  const { data: reservation, employee, status, onClose } = props;
+
+  // define data list
+  const dataList = [
+    {
+      label: "No. Booking",
+      value: reservation.booking_number,
+    },
+    {
+      label: "Nama Tamu",
+      value: reservation.reservation_guest?.name,
+    },
+    {
+      label: "No. Kamar",
+      value: reservation.reservation_room?.room_number,
+    },
+  ];
 
   // initial data
   const initialDate = set(new Date(reservation.start_date), {
@@ -22,19 +47,39 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
   const canCheckIn = isAfter(new Date(), initialDate);
 
   // declare form
+  const [date, setDate] = useState<Date>(initialDate);
+  const [time, setTime] = useState<string>("14:00:00");
   const { data, setData, post, errors, processing } = useForm<CheckIn.Create>({
     checked_in_at: initialDate,
     check_in_by: employee.user?.name || "",
     notes: "",
+    room_status: "Check In" as Enum.RoomStatus,
     employee_id: employee.id,
     reservation_id: reservation.id,
   });
 
-  // Handle check out
+  // handle time change
+  useEffect(() => {
+    const [hours, minutes, seconds] = time.split(":");
+    const formatted = set(date, {
+      hours: parseInt(hours),
+      minutes: parseInt(minutes),
+      seconds: parseInt(seconds),
+    });
+
+    setData("checked_in_at", new Date(formatted).toISOString());
+  }, [date, time]);
+
+  // Handle check in
   function handleCheckIn(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!canCheckIn) return;
+    if (!canCheckIn) {
+      toast.warning("Tidak dapat melakukan Check-in", {
+        description: "Belum memasuki waktu reservasi.",
+      });
+      return;
+    }
 
     // sent data
     toast.loading("Menambahkan data check-in...", {
@@ -48,11 +93,12 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
         });
         onClose();
       },
-      onError: (error) =>
+      onError: (error) => {
+        console.warn(error);
         toast.error("Check-in gagal ditambahkan", {
           id: `check-in-${reservation.id}`,
-          description: error.message,
-        }),
+        });
+      },
     });
   }
 
@@ -60,14 +106,18 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
     <>
       <DialogHeader>
         <DialogTitle>Check In Reservasi</DialogTitle>
-        <DialogDescription>Check-in untuk reservasi {reservation.booking_number}</DialogDescription>
-        {!canCheckIn && (
+        {canCheckIn ? (
+          <DialogDescription className="mt-2">
+            <DataList data={dataList} />
+          </DialogDescription>
+        ) : (
           <Alert>
             <AlertTitle>Belum Waktu Check In</AlertTitle>
             <AlertDescription>Check-in belum dapat dilakukan karena belum memasuki waktu reservasi.</AlertDescription>
           </Alert>
         )}
       </DialogHeader>
+      <Separator className="my-1" />
       <form
         onSubmit={handleCheckIn}
         className="grid max-w-lg grid-cols-2 gap-4"
@@ -77,22 +127,13 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
           <Label htmlFor="date">Tanggal</Label>
           <InputDate
             mode="single"
-            value={data.checked_in_at as Date}
-            onChange={(value) => {
-              const date = getDate(value as Date);
-              const month = getMonth(value as Date);
-              const year = getYear(value as Date);
-
-              setData(
-                "checked_in_at",
-                set(new Date(year, month, date), {
-                  hours: 14,
-                  minutes: 0,
-                }),
-              );
-            }}
+            value={date}
+            onChange={(value) => setDate(value as Date)}
             className="w-full"
-            disabledDate={{ before: new Date(reservation.start_date) }}
+            disabledDate={{
+              before: new Date(reservation.start_date),
+              after: new Date(reservation.end_date as Date),
+            }}
           />
           <InputError message={errors.checked_in_at} />
         </div>
@@ -103,20 +144,38 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
           <InputTime
             id="time"
             className="bg-inherit"
-            defaultValue="14:00:00"
-            onChange={(e) => {
-              const [hours, minutes] = e.target.value.split(":");
-
-              setData(
-                "checked_in_at",
-                set(data.checked_in_at as Date, {
-                  hours: parseInt(hours),
-                  minutes: parseInt(minutes),
-                }),
-              );
-            }}
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
             required
           />
+          <InputError message={errors.checked_in_at} />
+        </div>
+
+        {/* room status */}
+        <div className="col-span-2 grid gap-2">
+          <Label htmlFor="time">Status Kamar</Label>
+          <Select
+            value={data.room_status}
+            onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
+            required
+          >
+            <SelectTrigger id="room_status">
+              <SelectValue placeholder="Pilih Status Kamar">
+                <span className="capitalize">{data.room_status}</span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {status.map((status) => (
+                <SelectItem
+                  key={status}
+                  value={status}
+                  className="capitalize"
+                >
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <InputError message={errors.checked_in_at} />
         </div>
 
@@ -128,6 +187,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
             value={data.notes}
             onChange={(e) => setData("notes", e.target.value)}
             placeholder="Tambah catatan"
+            className="min-h-24"
           />
           <InputError message={errors.notes} />
         </div>
@@ -143,7 +203,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
           </Button>
           <Button
             type="submit"
-            disabled={processing || !canCheckIn}
+            disabled={processing}
           >
             Submit Check In
           </Button>

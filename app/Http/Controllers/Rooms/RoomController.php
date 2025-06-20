@@ -17,9 +17,8 @@ use App\Models\Reservations\Reservation;
 use App\Utils\DateHelper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -259,6 +258,35 @@ class RoomController extends Controller
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors([
+                "message" => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Update room status
+     */
+    public function updateStatus(Request $request, string $id)
+    {
+        try {
+            $status = $request->input("status");
+
+            if (!$status) {
+                throw new \Exception("Status tidak valid");
+            }
+
+            $room = Room::findOrFail($id);
+            $room->update([
+                "status" => $status,
+            ]);
+
+            return back();
+        } catch (ModelNotFoundException $e) {
+            return back()->withErrors([
+                "message" => "Kamar tidak ditemukan",
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors([
                 "message" => $e->getMessage(),
             ]);
         }

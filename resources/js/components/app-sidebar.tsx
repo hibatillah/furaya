@@ -8,8 +8,6 @@ import {
   BriefcaseIcon,
   CalendarCheckIcon,
   CircleDollarSignIcon,
-  ClockArrowDownIcon,
-  ClockArrowUpIcon,
   ClockFadingIcon,
   FlagIcon,
   HotelIcon,
@@ -138,6 +136,8 @@ const employeeMenuItems: Record<string, NavItem[]> = {
       href: route("dashboard"),
       icon: LayoutGrid,
     },
+  ],
+  Reservasi: [
     {
       title: "Reservasi",
       href: route("reservation.index"),
@@ -147,6 +147,13 @@ const employeeMenuItems: Record<string, NavItem[]> = {
       title: "Check In - Out",
       href: route("checkin.index"),
       icon: ClockFadingIcon,
+    },
+  ],
+  Kamar: [
+    {
+      title: "Kamar",
+      href: route("room.index"),
+      icon: HotelIcon,
     },
   ],
 };

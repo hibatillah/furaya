@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 export default function ReservationsShow(props: { reservation: Reservation.Default; status: Enum.ReservationStatus[] }) {
   const { reservation, status } = props;
+
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";
 
@@ -175,7 +176,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Check In",
-      value: reservation.formatted_check_in_date ?? "-",
+      value: reservation.formatted_checked_in_at ?? "-",
     },
     {
       label: "Check In Oleh",
@@ -183,7 +184,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Check Out",
-      value: reservation.formatted_check_out_date ?? "-",
+      value: reservation.formatted_checked_out_at ?? "-",
     },
     {
       label: "Check Out Oleh",
@@ -301,33 +302,39 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
-            </DropdownMenuItem>
+            {isEmployee && (
+              <DropdownMenuItem asChild>
+                <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild>
               <Link href={route("reservation.transaction", { id: reservation.id })}>Transkasi</Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                <DropdownMenuRadioGroup
-                  value={reservation.status}
-                  onValueChange={(value) => {
-                    handleUpdateReservationStatus(value as Enum.ReservationStatus);
-                  }}
-                >
-                  {status.map((item) => (
-                    <DropdownMenuRadioItem
-                      value={item}
-                      className="capitalize"
+            {isEmployee && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup
+                      value={reservation.status}
+                      onValueChange={(value) => {
+                        handleUpdateReservationStatus(value as Enum.ReservationStatus);
+                      }}
                     >
-                      {item}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
+                      {status.map((item) => (
+                        <DropdownMenuRadioItem
+                          value={item}
+                          className="capitalize"
+                        >
+                          {item}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

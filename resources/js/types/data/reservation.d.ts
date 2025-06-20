@@ -39,8 +39,8 @@ declare namespace Reservation {
     is_finished?: boolean;
     formatted_start_date?: string;
     formatted_end_date?: string;
-    formatted_check_in_date?: string;
-    formatted_check_out_date?: string;
+    formatted_checked_in_at?: string;
+    formatted_checked_out_at?: string;
   }
 
   interface Default extends Base, Addition {}
@@ -125,7 +125,9 @@ declare namespace CheckIn {
 
   interface Addition {}
   interface Default extends Base, Addition {}
-  type Create = Omit<Base, "id" | "reservation" | "employee">;
+  type Create = Omit<Base, "id" | "reservation" | "employee"> & {
+    room_status?: Enum.RoomStatus;
+  }
   type Update = Partial<Omit<Base, "reservation" | "employee">>;
 }
 
@@ -142,6 +144,8 @@ declare namespace CheckOut {
     notes?: string;
   }
 
-  type Create = Omit<Default, "id" | "reservation" | "employee">;
+  type Create = Omit<Default, "id" | "reservation" | "employee"> & {
+    room_status?: Enum.RoomStatus;
+  }
   type Update = Partial<Omit<Default, "reservation" | "employee">>;
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Guests\GuestController;
 use App\Http\Controllers\Reservations\ReservationController;
+use App\Http\Controllers\Rooms\RoomController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -62,6 +63,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
             "update" => "guest.update",
         ])
         ->middleware("role:manager,admin");
+
+    /** room resource routes for admin and employee */
+    Route::middleware("role:admin,employee")->group(function () {
+        /** update room status */
+        Route::put("kamar/{id}/status", [RoomController::class, "updateStatus"])
+            ->name("room.update.status");
+
+        /** show room page routes */
+        Route::resource("/kamar", RoomController::class)
+            ->only(["index", "show"])
+            ->parameters(["kamar" => "id"])
+            ->names([
+                "index" => "room.index",
+                "show" => "room.show",
+            ]);
+    });
 
     // IMPORTANT: This fallback route MUST be the very last route
     Route::fallback(function () {

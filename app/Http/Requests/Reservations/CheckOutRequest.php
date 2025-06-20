@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Reservations;
 
+use App\Enums\RoomStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,11 +25,12 @@ class CheckOutRequest extends FormRequest
     {
         return [
             "reservation_id" => ["required", "string", Rule::exists("reservations", "id")],
-            "checked_out_at" => ["required", "datetime"],
+            "checked_out_at" => ["required", "date"],
             "check_out_by" => ["required", "string", "max:255"],
             "employee_id" => ["required", "string", Rule::exists("employees", "id")],
             "final_total" => ["required", "numeric"],
             "notes" => ["nullable", "string", "max:255"],
+            "room_status" => ["required", "string", Rule::in(RoomStatusEnum::getValues())],
         ];
     }
 
@@ -39,7 +41,7 @@ class CheckOutRequest extends FormRequest
             "reservation_id.string" => "Reservation ID harus berupa string.",
             "reservation_id.exists" => "Reservation ID tidak ditemukan.",
             "checked_out_at.required" => "Tanggal check-out wajib diisi.",
-            "checked_out_at.datetime" => "Tanggal check-out harus berupa tanggal.",
+            "checked_out_at.date" => "Tanggal check-out harus berupa tanggal.",
             "check_out_by.required" => "Nama pegawai wajib diisi.",
             "check_out_by.string" => "Nama pegawai harus berupa string.",
             "check_out_by.max" => "Nama pegawai maksimal 255 karakter.",
@@ -50,6 +52,9 @@ class CheckOutRequest extends FormRequest
             "final_total.numeric" => "Final total harus berupa angka.",
             "notes.string" => "Catatan harus berupa string.",
             "notes.max" => "Catatan maksimal 255 karakter.",
+            "room_status.required" => "Status kamar wajib diisi.",
+            "room_status.string" => "Status kamar harus berupa string.",
+            "room_status.in" => "Status kamar tidak valid.",
         ];
     }
 }

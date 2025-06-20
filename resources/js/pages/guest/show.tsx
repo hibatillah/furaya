@@ -1,10 +1,8 @@
 import { DataList } from "@/components/data-list";
-import { DataTable, DataTableControls } from "@/components/data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
-import { reservationColumns } from "../reservation";
 
 export default function GuestShow(props: { guest: Guest.Default; reservations: Reservation.Default[] }) {
   const { guest, reservations } = props;
@@ -44,22 +42,8 @@ export default function GuestShow(props: { guest: Guest.Default; reservations: R
         <CardContent>
           <DataList
             data={dataList}
-            className="[--columns:2]"
+            className="lg:[--columns:2]"
           />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-bold">Riwayat Reservasi Tamu</h2>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={reservationColumns}
-            data={reservations}
-          >
-            {({ table }) => <DataTableControls table={table} />}
-          </DataTable>
         </CardContent>
       </Card>
     </AppLayout>

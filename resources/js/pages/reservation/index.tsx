@@ -20,124 +20,6 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-// define reservation table columns
-export const reservationColumns: ColumnDef<Reservation.Default>[] = [
-  {
-    id: "booking_number",
-    accessorKey: "booking_number",
-    header: "No. Booking",
-  },
-  {
-    id: "guest_name",
-    accessorFn: (row) => row.reservation_guest?.name,
-    header: "Nama Tamu",
-  },
-  {
-    id: "status",
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as Enum.ReservationStatus;
-
-      return (
-        <Badge
-          variant="outline"
-          className={cn("capitalize", reservationStatusBadgeColor[status])}
-        >
-          {status}
-        </Badge>
-      );
-    },
-    filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
-  },
-  {
-    id: "room_number",
-    accessorFn: (row) => row.reservation_room?.room_number,
-    header: "Kamar",
-  },
-  {
-    id: "room_type",
-    accessorFn: (row) => row.reservation_room?.room_type,
-    header: "Tipe Kamar",
-    cell: ({ row }) => {
-      const roomType = row.getValue("room_type") as string;
-      return <Badge variant="outline">{roomType}</Badge>;
-    },
-    filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
-  },
-  {
-    id: "start_date",
-    accessorFn: (row) => row.formatted_start_date,
-    header: "Masuk",
-  },
-  {
-    id: "end_date",
-    accessorFn: (row) => row.formatted_end_date,
-    header: "Keluar",
-  },
-  {
-    id: "booking_type",
-    accessorKey: "booking_type",
-    header: "Tipe Booking",
-    cell: ({ row }) => {
-      const bookingType = row.getValue("booking_type") as Enum.BookingType;
-
-      return (
-        <Badge
-          variant="outline"
-          className={cn("capitalize", bookingTypeBadgeColor[bookingType])}
-        >
-          {bookingType}
-        </Badge>
-      );
-    },
-    filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
-  },
-  {
-    id: "payment_method",
-    accessorKey: "payment_method",
-    header: "Pembayaran",
-    cell: ({ row }) => {
-      const paymentMethod = row.getValue("payment_method") as Enum.Payment;
-
-      return (
-        <Badge
-          variant="outline"
-          className={cn("capitalize", paymentMethodBadgeColor[paymentMethod])}
-        >
-          {paymentMethod}
-        </Badge>
-      );
-    },
-    filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-          >
-            <EllipsisVerticalIcon className="size-4" />
-            <span className="sr-only">Aksi</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={route("reservation.show", { id: row.original.id })}>Detail</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={route("reservation.edit", { id: row.original.id })}>Edit</Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
 export default function ReservationsIndex(props: {
   reservations: Reservation.Default[];
   type: ReservationRangeType;
@@ -151,6 +33,126 @@ export default function ReservationsIndex(props: {
   const { auth } = usePage<SharedData>().props;
   const isManager = auth.user.role === "manager";
 
+  // define reservation table columns
+  const columns: ColumnDef<Reservation.Default>[] = [
+    {
+      id: "booking_number",
+      accessorKey: "booking_number",
+      header: "No. Booking",
+    },
+    {
+      id: "guest_name",
+      accessorFn: (row) => row.reservation_guest?.name,
+      header: "Nama Tamu",
+    },
+    {
+      id: "status",
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as Enum.ReservationStatus;
+
+        return (
+          <Badge
+            variant="outline"
+            className={cn("capitalize", reservationStatusBadgeColor[status])}
+          >
+            {status}
+          </Badge>
+        );
+      },
+      filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
+    },
+    {
+      id: "room_number",
+      accessorFn: (row) => row.reservation_room?.room_number,
+      header: "Kamar",
+    },
+    {
+      id: "room_type",
+      accessorFn: (row) => row.reservation_room?.room_type,
+      header: "Tipe Kamar",
+      cell: ({ row }) => {
+        const roomType = row.getValue("room_type") as string;
+        return <Badge variant="outline">{roomType}</Badge>;
+      },
+      filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
+    },
+    {
+      id: "start_date",
+      accessorFn: (row) => row.formatted_start_date,
+      header: "Masuk",
+    },
+    {
+      id: "end_date",
+      accessorFn: (row) => row.formatted_end_date,
+      header: "Keluar",
+    },
+    {
+      id: "booking_type",
+      accessorKey: "booking_type",
+      header: "Tipe Booking",
+      cell: ({ row }) => {
+        const bookingType = row.getValue("booking_type") as Enum.BookingType;
+
+        return (
+          <Badge
+            variant="outline"
+            className={cn("capitalize", bookingTypeBadgeColor[bookingType])}
+          >
+            {bookingType}
+          </Badge>
+        );
+      },
+      filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
+    },
+    {
+      id: "payment_method",
+      accessorKey: "payment_method",
+      header: "Pembayaran",
+      cell: ({ row }) => {
+        const paymentMethod = row.getValue("payment_method") as Enum.Payment;
+
+        return (
+          <Badge
+            variant="outline"
+            className={cn("capitalize", paymentMethodBadgeColor[paymentMethod])}
+          >
+            {paymentMethod}
+          </Badge>
+        );
+      },
+      filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+            >
+              <EllipsisVerticalIcon className="size-4" />
+              <span className="sr-only">Aksi</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={route("reservation.show", { id: row.original.id })}>Detail</Link>
+            </DropdownMenuItem>
+            {!isManager && (
+              <DropdownMenuItem asChild>
+                <Link href={route("reservation.edit", { id: row.original.id })}>Edit</Link>
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Reservasi" />
@@ -160,7 +162,7 @@ export default function ReservationsIndex(props: {
         </CardHeader>
         <CardContent>
           <DataTable
-            columns={reservationColumns}
+            columns={columns}
             data={reservations}
           >
             {({ table }) => (

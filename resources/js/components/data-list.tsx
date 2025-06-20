@@ -14,7 +14,7 @@ export function DataList(props: DataListProps) {
   return (
     <dl
       className={cn(
-        "[&_dt]:text-foreground/70 [&_dd]:text-foreground grid grid-cols-[repeat(var(--columns),auto_1fr)] gap-x-8 gap-y-2 [--columns:1]",
+        "[&_dt]:text-foreground/70 [&_dd]:text-foreground grid gap-x-8 gap-y-2 [--columns:1] max-lg:gap-0.5 lg:grid-cols-[repeat(var(--columns),auto_1fr)] [&_dd]:max-lg:mb-2",
         className,
       )}
       {...rest}

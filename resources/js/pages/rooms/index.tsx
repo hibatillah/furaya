@@ -4,15 +4,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
 import { roomConditionBadgeColor, roomStatusBadgeColor } from "@/static/room";
-import { BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/react";
+import { BreadcrumbItem, SharedData } from "@/types";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import RoomDelete from "./delete";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -31,6 +43,10 @@ export default function RoomsIndex(props: {
 }) {
   const { rooms, roomTypes, bedTypes, roomConditions, roomStatuses } = props;
 
+  const { auth } = usePage<SharedData>().props;
+  const isAdmin = auth.user?.role === "admin";
+
+  // handle dialog
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
   const [selectedRow, setSelectedRow] = useState<Room.Default | null>(null);
@@ -46,6 +62,38 @@ export default function RoomsIndex(props: {
     setDialogType(null);
     setSelectedRow(null);
   }
+
+  // handle update reservation status
+  const handleUpdateRoomStatus = useCallback(
+    async (id: string, value: Enum.RoomStatus) => {
+      toast.loading("Mengubah status kamar...", {
+        id: `update-status-${id}`,
+      });
+
+      router.put(
+        route("room.update.status", { id }),
+        {
+          status: value,
+        },
+        {
+          preserveState: true,
+          onSuccess: () => {
+            toast.success("Status kamar berhasil diubah", {
+              id: `update-status-${id}`,
+            });
+          },
+          onError: (error) => {
+            console.log(error);
+            toast.error("Gagal mengubah status kamar", {
+              id: `update-status-${id}`,
+              description: error.message,
+            });
+          },
+        },
+      );
+    },
+    [selectedRow?.status, roomStatuses],
+  );
 
   // define data table columns
   const columns: ColumnDef<Room.Default>[] = [
@@ -153,19 +201,44 @@ export default function RoomsIndex(props: {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuRadioGroup
+                  value={row.original.status}
+                  onValueChange={(value) => {
+                    handleUpdateRoomStatus(row.original.id, value as Enum.RoomStatus);
+                  }}
+                >
+                  {roomStatuses.map((item) => (
+                    <DropdownMenuRadioItem
+                      value={item}
+                      className="capitalize"
+                    >
+                      {item}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href={route("room.show", { id: row.original.id })}>Detail</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={route("room.edit", { id: row.original.id })}>Edit</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => handleDialog("delete", row.original)}
-            >
-              Hapus
-            </DropdownMenuItem>
+            {isAdmin && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link href={route("room.edit", { id: row.original.id })}>Edit</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => handleDialog("delete", row.original)}
+                >
+                  Hapus
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
@@ -211,12 +284,14 @@ export default function RoomsIndex(props: {
                     },
                   ]}
                 />
-                <Button
-                  className="ms-auto w-fit"
-                  asChild
-                >
-                  <Link href={route("room.create")}>Tambah Kamar</Link>
-                </Button>
+                {isAdmin && (
+                  <Button
+                    className="ms-auto w-fit"
+                    asChild
+                  >
+                    <Link href={route("room.create")}>Tambah Kamar</Link>
+                  </Button>
+                )}
               </DataTableControls>
             )}
           </DataTable>

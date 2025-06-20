@@ -12,7 +12,6 @@ import { useState } from "react";
 import BedTypeCreate from "./create";
 import BedTypeDelete from "./delete";
 import BedTypeEdit from "./edit";
-import { DataTableFilter } from "@/components/data-table/data-table-filter";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -54,7 +53,7 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
       id: "rooms_count",
       accessorKey: "rooms_count",
       header: "Jumlah Kamar",
-      filterFn: "checkbox" as FilterFnOption<BedType.Default>,  // add filter column
+      filterFn: "checkbox" as FilterFnOption<BedType.Default>, // add filter column
     },
     {
       id: "actions",
@@ -99,14 +98,13 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <DataTableFilter table={table} />
                 <BedTypeCreate />
               </DataTableControls>
             )}
           </DataTable>
         </CardContent>
       </Card>
-      
+
       <Dialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

@@ -8,7 +8,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { bookingTypeBadgeColor, reservationStatusBadgeColor } from "@/static/reservation";
+import { reservationStatusBadgeColor } from "@/static/reservation";
+import { roomStatusBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -28,12 +29,13 @@ export default function CheckInIndex(props: {
   reservations: Reservation.Default[];
   type: ReservationRangeType;
   status: Enum.ReservationStatus[];
+  roomStatus: Enum.RoomStatus[];
   bookingType: Enum.BookingType[];
   paymentMethod: Enum.Payment[];
   roomType: string[];
   employee: Employee.Default;
 }) {
-  const { reservations, type, status, bookingType, paymentMethod, roomType, employee } = props;
+  const { reservations, type, status, roomStatus, bookingType, paymentMethod, roomType, employee } = props;
 
   // handle dialog
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -83,18 +85,18 @@ export default function CheckInIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
-      id: "booking_type",
-      accessorKey: "booking_type",
-      header: "Tipe Booking",
+      id: "room_status",
+      accessorFn: (row) => row.reservation_room?.room?.status,
+      header: "Status Kamar",
       cell: ({ row }) => {
-        const bookingType = row.getValue("booking_type") as Enum.BookingType;
+        const status = row.getValue("room_status") as Enum.RoomStatus;
 
         return (
           <Badge
             variant="outline"
-            className={cn("capitalize", bookingTypeBadgeColor[bookingType])}
+            className={cn("font-medium capitalize", roomStatusBadgeColor[status])}
           >
-            {bookingType}
+            {status}
           </Badge>
         );
       },
@@ -106,13 +108,8 @@ export default function CheckInIndex(props: {
       header: "Masuk",
     },
     {
-      id: "end_date",
-      accessorFn: (row) => row.formatted_end_date,
-      header: "Keluar",
-    },
-    {
       id: "check_in_date",
-      accessorFn: (row) => row.formatted_check_in_date,
+      accessorFn: (row) => row.formatted_checked_in_at,
       header: "Check In",
       cell: ({ row }) => {
         const checkIn = row.getValue("check_in_date") as string;
@@ -120,8 +117,13 @@ export default function CheckInIndex(props: {
       },
     },
     {
+      id: "end_date",
+      accessorFn: (row) => row.formatted_end_date,
+      header: "Keluar",
+    },
+    {
       id: "check_out_date",
-      accessorFn: (row) => row.formatted_check_out_date,
+      accessorFn: (row) => row.formatted_checked_out_at,
       header: "Check Out",
       cell: ({ row }) => {
         const checkOut = row.getValue("check_out_date") as string;
@@ -133,7 +135,6 @@ export default function CheckInIndex(props: {
       cell: ({ row }) => {
         const isCheckIn = row.original.check_in?.checked_in_at;
         const isCheckOut = row.original.check_out?.checked_out_at;
-        const isFinished = row.original.is_finished;
 
         return (
           <DropdownMenu>
@@ -148,7 +149,7 @@ export default function CheckInIndex(props: {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {!isFinished && (
+              {(!isCheckIn || !isCheckOut) && (
                 <>
                   <DropdownMenuItem
                     onClick={() => handleDialog("check-in", row.original)}
@@ -237,6 +238,7 @@ export default function CheckInIndex(props: {
             <CheckIn
               data={selectedRow}
               employee={employee}
+              status={roomStatus}
               onClose={handleDialogClose}
             />
           )}
@@ -244,6 +246,7 @@ export default function CheckInIndex(props: {
             <CheckOut
               data={selectedRow}
               employee={employee}
+              status={roomStatus}
               onClose={handleDialogClose}
             />
           )}

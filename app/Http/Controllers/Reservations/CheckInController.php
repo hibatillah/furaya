@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Reservations;
 use App\Http\Controllers\Controller;
 use App\Enums\BookingTypeEnum;
 use App\Enums\PaymentEnum;
+use App\Enums\RoomStatusEnum;
 use App\Enums\ReservationStatusEnum;
 use App\Http\Requests\Reservations\CheckInRequest;
 use App\Models\Managements\Employee;
-use App\Models\Reservations\CheckIn;
 use App\Models\Reservations\Reservation;
+use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class CheckInController extends Controller
@@ -38,6 +41,7 @@ class CheckInController extends Controller
         $query = Reservation::with([
             "checkIn",
             "checkOut",
+            "reservationRoom.room",
             'reservationGuest' => fn($q) => $q->select([
                 'id',
                 'name',
@@ -72,6 +76,7 @@ class CheckInController extends Controller
 
         // get static values
         $status = ReservationStatusEnum::getValues();
+        $roomStatus = RoomStatusEnum::getValues();
         $bookingType = BookingTypeEnum::getValues();
         $paymentMethod = PaymentEnum::getValues();
         $roomType = RoomType::all()->pluck('name');
@@ -85,6 +90,7 @@ class CheckInController extends Controller
             'reservations' => $reservations,
             'type' => $type,
             'status' => $status,
+            'roomStatus' => $roomStatus,
             'bookingType' => $bookingType,
             'paymentMethod' => $paymentMethod,
             'roomType' => $roomType,
@@ -99,6 +105,7 @@ class CheckInController extends Controller
     {
         try {
             $validated = $request->validated();
+
             $checkin = Arr::only($validated, [
                 'checked_in_at',
                 'check_in_by',
@@ -106,10 +113,21 @@ class CheckInController extends Controller
                 'employee_id',
             ]);
 
-            $reservation = Reservation::findOrFail($validated['reservation_id']);
-            $reservation->checkIn()->create($checkin);
+            DB::transaction(function () use ($validated, $checkin) {
+                // update reservation status
+                $reservation = Reservation::findOrFail($validated['reservation_id']);
+                $reservation->checkIn()->create($checkin);
+
+                // update related room status
+                $room = Room::findOrFail($reservation->reservationRoom->room_id);
+                $room->update([
+                    'status' => $validated['room_status'],
+                ]);
+            });
 
             return back();
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
         } catch (ModelNotFoundException $e) {
             return back()->withErrors([
                 'message' => "Data reservasi tidak ditemukan",

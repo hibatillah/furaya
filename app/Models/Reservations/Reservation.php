@@ -45,8 +45,8 @@ class Reservation extends BaseModel
         'is_finished',
         'formatted_start_date',
         'formatted_end_date',
-        'formatted_check_in_date',
-        'formatted_check_out_date',
+        'formatted_checked_in_at',
+        'formatted_checked_out_at',
     ];
 
     public function getIsFinishedAttribute()
@@ -78,18 +78,24 @@ class Reservation extends BaseModel
         return Carbon::parse($this->end_date)->translatedFormat('j F Y');
     }
 
-    public function getFormattedCheckInDateAttribute()
+    public function getFormattedCheckedInAtAttribute()
     {
-        if (!$this->check_in) return null;
-        return Carbon::parse($this->check_in->check_in_date)
-            ->translatedFormat('d M Y H:i');
+        if ($this->checkIn?->checked_in_at) {
+            return Carbon::parse($this->checkIn->checked_in_at)
+                ->translatedFormat('d M Y, H:i') . ' WIB';
+        }
+
+        return null;
     }
 
-    public function getFormattedCheckOutDateAttribute()
+    public function getFormattedCheckedOutAtAttribute()
     {
-        if (!$this->check_out) return null;
-        return Carbon::parse($this->check_out->check_out_date)
-            ->translatedFormat('d M Y H:i');
+        if ($this->checkOut?->checked_out_at) {
+            return Carbon::parse($this->checkOut->checked_out_at)
+                ->translatedFormat('d M Y H:i') . ' WIB';
+        }
+
+        return null;
     }
 
     /**

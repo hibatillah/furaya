@@ -60,6 +60,9 @@ class UserSeeder extends Seeder
       'department_id' => $department->id,
       'gender' => GenderEnum::MALE,
       'hire_date' => $dateISO,
+      'phone' => '081234567890',
+      'address' => 'Jl. Umban Sari',
+      'salary' => 2500000,
     ]);
 
     // create user data as guest

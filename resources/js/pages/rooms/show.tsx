@@ -1,5 +1,4 @@
 import { DataList } from "@/components/data-list";
-import { DataTable, DataTableControls } from "@/components/data-table";
 import { ImageContainer } from "@/components/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,6 @@ import { roomConditionBadgeColor, roomStatusBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { useMemo } from "react";
-import { reservationColumns } from "../reservation";
 
 export default function RoomShow(props: { room: Room.Default; reservations: Reservation.Default[] }) {
   const { room, reservations } = props;
@@ -69,15 +67,15 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Detail Kamar</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <CardContent className="grid gap-5 lg:grid-cols-2">
           <DataList
             data={dataList}
-            className="h-fit *:data-[label=Fasilitas]:col-span-full *:data-[value=Fasilitas]:col-span-full"
+            className="h-fit *:data-[label=Fasilitas]:col-span-full *:data-[value=Fasilitas]:col-span-full xl:[--columns:2]"
           />
-          <dl className="[&_dt]:text-foreground/70 xl:col-span-2">
+          <dl className="[&_dt]:text-foreground/70">
             <div className="flex flex-col gap-2">
               <dt>Foto Kamar</dt>
-              <dd className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <dd className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <ImageContainer
                     key={i}
@@ -89,20 +87,6 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
               </dd>
             </div>
           </dl>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-bold">Riwayat Reservasi Kamar</h2>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={reservationColumns}
-            data={reservations}
-          >
-            {({ table }) => <DataTableControls table={table} />}
-          </DataTable>
         </CardContent>
       </Card>
     </AppLayout>

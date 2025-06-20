@@ -15,12 +15,10 @@ Route::middleware(["auth", "verified", "role:admin"])->group(function () {
   /** room resource routes */
   Route::get("kamar/tambah", [RoomController::class, "create"])->name("room.create");
   Route::resource("/kamar", RoomController::class)
-    ->except(["create"])
+    ->except(["index", "create", "show"])
     ->parameters(["kamar" => "id"])
     ->names([
-      "index" => "room.index",
       "store" => "room.store",
-      "show" => "room.show",
       "edit" => "room.edit",
       "update" => "room.update",
       "destroy" => "room.destroy",
