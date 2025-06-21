@@ -4,6 +4,7 @@ namespace Database\Factories\Rooms;
 
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
+use App\Enums\SmokingTypeEnum;
 use App\Models\Rooms\BedType;
 use App\Models\Rooms\Meal;
 use App\Models\Rooms\Room;
@@ -39,6 +40,9 @@ class RoomFactory extends Factory
             ]),
             'price' => $roomType->base_rate,
             'capacity' => $roomType->capacity,
+            'size' => $this->faker->numberBetween(20, 100), // Size in square meters
+            'smoking_type' => $this->faker
+                ->randomElement(SmokingTypeEnum::getValues()),
             'room_type_id' => $roomType->id,
             'bed_type_id' => BedType::all()->random()->id,
             'rate_type_id' => $roomType->rate_type_id,

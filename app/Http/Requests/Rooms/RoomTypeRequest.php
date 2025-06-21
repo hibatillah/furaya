@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Rooms;
 
+use App\Enums\SmokingTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,8 @@ class RoomTypeRequest extends FormRequest
             "code" => ["required", "string", "max:5", Rule::unique("room_types", "code")->ignore($id)],
             "name" => ["required", "string", "max:255", Rule::unique("room_types", "name")->ignore($id)],
             "capacity" => ["required", "integer"],
+            "size" => ["nullable", "numeric", "min:0"],
+            "smoking_type" => ["nullable", "string", Rule::in(SmokingTypeEnum::getValues())],
             "base_rate" => ["required", "numeric", "min:0"],
             "rate_type_id" => ["required", "string", "exists:rate_types,id"],
             "facilities" => ["nullable", "array"],

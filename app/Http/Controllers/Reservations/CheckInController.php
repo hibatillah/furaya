@@ -127,7 +127,7 @@ class CheckInController extends Controller
 
             return back();
         } catch (ValidationException $e) {
-            return back()->withErrors($e->errors());
+            return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
             return back()->withErrors([
                 'message' => "Data reservasi tidak ditemukan",

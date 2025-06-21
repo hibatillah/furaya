@@ -176,7 +176,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Check In",
-      value: reservation.formatted_checked_in_at ?? "-",
+      value: reservation.formatted_check_in_at ?? "-",
     },
     {
       label: "Check In Oleh",
@@ -184,7 +184,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Check Out",
-      value: reservation.formatted_checked_out_at ?? "-",
+      value: reservation.formatted_check_out_at ?? "-",
     },
     {
       label: "Check Out Oleh",
@@ -302,14 +302,14 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={route("reservation.transaction", { id: reservation.id })}>Transkasi</Link>
+            </DropdownMenuItem>
             {isEmployee && (
               <DropdownMenuItem asChild>
                 <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem asChild>
-              <Link href={route("reservation.transaction", { id: reservation.id })}>Transkasi</Link>
-            </DropdownMenuItem>
             {isEmployee && (
               <>
                 <DropdownMenuSeparator />

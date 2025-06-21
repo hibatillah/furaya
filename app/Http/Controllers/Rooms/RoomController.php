@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rooms;
 
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
+use App\Enums\SmokingTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rooms\RoomRequest;
 use App\Models\Rooms\BedType;
@@ -14,7 +15,6 @@ use App\Models\Rooms\RoomType;
 use App\Models\Rooms\RateType;
 use App\Models\Rooms\Meal;
 use App\Models\Reservations\Reservation;
-use App\Utils\DateHelper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -24,29 +24,6 @@ use Inertia\Inertia;
 
 class RoomController extends Controller
 {
-    protected $dateISO;
-    protected $roomTypes;
-    protected $bedTypes;
-    protected $roomConditions;
-    protected $roomStatusLabels;
-    protected $roomStatusValues;
-    protected $rateTypes;
-    protected $mealTypes;
-    protected $facilities;
-
-    public function __construct()
-    {
-        $this->dateISO = DateHelper::getISO();
-        $this->roomTypes = RoomType::all();
-        $this->bedTypes = BedType::all();
-        $this->roomConditions = RoomConditionEnum::getValues();
-        $this->roomStatusLabels = RoomStatusEnum::getLabels();
-        $this->roomStatusValues = RoomStatusEnum::getValues();
-        $this->rateTypes = RateType::all();
-        $this->mealTypes = Meal::all();
-        $this->facilities = Facility::all();
-    }
-
     /**
      * Display a listing of the resource.
      */
@@ -56,12 +33,18 @@ class RoomController extends Controller
             ->orderBy('updated_at', 'desc')
             ->get();
 
+        $roomTypes = RoomType::all();
+        $bedTypes = BedType::all();
+
+        $roomConditions = RoomConditionEnum::getValues();
+        $roomStatusValues = RoomStatusEnum::getValues();
+
         return Inertia::render("rooms/index", [
             "rooms" => $rooms,
-            "roomTypes" => $this->roomTypes,
-            "bedTypes" => $this->bedTypes,
-            "roomConditions" => $this->roomConditions,
-            "roomStatuses" => $this->roomStatusValues,
+            "roomTypes" => $roomTypes,
+            "bedTypes" => $bedTypes,
+            "roomConditions" => $roomConditions,
+            "roomStatuses" => $roomStatusValues,
         ]);
     }
 
@@ -74,14 +57,24 @@ class RoomController extends Controller
             ->latest()
             ->get();
 
+        $bedTypes = BedType::all();
+        $rateTypes = RateType::all();
+        $mealTypes = Meal::all();
+        $facilities = Facility::all();
+
+        $roomConditions = RoomConditionEnum::getValues();
+        $roomStatusLabels = RoomStatusEnum::getLabels();
+        $smokingTypes = SmokingTypeEnum::getValues();
+
         return Inertia::render("rooms/create", [
-            "bedTypes" => $this->bedTypes,
+            "bedTypes" => $bedTypes,
             "roomTypes" => $roomTypes,
-            "rateTypes" => $this->rateTypes,
-            "mealTypes" => $this->mealTypes,
-            "roomConditions" => $this->roomConditions,
-            "roomStatuses" => $this->roomStatusLabels,
-            "facilities" => $this->facilities,
+            "rateTypes" => $rateTypes,
+            "mealTypes" => $mealTypes,
+            "roomConditions" => $roomConditions,
+            "roomStatuses" => $roomStatusLabels,
+            "facilities" => $facilities,
+            "smokingTypes" => $smokingTypes,
         ]);
     }
 
@@ -160,15 +153,25 @@ class RoomController extends Controller
             $room = Room::with("roomType", "bedType")->findOrFail($id);
             $roomTypes = RoomType::with('facility')->latest()->get();
 
+            $bedTypes = BedType::all();
+            $rateTypes = RateType::all();
+            $mealTypes = Meal::all();
+            $facilities = Facility::all();
+
+            $roomConditions = RoomConditionEnum::getValues();
+            $roomStatusLabels = RoomStatusEnum::getLabels();
+            $smokingTypes = SmokingTypeEnum::getValues();
+
             return Inertia::render("rooms/edit", [
                 "room" => $room,
-                "bedTypes" => $this->bedTypes,
+                "bedTypes" => $bedTypes,
                 "roomTypes" => $roomTypes,
-                "rateTypes" => $this->rateTypes,
-                "mealTypes" => $this->mealTypes,
-                "roomConditions" => $this->roomConditions,
-                "roomStatuses" => $this->roomStatusLabels,
-                "facilities" => $this->facilities,
+                "rateTypes" => $rateTypes,
+                "mealTypes" => $mealTypes,
+                "roomConditions" => $roomConditions,
+                "roomStatuses" => $roomStatusLabels,
+                "facilities" => $facilities,
+                "smokingTypes" => $smokingTypes,
             ]);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->withErrors([

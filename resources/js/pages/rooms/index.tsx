@@ -173,6 +173,22 @@ export default function RoomsIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
     {
+      id: "size",
+      accessorKey: "size",
+      header: "Luas Kamar",
+      cell: ({ row }) => {
+        const size = row.getValue("size") as number;
+
+        return !size ? (
+          "-"
+        ) : (
+          <span className="after:text-foreground relative after:absolute after:-end-2 after:top-0 after:text-[8px] after:content-['2']">
+            {size} m
+          </span>
+        );
+      },
+    },
+    {
       id: "capacity",
       accessorKey: "capacity",
       header: "Kapasitas",

@@ -6,6 +6,8 @@ declare namespace Room {
     view?: string;
     price: number | "";
     capacity: number | "";
+    size: number | "";
+    smoking_type: Enum.SmokingType;
     condition: Enum.RoomCondition;
     status: Enum.RoomStatus;
     room_type_id?: string;
@@ -59,6 +61,8 @@ declare namespace RoomType {
     code: string;
     name: string;
     capacity: number | "";
+    size: number | "";
+    smoking_type: Enum.SmokingType;
     base_rate?: number | "";
     facility: Facility.Default[];
     rate_type_id?: string;

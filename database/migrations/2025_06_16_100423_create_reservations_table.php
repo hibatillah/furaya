@@ -3,6 +3,7 @@
 use App\Enums\BookingTypeEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\ReservationStatusEnum;
+use App\Enums\ReservationTransactionEnum;
 use App\Enums\RoomPackageEnum;
 use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->uuid("id")->primary();
             $table->date("start_date");
             $table->date("end_date");
-            $table->integer("booking_number")->unique();
+            $table->string("booking_number")->unique();
             $table->string("arrival_from")->nullable();
             $table->integer("children")->nullable();
             $table->integer("adults");
@@ -97,8 +98,10 @@ return new class extends Migration
             $table->foreignUuid("reservation_id")
                 ->constrained("reservations")
                 ->cascadeOnDelete();
-            $table->string("description");
             $table->float("amount", 10, 3);
+            $table->enum("type", ReservationTransactionEnum::getValues());
+            $table->boolean("is_paid")->default(false);
+            $table->string("description");
             $table->timestamps();
         });
 
@@ -111,8 +114,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('employees')
                 ->nullOnDelete();
+            $table->datetime('check_in_at');
             $table->string('check_in_by');
-            $table->datetime('checked_in_at');
             $table->string('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -127,8 +130,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('employees')
                 ->nullOnDelete();
+            $table->datetime('check_out_at');
             $table->string('check_out_by');
-            $table->datetime('checked_out_at');
             $table->float('final_total', 10, 2);
             $table->string('notes')->nullable();
             $table->timestamps();

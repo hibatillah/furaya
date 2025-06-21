@@ -15,12 +15,7 @@ import { isAfter, set } from "date-fns";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function CheckOut(props: {
-  data: Reservation.Default;
-  employee: Employee.Default;
-  status: Enum.RoomStatus[];
-  onClose: () => void;
-}) {
+export default function CheckOut(props: { data: Reservation.Default; employee: Employee.Default; status: Enum.RoomStatus[]; onClose: () => void }) {
   const { data: reservation, employee, status, onClose } = props;
 
   // define data list
@@ -46,13 +41,13 @@ export default function CheckOut(props: {
   });
 
   const canCheckIn = isAfter(new Date(), initialDate);
-  const canCheckOut = canCheckIn && reservation.check_in?.checked_in_at;
+  const canCheckOut = canCheckIn && reservation.check_in?.check_in_at;
 
   // declare form
   const [date, setDate] = useState<Date>(initialDate);
   const [time, setTime] = useState<string>("12:00:00");
   const { data, setData, post, errors, processing } = useForm<CheckOut.Create>({
-    checked_out_at: initialDate,
+    check_out_at: initialDate,
     check_out_by: employee.user?.name || "",
     notes: "",
     employee_id: employee.id,
@@ -70,7 +65,7 @@ export default function CheckOut(props: {
       seconds: parseInt(seconds),
     });
 
-    setData("checked_out_at", new Date(formatted).toISOString());
+    setData("check_out_at", new Date(formatted).toISOString());
   }, [date, time]);
 
   // Handle check out
@@ -109,9 +104,12 @@ export default function CheckOut(props: {
       <DialogHeader>
         <DialogTitle>Check Out Reservasi</DialogTitle>
         {canCheckOut ? (
-          <DialogDescription className="mt-2">
-            <DataList data={dataList} />
-          </DialogDescription>
+          <>
+            <DialogDescription className="mt-2">
+              <DataList data={dataList} />
+            </DialogDescription>
+            <Separator className="my-1" />
+          </>
         ) : (
           <Alert>
             <AlertTitle>Belum Waktu Check Out</AlertTitle>
@@ -119,7 +117,6 @@ export default function CheckOut(props: {
           </Alert>
         )}
       </DialogHeader>
-      <Separator className="my-1" />
       <form
         onSubmit={handleCheckOut}
         className="grid max-w-lg grid-cols-2 gap-4"
@@ -137,7 +134,7 @@ export default function CheckOut(props: {
               after: new Date(reservation.end_date as Date),
             }}
           />
-          <InputError message={errors.checked_out_at} />
+          <InputError message={errors.check_out_at} />
         </div>
 
         {/* time */}
@@ -150,7 +147,6 @@ export default function CheckOut(props: {
             onChange={(e) => setTime(e.target.value)}
             required
           />
-          <InputError message={errors.checked_out_at} />
         </div>
 
         {/* final total */}

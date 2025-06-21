@@ -33,7 +33,11 @@ class ReservationRequest extends FormRequest
 
         return [
             // reservation data
-            "booking_number" => ["required", "integer", Rule::unique("reservations", "booking_number")->ignore($id)],
+            "booking_number" => [
+                "required",
+                "integer",
+                Rule::unique("reservations", "booking_number")->ignore($id),
+            ],
             "start_date" => ["required", "date"],
             "end_date" => ["required", "date", "after:start_date"],
             "length_of_stay" => ["required", "integer"],
@@ -44,7 +48,11 @@ class ReservationRequest extends FormRequest
             "extra_bed" => ["nullable", "integer"],
             "arrival_from" => ["nullable", "string", "max:255"],
             "employee_name" => ["required", "string", "max:255"],
-            "employee_id" => ["required", "string", Rule::exists("employees", "id")],
+            "employee_id" => [
+                "required",
+                "string",
+                Rule::exists("employees", "id")
+            ],
             "booking_type" => ["required", Rule::in(BookingTypeEnum::getValues())],
             "visit_purpose" => ["required", Rule::in(VisitPurposeEnum::getValues())],
             "room_package" => ["required", Rule::in(RoomPackageEnum::getValues())],

@@ -52,3 +52,8 @@ export const roomStatusBadgeColor = [
   acc[roomStatus as Enum.RoomStatus] = badgeColor[index];
   return acc;
 }, {} as Record<Enum.RoomStatus, string>);
+
+export const smokingTypeBadgeColor = {
+  "smoking": badgeColor[0],
+  "non-smoking": badgeColor[1],
+}

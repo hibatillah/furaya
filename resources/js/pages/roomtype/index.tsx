@@ -27,9 +27,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function RoomTypeIndex(props: {
   roomTypes: RoomType.Default[];
   facilities: Facility.Default[];
+  smokingTypes: Enum.SmokingType[];
   rateTypes: RateType.Default[];
 }) {
-  const { roomTypes, facilities, rateTypes } = props;
+  const { roomTypes, facilities, rateTypes, smokingTypes } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"detail" | "delete" | "edit" | null>(null);
@@ -57,8 +58,13 @@ export default function RoomTypeIndex(props: {
       header: "Nama",
     },
     {
+      id: "capacity",
       accessorKey: "capacity",
       header: "Kapasitas",
+      cell: ({ row }) => {
+        const capacity = row.getValue("capacity") as number;
+        return `${capacity} orang`;
+      },
     },
     {
       accessorKey: "base_rate",
@@ -66,6 +72,22 @@ export default function RoomTypeIndex(props: {
       cell: ({ row }) => {
         const baseRate = row.original.base_rate as number;
         return formatCurrency(baseRate);
+      },
+    },
+    {
+      id: "size",
+      accessorKey: "size",
+      header: "Luas Kamar",
+      cell: ({ row }) => {
+        const size = row.getValue("size") as number;
+
+        return !size ? (
+          "-"
+        ) : (
+          <span className="after:text-foreground relative after:absolute after:-end-2 after:top-0 after:text-[8px] after:content-['2']">
+            {size} m
+          </span>
+        );
       },
     },
     {
@@ -126,7 +148,11 @@ export default function RoomTypeIndex(props: {
             {({ table }) => (
               <DataTableControls table={table}>
                 <DataTableFilter table={table} />
-                <RoomTypeCreate facilities={facilities} rateTypes={rateTypes} />
+                <RoomTypeCreate
+                  facilities={facilities}
+                  rateTypes={rateTypes}
+                  smokingTypes={smokingTypes}
+                />
               </DataTableControls>
             )}
           </DataTable>
@@ -163,6 +189,7 @@ export default function RoomTypeIndex(props: {
               data={selectedRow}
               facilities={facilities}
               rateTypes={rateTypes}
+              smokingTypes={smokingTypes}
               onClose={handleDialogClose}
             />
           )}

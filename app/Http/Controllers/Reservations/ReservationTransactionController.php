@@ -1,65 +1,44 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Reservations;
 
-use App\Models\Reservations\ReservationTransaction;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Reservations\Reservation;
+use Inertia\Inertia;
 
 class ReservationTransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(string $id)
     {
-        //
-    }
+        $reservation = Reservation::with([
+            'reservationGuest:id,reservation_id,name',
+            'reservationRoom:id,reservation_id,room_number',
+            'reservationTransaction' => fn($q) => $q->orderBy('created_at')->select([
+                'id',
+                'reservation_id',
+                'amount',
+                'description',
+                'created_at',
+            ]),
+        ])
+            ->select([
+                'id',
+                'booking_number',
+                'start_date',
+                'end_date',
+                'length_of_stay',
+                'booking_type',
+                'payment_method',
+                'total_price',
+                'status',
+            ])
+            ->findOrFail($id);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(ReservationTransaction $reservationTransaction)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ReservationTransaction $reservationTransaction)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ReservationTransaction $reservationTransaction)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ReservationTransaction $reservationTransaction)
-    {
-        //
+        return Inertia::render("reservation/transaction", [
+            "reservation" => $reservation,
+        ]);
     }
 }

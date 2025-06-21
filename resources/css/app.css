@@ -200,6 +200,10 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+  
+  input[type="search"] {
+    @apply [&::-webkit-search-cancel-button]:appearance-none;
+  }
 
   input[type="number"] {
     @apply proportional-nums;

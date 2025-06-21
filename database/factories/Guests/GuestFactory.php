@@ -3,6 +3,7 @@
 namespace Database\Factories\Guests;
 
 use App\Enums\GenderEnum;
+use App\Models\Guests\Country;
 use App\Models\Guests\Nationality;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -26,6 +27,7 @@ class GuestFactory extends Factory
             "phone" => $this->faker->unique()->numerify('+628#########'),
             "profession" => $this->faker->jobTitle,
             "nationality" => Nationality::all()->random()->name,
+            "country" => Country::all()->random()->name,
             "address" => $this->faker->address,
         ];
     }

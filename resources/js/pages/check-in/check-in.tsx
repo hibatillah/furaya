@@ -14,12 +14,7 @@ import { isAfter, set } from "date-fns";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function CheckIn(props: {
-  data: Reservation.Default;
-  employee: Employee.Default;
-  status: Enum.RoomStatus[];
-  onClose: () => void;
-}) {
+export default function CheckIn(props: { data: Reservation.Default; employee: Employee.Default; status: Enum.RoomStatus[]; onClose: () => void }) {
   const { data: reservation, employee, status, onClose } = props;
 
   // define data list
@@ -50,7 +45,7 @@ export default function CheckIn(props: {
   const [date, setDate] = useState<Date>(initialDate);
   const [time, setTime] = useState<string>("14:00:00");
   const { data, setData, post, errors, processing } = useForm<CheckIn.Create>({
-    checked_in_at: initialDate,
+    check_in_at: initialDate,
     check_in_by: employee.user?.name || "",
     notes: "",
     room_status: "Check In" as Enum.RoomStatus,
@@ -67,7 +62,7 @@ export default function CheckIn(props: {
       seconds: parseInt(seconds),
     });
 
-    setData("checked_in_at", new Date(formatted).toISOString());
+    setData("check_in_at", new Date(formatted).toISOString());
   }, [date, time]);
 
   // Handle check in
@@ -107,9 +102,12 @@ export default function CheckIn(props: {
       <DialogHeader>
         <DialogTitle>Check In Reservasi</DialogTitle>
         {canCheckIn ? (
-          <DialogDescription className="mt-2">
-            <DataList data={dataList} />
-          </DialogDescription>
+          <>
+            <DialogDescription className="mt-2">
+              <DataList data={dataList} />
+            </DialogDescription>
+            <Separator className="my-1" />
+          </>
         ) : (
           <Alert>
             <AlertTitle>Belum Waktu Check In</AlertTitle>
@@ -117,7 +115,6 @@ export default function CheckIn(props: {
           </Alert>
         )}
       </DialogHeader>
-      <Separator className="my-1" />
       <form
         onSubmit={handleCheckIn}
         className="grid max-w-lg grid-cols-2 gap-4"
@@ -135,7 +132,7 @@ export default function CheckIn(props: {
               after: new Date(reservation.end_date as Date),
             }}
           />
-          <InputError message={errors.checked_in_at} />
+          <InputError message={errors.check_in_at} />
         </div>
 
         {/* time */}
@@ -148,7 +145,6 @@ export default function CheckIn(props: {
             onChange={(e) => setTime(e.target.value)}
             required
           />
-          <InputError message={errors.checked_in_at} />
         </div>
 
         {/* room status */}
@@ -176,7 +172,7 @@ export default function CheckIn(props: {
               ))}
             </SelectContent>
           </Select>
-          <InputError message={errors.checked_in_at} />
+          <InputError message={errors.check_in_at} />
         </div>
 
         {/* notes */}

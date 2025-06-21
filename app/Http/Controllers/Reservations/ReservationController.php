@@ -6,6 +6,7 @@ use App\Enums\BookingTypeEnum;
 use App\Enums\GenderEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\ReservationStatusEnum;
+use App\Enums\ReservationTransactionEnum;
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomPackageEnum;
 use App\Enums\RoomStatusEnum;
@@ -22,6 +23,7 @@ use App\Models\Rooms\RoomType;
 use App\Models\Managements\Employee;
 use App\Models\Reservations\GuestType;
 use App\Models\Reservations\ReservationRoom;
+use App\Models\Reservations\ReservationTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -30,6 +32,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -126,9 +129,6 @@ class ReservationController extends Controller
             // ---DEFINE DATA---
             // define reservation data
             $reservation = Arr::only($validated, [
-                "booking_number",
-                "start_date",
-                "end_date",
                 "length_of_stay",
                 "adults",
                 "pax",
@@ -213,15 +213,24 @@ class ReservationController extends Controller
                 $reservationGuest["country"] = $validated["country"];
 
                 // create reservation
-                $reservation = Reservation::create($reservation);
+                $reservation = Reservation::create(array_merge(
+                    $reservation,
+                    [
+                        "booking_number" => Reservation::generateBookingNumber(),
+                    ]
+                ));
                 $reservation->reservationRoom()->create($reservationRoom);
                 $reservation->reservationGuest()->create($reservationGuest);
                 $reservation->reservationTransaction()->create([
                     "amount" => $validated["total_price"],
+                    "type" => ReservationTransactionEnum::BOOKING,
+                    "is_paid" => $validated["advance_amount"] > 0,
                     "description" => "Create Booking",
                 ]);
                 $reservation->reservationTransaction()->create([
                     "amount" => $validated["advance_amount"],
+                    "type" => ReservationTransactionEnum::DEPOSIT,
+                    "is_paid" => $validated["advance_amount"] > 0,
                     "description" => $validated["advance_remarks"] || "Add Booking Advance",
                 ]);
             });
@@ -232,7 +241,7 @@ class ReservationController extends Controller
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             return back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan menambahkan reservasi.",
             ]);
         }
     }
@@ -291,48 +300,167 @@ class ReservationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(ReservationRequest $request, string $id)
     {
-        //
-    }
+        try {
+            $validated = $request->validated();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id) {}
+            // Find the existing reservation
+            $existingReservation = Reservation::findOrFail($id);
 
-    /**
-     * Show reservation transaction history
-     */
-    public function transaction(string $id)
-    {
-        $reservation = Reservation::with([
-            'reservationGuest:id,reservation_id,name',
-            'reservationRoom:id,reservation_id,room_number',
-            'reservationTransaction' => fn($q) => $q->orderBy('created_at')->select([
-                'id',
-                'reservation_id',
-                'amount',
-                'description',
-                'created_at',
-            ]),
-        ])
-            ->select([
-                'id',
-                'booking_number',
-                'start_date',
-                'end_date',
-                'length_of_stay',
-                'booking_type',
-                'payment_method',
-                'total_price',
-                'status',
-            ])
-            ->findOrFail($id);
+            // ---DEFINE DATA---
+            // define reservation data
+            $reservation = Arr::only($validated, [
+                "start_date",
+                "end_date",
+                "length_of_stay",
+                "adults",
+                "pax",
+                "total_price",
+                "children",
+                "arrival_from",
+                "guest_type",
+                "employee_name",
+                "employee_id",
+                "booking_type",
+                "visit_purpose",
+                "room_package",
+                "payment_method",
+                "status_acc",
+                "discount",
+                "discount_reason",
+                "commission_percentage",
+                "commission_amount",
+                "remarks",
+                "advance_remarks",
+                "advance_amount",
+            ]);
 
-        return Inertia::render("reservation/transaction", [
-            "reservation" => $reservation,
-        ]);
+            // define reservation room data
+            $reservationRoom = Arr::only($validated, [
+                "room_id",
+                "room_number",
+                "room_type",
+                "room_rate",
+                "bed_type",
+                "meal",
+                "view",
+            ]);
+
+            // define user guest data
+            $userData = Arr::only($validated, [
+                "name",
+                "email",
+            ]);
+            $guestData = Arr::only($validated, [
+                "nik_passport",
+                "phone",
+                "gender",
+                "birthdate",
+                "profession",
+                "nationality",
+                "address",
+            ]);
+
+            // ---UPDATE RESERVATION DATA---
+            DB::transaction(function () use (
+                $existingReservation,
+                $userData,
+                $guestData,
+                $reservation,
+                $reservationRoom,
+                $validated
+            ) {
+                // upsert user data based on `email`
+                $user = User::updateOrCreate(
+                    ['email' => $userData['email']],
+                    array_merge($userData, [
+                        "password" => Hash::make("haihaihai"),
+                        "role" => "guest",
+                    ])
+                );
+
+                // upsert guest data based on `nik_passport`
+                $guest = $user->guest()->updateOrCreate(
+                    ['nik_passport' => $guestData['nik_passport']],
+                    $guestData
+                );
+
+                // define reservation guest data
+                $reservationGuest = $guest->only([
+                    "nik_passport",
+                    "name",
+                    "phone",
+                    "email",
+                    "address",
+                    "nationality",
+                ]);
+                $reservationGuest["country"] = $validated["country"];
+
+                // update reservation
+                $existingReservation->update($reservation);
+
+                // update reservation room
+                $existingReservation->reservationRoom()->update($reservationRoom);
+
+                // update reservation guest
+                $existingReservation->reservationGuest()->update($reservationGuest);
+
+                // Update or create booking transaction if it doesn't exist
+                $bookingTransaction = $existingReservation->reservationTransaction()
+                    ->where('type', ReservationTransactionEnum::BOOKING)
+                    ->first();
+
+                if ($bookingTransaction) {
+                    $bookingTransaction->update([
+                        "amount" => $validated["total_price"],
+                        "is_paid" => $validated["advance_amount"] > 0,
+                    ]);
+                } else {
+                    $existingReservation->reservationTransaction()->create([
+                        "amount" => $validated["total_price"],
+                        "type" => ReservationTransactionEnum::BOOKING,
+                        "is_paid" => $validated["advance_amount"] > 0,
+                        "description" => "Create Booking",
+                    ]);
+                }
+
+                // Update or create deposit transaction if advance amount exists
+                if ($validated["advance_amount"] > 0) {
+                    $depositTransaction = $existingReservation->reservationTransaction()
+                        ->where('type', ReservationTransactionEnum::DEPOSIT)
+                        ->first();
+
+                    if ($depositTransaction) {
+                        $depositTransaction->update([
+                            "amount" => $validated["advance_amount"],
+                            "is_paid" => true,
+                            "description" => $validated["advance_remarks"] || "Add Booking Advance",
+                        ]);
+                    } else {
+                        $existingReservation->reservationTransaction()->create([
+                            "amount" => $validated["advance_amount"],
+                            "type" => ReservationTransactionEnum::DEPOSIT,
+                            "is_paid" => true,
+                            "description" => $validated["advance_remarks"] || "Add Booking Advance",
+                        ]);
+                    }
+                }
+            });
+
+            return redirect()->route("reservation.show", $id)
+                ->with("success", "Reservasi berhasil diperbarui");
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (ModelNotFoundException $e) {
+            return back()->withErrors([
+                "message" => "Reservasi tidak ditemukan.",
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                "message" => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

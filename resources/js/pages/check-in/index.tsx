@@ -109,7 +109,7 @@ export default function CheckInIndex(props: {
     },
     {
       id: "check_in_date",
-      accessorFn: (row) => row.formatted_checked_in_at,
+      accessorFn: (row) => row.formatted_check_in_at,
       header: "Check In",
       cell: ({ row }) => {
         const checkIn = row.getValue("check_in_date") as string;
@@ -123,7 +123,7 @@ export default function CheckInIndex(props: {
     },
     {
       id: "check_out_date",
-      accessorFn: (row) => row.formatted_checked_out_at,
+      accessorFn: (row) => row.formatted_check_out_at,
       header: "Check Out",
       cell: ({ row }) => {
         const checkOut = row.getValue("check_out_date") as string;
@@ -133,8 +133,8 @@ export default function CheckInIndex(props: {
     {
       id: "actions",
       cell: ({ row }) => {
-        const isCheckIn = row.original.check_in?.checked_in_at;
-        const isCheckOut = row.original.check_out?.checked_out_at;
+        const isCheckIn = row.original.check_in?.check_in_at;
+        const isCheckOut = row.original.check_out?.check_out_at;
 
         return (
           <DropdownMenu>

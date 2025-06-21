@@ -24,7 +24,7 @@ class RoomSeeder extends Seeder
     DB::table('rooms')->truncate();
 
     // define initial facilities
-    $facilities = ['Wifi', 'Televisi', "Kursi", "Meja", "Lemari", "Cermin", "Gantungan Baju", "Kulkas", "Brankas", "Handuk", "Sikat Gigi", "Selimut", "Bantal", "Pasta Gigi", "Gelas", "Pemanas Air", "Tissue", "Tempat Sampah", "Telepon Kabel", "AC", "Tirai Jendela", "Sabun", "Sampo", "Air Mineral", "Minibar", "Teh", "Kopi", "Hanger", "Sandal", "Hair Dryer", "Setrika", "Sofa", "Speaker"];
+    $facilities = ['Wifi', 'Televisi', "Kursi", "Meja", "Lemari", "Cermin", "Gantungan Baju", "Kulkas", "Brankas", "Handuk", "Sikat Gigi", "Selimut", "Bantal", "Pasta Gigi", "Gelas", "Pemanas Air", "Tissue", "Tempat Sampah", "Telepon Kabel", "AC", "Tirai Jendela", "Sabun", "Sampo", "Minibar",  "Sandal", "Hair Dryer", "Setrika", "Sofa", "Speaker"];
 
     // define initial bed types
     $bedTypes = ['Single', 'Double', 'Twin', 'Queen', 'King'];
@@ -65,6 +65,6 @@ class RoomSeeder extends Seeder
     }
 
     // rooms using rate type id from room type
-    Room::factory()->count(23)->create();
+    Room::factory()->count(28)->create();
   }
 }

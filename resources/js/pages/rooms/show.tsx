@@ -4,13 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
-import { roomConditionBadgeColor, roomStatusBadgeColor } from "@/static/room";
+import { roomConditionBadgeColor, roomStatusBadgeColor, smokingTypeBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { useMemo } from "react";
 
 export default function RoomShow(props: { room: Room.Default; reservations: Reservation.Default[] }) {
-  const { room, reservations } = props;
+  const { room } = props;
 
   // define page breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -24,19 +24,6 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
     },
   ];
 
-  // define badge for data
-  function BadgeData({ children, className }: { children?: React.ReactNode; className?: string }) {
-    if (!children) return "-";
-    return (
-      <Badge
-        variant="secondary"
-        className={cn("border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full font-medium", className)}
-      >
-        {children}
-      </Badge>
-    );
-  }
-
   const getFacilityList = useMemo(() => {
     if (!room.facility) return "-";
     return room.facility.map((facility) => facility.facility?.name).join(", ");
@@ -44,20 +31,66 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
 
   // define data list for room detail
   const dataList = [
-    { label: "Nomor Kamar", value: room.room_number },
-    { label: "Lantai", value: room.floor_number },
-    { label: "Harga", value: formatCurrency(room.price || 0) },
-    { label: "Kapasitas", value: `${room.capacity} orang` },
-    { label: "View", value: room.view ?? "-" },
-    { label: "Status Kamar", value: <BadgeData className={roomStatusBadgeColor[room.status as Enum.RoomStatus]}>{room.status}</BadgeData> },
+    {
+      label: "Nomor Kamar",
+      value: room.room_number,
+    },
+    {
+      label: "Lantai",
+      value: room.floor_number,
+    },
+    {
+      label: "Harga",
+      value: formatCurrency(room.price || 0),
+    },
+    {
+      label: "Kapasitas",
+      value: `${room.capacity} orang`,
+    },
+    {
+      label: "Luas Kamar",
+      value: room.size ? (
+        <span className="after:text-foreground relative after:absolute after:-end-2 after:top-0 after:text-[8px] after:content-['2']">
+          {room.size} m
+        </span>
+      ) : (
+        "-"
+      ),
+    },
+    {
+      label: "View",
+      value: room.view ?? "-",
+    },
+    {
+      label: "Jumlah Fasilitas",
+      value: room.count_facility ?? 0,
+    },
+    {
+      label: "Status Kamar",
+      value: <Badge className={roomStatusBadgeColor[room.status]}>{room.status}</Badge>,
+    },
     {
       label: "Kondisi",
-      value: <BadgeData className={cn("capitalize", roomConditionBadgeColor[room.condition as Enum.RoomCondition])}>{room.condition}</BadgeData>,
+
+      value: <Badge className={cn("capitalize", roomConditionBadgeColor[room.condition])}>{room.condition}</Badge>,
     },
-    { label: "Tipe Kamar", value: <BadgeData>{room.room_type?.name}</BadgeData> },
-    { label: "Tipe Tempat Tidur", value: <BadgeData>{room.bed_type?.name}</BadgeData> },
-    { label: "Jumlah Fasilitas", value: room.count_facility ?? 0 },
-    { label: "Fasilitas", value: getFacilityList },
+    {
+      label: "Tipe Kamar",
+      value: <Badge variant="outline">{room.room_type?.name}</Badge>,
+    },
+    {
+      label: "Tipe Tempat Tidur",
+      value: <Badge variant="outline">{room.bed_type?.name}</Badge>,
+    },
+    {
+      label: "Smoking Type",
+
+      value: <Badge className={cn("capitalize", smokingTypeBadgeColor[room.smoking_type])}>{room.smoking_type}</Badge>,
+    },
+    {
+      label: "Fasilitas",
+      value: getFacilityList,
+    },
   ];
 
   return (

@@ -26,7 +26,9 @@ class ReservationFactory extends Factory
      */
     public function definition(): array
     {
-        $room = Room::all()->random();
+        $now = now()->format('Ymd');
+
+        // reservation details
         $startDate = Carbon::instance(
             $this->faker->dateTimeBetween('-7 day', '+1 month')
         );
@@ -34,7 +36,15 @@ class ReservationFactory extends Factory
             $this->faker->numberBetween(1, 3)
         );
         $lengthOfStay = $startDate->diffInDays($endDate);
+        $status = $this->faker->randomElement([
+            ReservationStatusEnum::BOOKED,
+            ReservationStatusEnum::PENDING,
+            ReservationStatusEnum::CHECKED_IN,
+            ReservationStatusEnum::CANCELLED,
+        ]);
 
+        // room and guest details
+        $room = Room::all()->random();
         $adults = $this->faker->numberBetween(1, 3);
         $children = $this->faker->numberBetween(0, 2);
         $pax = $adults + $children;
@@ -42,12 +52,10 @@ class ReservationFactory extends Factory
         $employee = Employee::with('user')->get()->random();
 
         return [
-            "start_date" => $startDate->format("Y-m-d"),
-            "end_date" => $endDate->format("Y-m-d"),
-            "booking_number" => $this->faker
-                ->unique()
-                ->numberBetween(100000, 999999),
-            "arrival_from" => $this->faker->city,
+            "start_date" => $startDate,
+            "end_date" => $endDate,
+            "booking_number" => $now . '-' . $this->faker->unique()->numerify('#####'),
+            "arrival_from" => strtoupper($this->faker->city),
             "children" => $children,
             "adults" => $adults,
             "pax" => $pax,
@@ -56,24 +64,24 @@ class ReservationFactory extends Factory
             "guest_type" => GuestType::all()->random()->name,
             "employee_name" => $employee->user->name,
             "employee_id" => $employee->id,
-            "status" => $this->faker->randomElement([
-                ReservationStatusEnum::BOOKED,
-                ReservationStatusEnum::PENDING,
-                ReservationStatusEnum::CHECKED_IN,
-            ]),
+            "status" => $status,
             "booking_type" => $this->faker->randomElement(BookingTypeEnum::getValues()),
             "visit_purpose" => $this->faker->randomElement(VisitPurposeEnum::getValues()),
             "room_package" => $this->faker->randomElement(RoomPackageEnum::getValues()),
             "payment_method" => $this->faker->randomElement(PaymentEnum::getValues()),
             "status_acc" => StatusAccEnum::APPROVED,
-            "discount" => 0,
+            "discount" => $this->faker->numberBetween(0, 25),
             "discount_reason" => null,
             "commission_percentage" => 0,
             "commission_amount" => 0,
             "remarks" => $this->faker->sentence,
             "advance_remarks" => $this->faker->sentence,
-            "advance_amount" => 100000,
-            "canceled_at" => null,
+            "advance_amount" => $this->faker->numberBetween(100000, 200000),
+            "canceled_at" => $status === ReservationStatusEnum::CANCELLED
+                ? $startDate->copy()->addDays(
+                    $this->faker->numberBetween(-1, -3)
+                )
+                : null,
         ];
     }
 }

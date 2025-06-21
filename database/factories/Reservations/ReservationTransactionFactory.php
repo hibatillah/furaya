@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Reservations;
 
+use App\Enums\ReservationTransactionEnum;
 use App\Models\Reservations\Reservation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,8 +22,10 @@ class ReservationTransactionFactory extends Factory
 
         return [
             "reservation_id" => $reservation->id,
-            "description" => "Booking Payment",
             "amount" => $reservation->total_price,
+            "type" => ReservationTransactionEnum::BOOKING,
+            "is_paid" => $this->faker->boolean(80), // 80% chance of true
+            "description" => $this->faker->sentence,
         ];
     }
 }

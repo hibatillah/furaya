@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rooms;
 
+use App\Enums\SmokingTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rooms\RoomTypeRequest;
 use App\Models\Rooms\Facility;
@@ -24,11 +25,13 @@ class RoomTypeController extends Controller
         $roomTypes = RoomType::with('facility', 'rateType')->latest()->get();
         $facilities = Facility::all();
         $rateTypes = RateType::all();
+        $smokingTypes = SmokingTypeEnum::getValues();
 
         return Inertia::render('roomtype/index', [
             'roomTypes' => $roomTypes,
             'facilities' => $facilities,
             'rateTypes' => $rateTypes,
+            'smokingTypes' => $smokingTypes,
         ]);
     }
 

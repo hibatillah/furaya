@@ -2,6 +2,7 @@
 
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
+use App\Enums\SmokingTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -32,6 +33,8 @@ return new class extends Migration
             $table->string("code")->unique();
             $table->string('name')->unique();
             $table->integer('capacity');
+            $table->float("size", 4, 2);
+            $table->enum("smoking_type", SmokingTypeEnum::getValues());
             $table->float('base_rate', 8, 2)->nullable();
             $table->foreignUuid("rate_type_id")
                 ->nullable()
@@ -62,6 +65,8 @@ return new class extends Migration
                 ->default('ready');
             $table->float("price", 8, 2);
             $table->integer("capacity");
+            $table->float("size", 4, 2);
+            $table->enum("smoking_type", SmokingTypeEnum::getValues());
             $table->foreignUuid("rate_type_id")
                 ->nullable()
                 ->constrained("rate_types")

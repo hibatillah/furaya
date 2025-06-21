@@ -11,7 +11,9 @@ import { useForm } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export default function RoomTypeCreate({ facilities, rateTypes }: { facilities: Facility.Default[]; rateTypes: RateType.Default[] }) {
+export default function RoomTypeCreate(props: { facilities: Facility.Default[]; rateTypes: RateType.Default[]; smokingTypes: Enum.SmokingType[] }) {
+  const { facilities, rateTypes, smokingTypes } = props;
+
   const { data, setData, post, errors, processing, reset } = useForm<RoomType.Create>();
 
   const [open, setOpen] = useState(false);
@@ -144,7 +146,7 @@ export default function RoomTypeCreate({ facilities, rateTypes }: { facilities: 
                 id="base_rate"
                 type="number"
                 min={0}
-                step={25000}
+                step="any"
                 value={data.base_rate}
                 placeholder="Tarif Dasar"
                 onChange={(e) => setData("base_rate", parseFloat(e.target.value))}
@@ -179,6 +181,52 @@ export default function RoomTypeCreate({ facilities, rateTypes }: { facilities: 
               </span>
             </div>
             <InputError message={errors.capacity} />
+          </div>
+
+          {/* size */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="size">Luas Kamar</Label>
+            <div className="relative">
+              <Input
+                id="size"
+                type="number"
+                value={data.size}
+                placeholder="Input luas kamar"
+                onChange={(e) => setData("size", parseInt(e.target.value))}
+                autoComplete="off"
+                disableHandle
+                required
+              />
+              <span className="text-muted-foreground absolute inset-y-0 end-4 flex items-center after:absolute after:-end-1.5 after:top-1 after:text-[8px] after:content-['2']">
+                m
+              </span>
+            </div>
+            <InputError message={errors.size} />
+          </div>
+
+          {/* smoking type */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="smoking_type">Smoking Type</Label>
+            <Select
+              value={data.smoking_type}
+              onValueChange={(value) => setData("smoking_type", value as Enum.SmokingType)}
+            >
+              <SelectTrigger id="smoking_type">
+                <SelectValue placeholder="Pilih Smoking Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {smokingTypes.map((type) => (
+                  <SelectItem
+                    key={type}
+                    value={type}
+                    className="capitalize"
+                  >
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <InputError message={errors.rate_type_id} />
           </div>
 
           {/* facilities */}

@@ -9,7 +9,6 @@ declare namespace Reservation {
     pax: number | "";
     total_price: number | "";
     children?: number | "";
-    extra_bed?: number | "";
     arrival_from?: string;
     guest_type?: string;
     employee_name: string;
@@ -39,12 +38,12 @@ declare namespace Reservation {
     is_finished?: boolean;
     formatted_start_date?: string;
     formatted_end_date?: string;
-    formatted_checked_in_at?: string;
-    formatted_checked_out_at?: string;
+    formatted_check_in_at?: string;
+    formatted_check_out_at?: string;
   }
 
   interface Default extends Base, Addition {}
-  type Create = Omit<Base, "id" | "employee"> & ReservationRoom.Create & Guest.Create;
+  type Create = Omit<Base, "id" | "booking_number" | "employee"> & ReservationRoom.Create & Guest.Create;
   type Update = Partial<Omit<Base, "employee"> & ReservationRoom.Update & ReservationGuest.Update>;
 }
 
@@ -100,9 +99,10 @@ declare namespace ReservationTransaction {
     id: string;
     reservation_id: string;
     reservation?: Reservation.Default;
-    date: Date | string;
-    description: string;
     amount: number | "";
+    transaction_type: Enum.ReservationTransaction;
+    is_paid: boolean;
+    description: string;
   }
 
   interface Addition {}
@@ -116,7 +116,7 @@ declare namespace CheckIn {
     id: string;
     reservation_id: string;
     reservation?: Reservation.Default;
-    checked_in_at: Date | string;
+    check_in_at: Date | string;
     check_in_by: string;
     employee_id: string;
     employee?: Employee.Default;
@@ -127,7 +127,7 @@ declare namespace CheckIn {
   interface Default extends Base, Addition {}
   type Create = Omit<Base, "id" | "reservation" | "employee"> & {
     room_status?: Enum.RoomStatus;
-  }
+  };
   type Update = Partial<Omit<Base, "reservation" | "employee">>;
 }
 
@@ -136,7 +136,7 @@ declare namespace CheckOut {
     id: string;
     reservation_id: string;
     reservation?: Reservation.Default;
-    checked_out_at: Date | string;
+    check_out_at: Date | string;
     employee_id: string;
     employee?: Employee.Default;
     final_total: number | "";
@@ -146,6 +146,6 @@ declare namespace CheckOut {
 
   type Create = Omit<Default, "id" | "reservation" | "employee"> & {
     room_status?: Enum.RoomStatus;
-  }
+  };
   type Update = Partial<Omit<Default, "reservation" | "employee">>;
 }

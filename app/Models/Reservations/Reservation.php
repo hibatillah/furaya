@@ -39,14 +39,28 @@ class Reservation extends BaseModel
     }
 
     /**
+     * Generate a unique booking number
+     * based on the current date and count of today's reservations
+     */
+    public static function generateBookingNumber(): string
+    {
+        $date = now()->format('Ymd');
+        $count = Reservation::whereDate('created_at', today())->count() + 1;
+        $number = str_pad($count, 5, '0', STR_PAD_LEFT);
+
+        return "{$date}-{$number}";
+    }
+
+
+    /**
      * appends custom attributes
      */
     protected $appends = [
         'is_finished',
         'formatted_start_date',
         'formatted_end_date',
-        'formatted_checked_in_at',
-        'formatted_checked_out_at',
+        'formatted_check_in_at',
+        'formatted_check_out_at',
     ];
 
     public function getIsFinishedAttribute()
@@ -78,20 +92,20 @@ class Reservation extends BaseModel
         return Carbon::parse($this->end_date)->translatedFormat('j F Y');
     }
 
-    public function getFormattedCheckedInAtAttribute()
+    public function getFormattedCheckInAtAttribute()
     {
-        if ($this->checkIn?->checked_in_at) {
-            return Carbon::parse($this->checkIn->checked_in_at)
+        if ($this->checkIn?->check_in_at) {
+            return Carbon::parse($this->checkIn->check_in_at)
                 ->translatedFormat('d M Y, H:i') . ' WIB';
         }
 
         return null;
     }
 
-    public function getFormattedCheckedOutAtAttribute()
+    public function getFormattedCheckOutAtAttribute()
     {
-        if ($this->checkOut?->checked_out_at) {
-            return Carbon::parse($this->checkOut->checked_out_at)
+        if ($this->checkOut?->check_out_at) {
+            return Carbon::parse($this->checkOut->check_out_at)
                 ->translatedFormat('d M Y H:i') . ' WIB';
         }
 

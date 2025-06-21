@@ -59,7 +59,6 @@ export default function ReservationsCreate(props: {
 
   const { data, setData, post, processing, errors } = useForm<Reservation.Create>({
     // reservation data
-    booking_number: 0,
     start_date: startDate as Date,
     end_date: endDate as Date,
     length_of_stay: MIN_LENGTH_OF_STAY,
@@ -68,7 +67,6 @@ export default function ReservationsCreate(props: {
     pax: MIN_PAX,
     total_price: 0,
     children: 0,
-    extra_bed: 0,
     arrival_from: "",
     guest_type: "",
     employee_name: employee.user?.name || "",
@@ -126,6 +124,12 @@ export default function ReservationsCreate(props: {
             id: "get-guest",
             description: "Data tamu diterapkan ke form",
           });
+
+          const nationality = nationalities.find((e) => e.name === guest.nationality);
+          const country = countries.find((e) => e.name === guest.country);
+
+          setSelectedNationality(nationality?.id);
+          setSelectedCountry(country?.id);
 
           // apply guest data to form
           setData((prev) => ({
@@ -277,6 +281,12 @@ export default function ReservationsCreate(props: {
    */
   useEffect(() => {
     if (startDate && endDate) {
+      const start = startDate as Date;
+      const end = endDate as Date;
+
+      setData("start_date", format(start, "yyyy-MM-dd"));
+      setData("end_date", format(end, "yyyy-MM-dd"));
+
       getAvailableRoomTypes();
     }
   }, [startDate, endDate]);

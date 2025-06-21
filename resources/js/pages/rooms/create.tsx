@@ -32,8 +32,9 @@ export default function RoomsCreate(props: {
   facilities: Facility.Default[];
   roomStatuses: Enum.RoomStatus[];
   mealTypes: Meal.Default[];
+  smokingTypes: Enum.SmokingType[];
 }) {
-  const { roomTypes, bedTypes, rateTypes, roomConditions, facilities, roomStatuses, mealTypes } = props;
+  const { roomTypes, bedTypes, rateTypes, roomConditions, facilities, roomStatuses, mealTypes, smokingTypes } = props;
 
   // define facility options for multiselect
   const facilityOptions = useMemo(() => {
@@ -58,6 +59,8 @@ export default function RoomsCreate(props: {
     capacity: "",
     condition: initialCondition,
     status: initialStatus,
+    size: "",
+    smoking_type: "" as Enum.SmokingType,
     room_type_id: "",
     bed_type_id: "",
     rate_type_id: "",
@@ -71,6 +74,8 @@ export default function RoomsCreate(props: {
     if (selectedRoomType) {
       setData("price", selectedRoomType.base_rate || "");
       setData("capacity", selectedRoomType.capacity || "");
+      setData("size", selectedRoomType.size || "");
+      setData("smoking_type", selectedRoomType.smoking_type || ("" as Enum.SmokingType));
       setSelectedFacilities(
         selectedRoomType.facility?.map((item) => ({
           value: item.id,
@@ -365,8 +370,54 @@ export default function RoomsCreate(props: {
               <InputError message={errors.condition} />
             </div>
 
+            {/* size */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="size">Luas Kamar</Label>
+              <div className="relative">
+                <Input
+                  id="size"
+                  type="number"
+                  value={data.size}
+                  placeholder="Input luas kamar"
+                  onChange={(e) => setData("size", parseInt(e.target.value))}
+                  autoComplete="off"
+                  disableHandle
+                  required
+                />
+                <span className="text-muted-foreground absolute inset-y-0 end-4 flex items-center after:absolute after:-end-1.5 after:top-1 after:text-[8px] after:content-['2']">
+                  m
+                </span>
+              </div>
+              <InputError message={errors.size} />
+            </div>
+
+            {/* smoking type */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="smoking_type">Smoking Type</Label>
+              <Select
+                value={data.smoking_type}
+                onValueChange={(value) => setData("smoking_type", value as Enum.SmokingType)}
+              >
+                <SelectTrigger id="smoking_type">
+                  <SelectValue placeholder="Pilih Smoking Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {smokingTypes.map((type) => (
+                    <SelectItem
+                      key={type}
+                      value={type}
+                      className="capitalize"
+                    >
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.rate_type_id} />
+            </div>
+
             {/* view */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="view">View</Label>
               <Input
                 id="view"
@@ -380,7 +431,7 @@ export default function RoomsCreate(props: {
             </div>
 
             {/* image */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="image">Gambar</Label>
               <Input
                 id="image"

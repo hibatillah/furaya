@@ -4,6 +4,7 @@ namespace App\Http\Requests\Rooms;
 
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
+use App\Enums\SmokingTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
@@ -38,6 +39,8 @@ class RoomRequest extends FormRequest
             'condition' => ['required', Rule::in(RoomConditionEnum::getValues())],
             'price' => ['required', 'numeric', 'min:1'],
             'capacity' => ['required', 'integer', 'min:1'],
+            "size" => ["nullable", "numeric", "min:0"],
+            "smoking_type" => ["nullable", "string", Rule::in(SmokingTypeEnum::getValues())],
             'room_type_id' => ['required', Rule::exists("room_types", "id")],
             'bed_type_id' => ['required', Rule::exists("bed_types", "id")],
             'rate_type_id' => ['required', Rule::exists("rate_types", "id")],

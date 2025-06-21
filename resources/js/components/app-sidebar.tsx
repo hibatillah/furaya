@@ -151,7 +151,7 @@ const employeeMenuItems: Record<string, NavItem[]> = {
   ],
   Kamar: [
     {
-      title: "Kamar",
+      title: "Status Kamar",
       href: route("room.index"),
       icon: HotelIcon,
     },

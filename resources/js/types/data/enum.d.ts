@@ -40,4 +40,8 @@ declare namespace Enum {
   export type Payment = "cash" | "bank transfer" | "debit card" | "digital wallet" | "credit card" | "voucher" | "direct billing" | "other";
 
   export type ReservationStatus = "pending" | "booked" | "checked in" | "checked out" | "no show" | "cancelled" | "overdue";
+
+  export type SmokingType = "smoking" | "non-smoking";
+
+  export type ReservationTransaction = "booking" | "deposit" | "charge" | "refund" | "discount";
 }

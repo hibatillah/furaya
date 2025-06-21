@@ -13,9 +13,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "verified", "role:admin"])->group(function () {
   /** room resource routes */
-  Route::get("kamar/tambah", [RoomController::class, "create"])->name("room.create");
   Route::resource("/kamar", RoomController::class)
-    ->except(["index", "create", "show"])
+    ->except(["index", "crete", "show"])
     ->parameters(["kamar" => "id"])
     ->names([
       "store" => "room.store",
