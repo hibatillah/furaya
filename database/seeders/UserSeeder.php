@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Enums\GenderEnum;
 use App\Enums\RoleEnum;
 use App\Models\Managements\Department;
+use App\Models\Managements\Employee;
 use App\Models\User;
 use App\Utils\DateHelper;
 use Illuminate\Database\Seeder;
@@ -18,9 +18,10 @@ class UserSeeder extends Seeder
     $password = bcrypt('haihaihai');
 
     // truncate existing data to avoid duplicates
-    DB::table('users')->truncate();
+    DB::table('guests')->truncate();
     DB::table('employees')->truncate();
     DB::table('departments')->truncate();
+    DB::table('users')->truncate();
 
     // define user data
     $users = [
@@ -49,26 +50,26 @@ class UserSeeder extends Seeder
       'name' => 'Front Desk',
     ]);
 
-    $employee = User::create([
-      'name' => 'employee',
-      'email' => 'employee@gmail.com',
-      'password' => $password,
-      'role' => RoleEnum::EMPLOYEE,
-    ]);
+    // create employees data
+    foreach (range(1, 3) as $i) {
+      $employeeUser = User::create([
+        'name' => 'employee' . $i,
+        'email' => 'employee' . $i . '@gmail.com',
+        'password' => $password,
+        'role' => RoleEnum::EMPLOYEE,
+      ]);
 
-    $employee->employee()->create([
-      'department_id' => $department->id,
-      'gender' => GenderEnum::MALE,
-      'hire_date' => $dateISO,
-      'phone' => '081234567890',
-      'address' => 'Jl. Umban Sari',
-      'salary' => 2500000,
-    ]);
+      Employee::factory()->create([
+        'user_id' => $employeeUser->id,
+        'department_id' => $department->id,
+      ]);
+    }
 
     // create user data as guest
-    User::factory()->count(10)->create([
+    User::factory()->count(10)->sequence(fn($sequence) => [
+      'email' => "guest{$sequence->index}@gmail.com",
       'password' => $password,
       'role' => RoleEnum::GUEST,
-    ]);
+    ])->create();
   }
 }

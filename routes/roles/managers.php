@@ -1,13 +1,12 @@
 <?php
 
-use App\Http\Controllers\Guests\GuestController;
 use App\Http\Controllers\Managements\DepartmentController;
 use App\Http\Controllers\Managements\EmployeeController;
 use App\Http\Controllers\Managements\AdminController;
 use App\Http\Controllers\Managements\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(["auth", "verified", "role:manager"])->group(function () {
+Route::middleware("role:manager")->group(function () {
     /** user resource routes */
     Route::resource("user", UserController::class)
         ->only(["index", "update", "destroy"])

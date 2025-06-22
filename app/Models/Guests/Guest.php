@@ -3,6 +3,7 @@
 namespace App\Models\Guests;
 
 use App\Models\BaseModel;
+use App\Models\Reservations\Reservation;
 use App\Models\Reservations\ReservationGuest;
 use App\Models\User;
 use Carbon\Carbon;

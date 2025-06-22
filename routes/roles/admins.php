@@ -11,7 +11,7 @@ use App\Http\Controllers\Rooms\BedTypeController;
 use App\Http\Controllers\Rooms\FacilityController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(["auth", "verified", "role:admin"])->group(function () {
+Route::middleware("role:admin")->group(function () {
   /** room resource routes */
   Route::resource("/kamar", RoomController::class)
     ->except(["index", "crete", "show"])

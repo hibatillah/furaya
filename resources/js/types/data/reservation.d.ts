@@ -100,7 +100,7 @@ declare namespace ReservationTransaction {
     reservation_id: string;
     reservation?: Reservation.Default;
     amount: number | "";
-    transaction_type: Enum.ReservationTransaction;
+    type: Enum.ReservationTransaction;
     is_paid: boolean;
     description: string;
   }

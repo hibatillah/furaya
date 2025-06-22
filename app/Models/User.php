@@ -6,10 +6,11 @@ namespace App\Models;
 
 use App\Models\Guests\Guest;
 use App\Models\Managements\Employee;
+use App\Models\Reservations\Reservation;
+use App\Models\Reservations\ReservationGuest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
@@ -62,5 +63,17 @@ class User extends Authenticatable
     public function guest()
     {
         return $this->hasOne(Guest::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasManyThrough(
+            Reservation::class,
+            ReservationGuest::class,
+            'guest_id',          // foreign key on ReservationGuest
+            'id',                // foreign key on Reservation
+            'guest.id',          // local key on Guest (via hasOne)
+            'reservation_id'     // local key on ReservationGuest
+        );
     }
 }

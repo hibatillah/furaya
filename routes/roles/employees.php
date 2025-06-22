@@ -4,7 +4,7 @@ use App\Http\Controllers\Reservations\CheckInController;
 use App\Http\Controllers\Reservations\CheckOutController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(["auth", "verified", "role:employee"])->group(function () {
+Route::middleware("role:employee")->group(function () {
   /** check in routes */
   Route::resource("check-in", CheckInController::class)
     ->only(["index", "store"])

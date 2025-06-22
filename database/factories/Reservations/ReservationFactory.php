@@ -27,21 +27,32 @@ class ReservationFactory extends Factory
     public function definition(): array
     {
         $now = now()->format('Ymd');
+        $chances = $this->faker->numberBetween(1, 100);
 
         // reservation details
         $startDate = Carbon::instance(
-            $this->faker->dateTimeBetween('-7 day', '+1 month')
+            $this->faker->dateTimeBetween('-8 month', '+6 month')
         );
         $endDate = $startDate->copy()->addDays(
             $this->faker->numberBetween(1, 3)
         );
         $lengthOfStay = $startDate->diffInDays($endDate);
-        $status = $this->faker->randomElement([
-            ReservationStatusEnum::BOOKED,
-            ReservationStatusEnum::PENDING,
-            ReservationStatusEnum::CHECKED_IN,
-            ReservationStatusEnum::CANCELLED,
-        ]);
+
+        if ($endDate->isBefore(now())) {
+            $status = match (true) {
+                $chances <= 60 => ReservationStatusEnum::CHECKED_OUT,
+                $chances <= 80 => ReservationStatusEnum::OVERDUE,
+                $chances <= 95 => ReservationStatusEnum::CANCELLED,
+                default        => ReservationStatusEnum::NO_SHOW,
+            };
+        } else if ($startDate->isAfter(now()->endOfDay())) {
+            $status = match (true) {
+                $chances <= 80 => ReservationStatusEnum::BOOKED,
+                default        => ReservationStatusEnum::PENDING,
+            };
+        } else {
+            $status = ReservationStatusEnum::CHECKED_IN;
+        }
 
         // room and guest details
         $room = Room::all()->random();
@@ -54,7 +65,7 @@ class ReservationFactory extends Factory
         return [
             "start_date" => $startDate,
             "end_date" => $endDate,
-            "booking_number" => $now . '-' . $this->faker->unique()->numerify('#####'),
+            "booking_number" => $now . $this->faker->unique()->numerify('####'),
             "arrival_from" => strtoupper($this->faker->city),
             "children" => $children,
             "adults" => $adults,

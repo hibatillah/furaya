@@ -3,12 +3,12 @@
 import * as React from "react";
 import { LabelList, Pie, PieChart } from "recharts";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { pieChartColors } from "./utils";
 
-export function ChartCountBedType({ data, className }: { data: Record<string, number>; className?: string }) {
+export function ChartReservationStatusDistribution({ data, className }: { data: Record<string, number>; className?: string }) {
   const chartData = React.useMemo(() => {
     return Object.entries(data).map(([bedType, count], index) => ({
       bedType,
@@ -30,13 +30,13 @@ export function ChartCountBedType({ data, className }: { data: Record<string, nu
   return (
     <Card className={cn("flex flex-col gap-2", className)}>
       <CardHeader className="items-center pb-0">
-        <CardTitle>Jumlah Penggunaan Kasur</CardTitle>
-        <CardDescription className="text-center text-pretty">Pembagian Penggunaan Tipe Kasur Berdasarkan Kamar</CardDescription>
+        <CardTitle>Status Reservasi Mendatang</CardTitle>
+        <CardDescription className="text-center text-pretty">Pembagian status untuk reservasi mendatang</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={config}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square h-[300px]"
         >
           <PieChart>
             <ChartTooltip
@@ -44,13 +44,16 @@ export function ChartCountBedType({ data, className }: { data: Record<string, nu
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
+              label={{
+                fill: "var(--color-foreground)",
+              }}
               data={chartData}
               dataKey="count"
               nameKey="bedType"
             >
               <LabelList
                 dataKey="bedType"
-                className="fill-background"
+                className="fill-black"
                 stroke="none"
                 fontSize={12}
                 offset={10}
@@ -63,12 +66,6 @@ export function ChartCountBedType({ data, className }: { data: Record<string, nu
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="text-muted-foreground flex justify-center gap-2">
-        <span className="text-foreground font-bold">{totalType}</span>
-        <span>Tipe kasur pada</span>
-        <span className="text-foreground font-semibold">{total.toLocaleString()}</span>
-        <span>kamar.</span>
-      </CardFooter>
     </Card>
   );
 }

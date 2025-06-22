@@ -1,50 +1,32 @@
-import { ChartCountBedType } from "@/components/charts/count-bed-type";
-import { ChartCountRoomType } from "@/components/charts/count-room-type";
-import { ChartCountUserRole } from "@/components/charts/count-user-role";
-import { ChartMostUsedFacility } from "@/components/charts/most-used-facility";
+import { ChartCountBedType } from "@/components/charts/count-bed-type-chart";
+import { ChartCountFacilityUsed } from "@/components/charts/count-facility-used-chart";
+import { ChartCountGuestNationality } from "@/components/charts/count-guest-nationality-chart";
+import { ChartCountGuestReservation } from "@/components/charts/count-guest-reservation-chart";
+import { ChartCountMealReservation } from "@/components/charts/count-meal-reservation-chart";
+import { ChartCountRoomType } from "@/components/charts/count-room-type-chart";
+import { ChartCountUserRole } from "@/components/charts/count-user-role-chart";
+import { ChartDailyReservationVolume } from "@/components/charts/daily-reservation-volume-chart";
+import { ChartMonthlyReservationVolume } from "@/components/charts/monthly-reservation-volume-chart";
+import { ChartMostRoomTypeReservation } from "@/components/charts/most-room-type-reservation-chart";
+import { ChartReservationStatusDistribution } from "@/components/charts/reservation-status-distribution-chart";
 import DashboardTabs, { DashboardTabsData } from "@/components/dashboard-tabs";
-import { InputDate } from "@/components/input-date";
 import AppLayout from "@/layouts/app-layout";
 import { SharedData, type BreadcrumbItem } from "@/types";
 import { Head, usePage } from "@inertiajs/react";
-import { endOfMonth, startOfMonth } from "date-fns";
 import { CalendarCheckIcon, CircleDollarSignIcon, EarthIcon, HotelIcon, UsersIcon } from "lucide-react";
-import { useState } from "react";
-import { DateRange } from "react-day-picker";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: route("dashboard"),
   },
 ];
 
-type mode = "month" | "year";
+export default function Dashboard({ charts }: { charts: Record<string, Record<string, number>> }) {
+  console.log(charts);
 
-export default function Dashboard({
-  userRoleCount,
-  roomTypeCount,
-  bedTypeCount,
-  mostUsedFacilityByRoom,
-}: {
-  userRoleCount: Record<Enum.Role, number>;
-  roomTypeCount: Record<string, number>;
-  bedTypeCount: Record<string, number>;
-  mostUsedFacilityByRoom: Record<string, number>;
-}) {
   const { auth } = usePage<SharedData>().props;
   const role = auth.user?.role as Enum.Role;
-
-  // set mode how data will be shown
-  const [mode, setMode] = useState<mode>("month");
-
-  // set date range based on mode
-  const firstDateMonth = startOfMonth(new Date());
-  const lastDateMonth = endOfMonth(new Date());
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: firstDateMonth,
-    to: lastDateMonth,
-  });
 
   let dashboardMenu: DashboardTabsData[] = [
     {
@@ -52,17 +34,29 @@ export default function Dashboard({
       icon: CalendarCheckIcon,
       content: (
         <div className="grid w-full gap-4 lg:grid-cols-2 xl:grid-cols-6">
-          <ChartCountUserRole
-            data={userRoleCount}
-            className="xl:col-span-2"
+          <ChartDailyReservationVolume
+            data={charts.dailyReservationVolume}
+            className="lg:col-span-full"
           />
-          <ChartCountRoomType
-            data={roomTypeCount}
-            className="xl:col-span-2"
+          <ChartMonthlyReservationVolume
+            data={charts.monthlyReservationVolume}
+            className="lg:col-span-3"
           />
-          <ChartCountBedType
-            data={bedTypeCount}
-            className="xl:col-span-2"
+          <ChartCountGuestReservation
+            data={charts.topGuestsByReservationCount}
+            className="xl:col-span-3"
+          />
+          <ChartMostRoomTypeReservation
+            data={charts.roomTypePopularity}
+            className="lg:col-span-2"
+          />
+          <ChartReservationStatusDistribution
+            data={charts.reservationStatusDistribution}
+            className="lg:col-span-2"
+          />
+          <ChartCountMealReservation
+            data={charts.topMealByReservationCount}
+            className="lg:col-span-2"
           />
         </div>
       ),
@@ -72,18 +66,30 @@ export default function Dashboard({
       icon: HotelIcon,
       content: (
         <div className="grid w-full gap-4 xl:grid-cols-3 2xl:grid-cols-3">
-          <ChartMostUsedFacility
-            data={mostUsedFacilityByRoom}
+          <ChartCountRoomType data={charts.roomTypeCount} />
+          <ChartCountBedType data={charts.bedTypeCount} />
+          <ChartCountFacilityUsed
+            data={charts.mostUsedFacilityByRoom}
             className="xl:col-span-2"
           />
-          <ChartCountRoomType data={roomTypeCount} />
         </div>
       ),
     },
     {
       title: "Demografi",
       icon: EarthIcon,
-      content: <p>Content for Tab Demografi</p>,
+      content: (
+        <div className="grid w-full gap-4 xl:grid-cols-6">
+          <ChartCountGuestNationality
+            data={charts.guestNationalityDistribution}
+            className="xl:col-span-3"
+          />
+          <ChartCountUserRole
+            data={charts.userRoleCount}
+            className="xl:col-span-2"
+          />
+        </div>
+      ),
     },
     {
       title: "Karyawan",
@@ -108,18 +114,18 @@ export default function Dashboard({
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <div className="">
+      <div>
         <DashboardTabs
           data={dashboardMenu}
           className="w-full"
         >
-          <InputDate
+          {/* <InputDate
             mode="range"
             value={dateRange}
             onChange={(date) => setDateRange(date as DateRange)}
             className="border-input/30 bg-card ms-auto w-56 max-lg:w-full lg:h-8"
             align="end"
-          />
+          /> */}
         </DashboardTabs>
       </div>
     </AppLayout>

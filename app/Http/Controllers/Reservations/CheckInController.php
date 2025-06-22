@@ -12,6 +12,7 @@ use App\Models\Managements\Employee;
 use App\Models\Reservations\Reservation;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
+use App\Services\ReservationService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -22,6 +23,13 @@ use Inertia\Inertia;
 
 class CheckInController extends Controller
 {
+    protected ReservationService $reservationService;
+
+    public function __construct(ReservationService $reservation)
+    {
+        $this->reservationService = $reservation;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -33,9 +41,8 @@ class CheckInController extends Controller
         $end = $request->input('end');
 
         // get the date range based on the type
-        $reservationController = new ReservationController();
-
-        [$start_date, $end_date] = $reservationController->getDateRange($type, $start, $end);
+        [$start_date, $end_date] = $this->reservationService
+            ->getDateRange($type, $start, $end);
 
         // get the reservations based on the date range
         $query = Reservation::with([
@@ -72,7 +79,7 @@ class CheckInController extends Controller
             ->get();
 
         // update reservation status
-        $reservationController->updateOnGoingReservationStatus();
+        $this->reservationService->updateOnGoingStatus();
 
         // get static values
         $status = ReservationStatusEnum::getValues();

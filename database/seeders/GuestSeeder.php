@@ -21,7 +21,6 @@ class GuestSeeder extends Seeder
     DB::table('countries')->truncate();
     DB::table('geographies')->truncate();
     DB::table('nationalities')->truncate();
-    DB::table('guests')->truncate();
 
     // define data options
     $guestTypes = ["vip", "regular", "business man", "family", "couple", "single", "group", "other"];

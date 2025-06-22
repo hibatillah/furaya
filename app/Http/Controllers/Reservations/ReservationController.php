@@ -7,9 +7,7 @@ use App\Enums\GenderEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\ReservationTransactionEnum;
-use App\Enums\RoomConditionEnum;
 use App\Enums\RoomPackageEnum;
-use App\Enums\RoomStatusEnum;
 use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
 use App\Http\Controllers\Controller;
@@ -18,26 +16,29 @@ use App\Models\Guests\Country;
 use App\Models\Guests\Guest;
 use App\Models\Guests\Nationality;
 use App\Models\Reservations\Reservation;
-use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
 use App\Models\Managements\Employee;
 use App\Models\Reservations\GuestType;
-use App\Models\Reservations\ReservationRoom;
-use App\Models\Reservations\ReservationTransaction;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\ReservationService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ReservationController extends Controller
 {
+    protected ReservationService $reservationService;
+
+    public function __construct(ReservationService $reservation)
+    {
+        $this->reservationService = $reservation;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -49,7 +50,8 @@ class ReservationController extends Controller
         $end = $request->input('end');
 
         // get the date range based on the type
-        [$start_date, $end_date] = $this->getDateRange($type, $start, $end);
+        [$start_date, $end_date] = $this->reservationService
+            ->getDateRange($type, $start, $end);
 
         // get the reservations based on the date range
         $query = Reservation::with([
@@ -90,7 +92,7 @@ class ReservationController extends Controller
             ->get();
 
         // update reservation status
-        $this->updateOnGoingReservationStatus();
+        $this->reservationService->updateOnGoingStatus();
 
         // get static values
         $status = ReservationStatusEnum::getValues();
@@ -464,50 +466,6 @@ class ReservationController extends Controller
     }
 
     /**
-     * Get the date range based on the type
-     *
-     * @param string $type
-     * @param string|null $start
-     * @param string|null $end
-     * @return array [start_date, end_date]
-     */
-    public function getDateRange(
-        string $type,
-        ?string $start,
-        ?string $end
-    ): array {
-        $today = Carbon::today();
-
-        switch ($type) {
-            case 'last_30_days':
-                return [$today->copy()->subDays(30)->startOfDay(), $today->copy()->endOfDay()];
-
-            case 'last_3_months':
-                return [$today->copy()->subMonths(3)->startOfDay(), $today->copy()->endOfDay()];
-
-            case 'last_6_months':
-                return [$today->copy()->subMonths(6)->startOfDay(), $today->copy()->endOfDay()];
-
-            case 'last_year':
-                return [$today->copy()->subYear()->startOfDay(), $today->copy()->endOfDay()];
-
-            case 'custom_range':
-                $start_date = $start
-                    ? Carbon::parse($start)->startOfDay()
-                    : null;
-                $end_date = $end
-                    ? Carbon::parse($end)->endOfDay()
-                    : Carbon::today()->endOfDay();
-
-                return [$start_date, $end_date];
-
-            case 'upcoming':
-            default:
-                return [$today->copy()->startOfDay(), null];
-        }
-    }
-
-    /**
      * Get the guest data
      *
      * @param Request $request
@@ -565,24 +523,13 @@ class ReservationController extends Controller
                 throw new \Exception('Tanggal tidak valid');
             }
 
-            // Get room IDs from reservation rooms that belong to overlapping reservations
-            $reservedRoomIds = $this->getReservedRoomIds($startDate, $endDate);
+            // get reserved room ids from service
+            $reservedRoomIds = $this->reservationService
+                ->getReservedRoomIds($startDate, $endDate);
 
-            // Get rooms that are in available status/condition and not reserved
-            $rooms = Room::with('roomType', 'bedType', 'meal')
-                ->whereIn('status', [
-                    RoomStatusEnum::VC,
-                    RoomStatusEnum::OO,
-                    RoomStatusEnum::CO,
-                    RoomStatusEnum::HU,
-                ])
-                ->whereNotIn('condition', [
-                    RoomConditionEnum::BOOKED,
-                    RoomConditionEnum::BOOKED_CLEANING,
-                ])
-                ->whereNotIn('id', $reservedRoomIds) // exclude overlapping reservations
-                ->where('room_type_id', $roomTypeId)
-                ->get();
+            // get available rooms from service with reservedRoomIds
+            $rooms = $this->reservationService
+                ->getAvailableRooms($reservedRoomIds, $roomTypeId);
 
             return response()->json([
                 "rooms" => $rooms,
@@ -622,24 +569,13 @@ class ReservationController extends Controller
                 throw new \Exception('Tanggal tidak valid');
             }
 
-            // Get room IDs from reservation rooms that belong to overlapping reservations
-            $reservedRoomIds = $this->getReservedRoomIds($startDate, $endDate);
+            // get reserved room ids from service
+            $reservedRoomIds = $this->reservationService
+                ->getReservedRoomIds($startDate, $endDate);
 
-            // Get room types that have available rooms
-            $roomTypes = RoomType::whereHas('room', function ($query) use ($reservedRoomIds) {
-                $query->whereIn('status', [
-                    RoomStatusEnum::VC,
-                    RoomStatusEnum::OO,
-                    RoomStatusEnum::CO,
-                    RoomStatusEnum::HU,
-                ])
-                    ->whereNotIn('condition', [
-                        RoomConditionEnum::BOOKED,
-                        RoomConditionEnum::BOOKED_CLEANING,
-                    ])
-                    ->whereNotIn('id', $reservedRoomIds);
-            })
-                ->get();
+            // get available room types from service with reservedRoomIds
+            $roomTypes = $this->reservationService
+                ->getAvailableRoomTypes($reservedRoomIds);
 
             return response()->json([
                 "roomTypes" => $roomTypes,
@@ -661,25 +597,6 @@ class ReservationController extends Controller
             );
         }
     }
-
-    /**
-     * Get roomIDs that are reserved
-     * based on reservation date
-     *
-     * @param string $startDate
-     * @param string $endDate
-     * @return \Illuminate\Support\Collection
-     */
-    private function getReservedRoomIds($startDate, $endDate)
-    {
-        $reservedRoomIds = ReservationRoom::whereHas('reservation', function ($query) use ($startDate, $endDate) {
-            $query->where('start_date', '<=', $endDate)
-                ->where('end_date', '>=', $startDate);
-        })->pluck('room_id');
-
-        return $reservedRoomIds;
-    }
-
 
     /**
      * Get data needed for reservation form
@@ -716,25 +633,6 @@ class ReservationController extends Controller
     }
 
     /**
-     * Update reservation status automatically
-     */
-    public function updateOnGoingReservationStatus()
-    {
-        $reservations = Reservation::whereNotIn("status", [
-            ReservationStatusEnum::CHECKED_OUT,
-            ReservationStatusEnum::NO_SHOW,
-            ReservationStatusEnum::CANCELLED,
-            ReservationStatusEnum::OVERDUE,
-        ])->get();
-
-        if (!$reservations->isEmpty()) {
-            foreach ($reservations as $reservation) {
-                $reservation->updateReservationStatus();
-            }
-        }
-    }
-
-    /**
      * Update reservation status manually
      */
     public function updateStatus(Request $request, string $id)
@@ -746,10 +644,7 @@ class ReservationController extends Controller
                 throw new \Exception("Status tidak valid");
             }
 
-            $reservation = Reservation::findOrFail($id);
-            $reservation->update([
-                "status" => $status,
-            ]);
+            $this->reservationService->updateStatus($id, $status);
 
             return back();
         } catch (ModelNotFoundException $e) {
