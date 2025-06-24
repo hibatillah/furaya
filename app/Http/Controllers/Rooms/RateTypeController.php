@@ -39,23 +39,15 @@ class RateTypeController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan tipe tarif."
             ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(RateType $rateType) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(RateType $rateType) {}
 
     /**
      * Update the specified resource in storage.
@@ -68,14 +60,17 @@ class RateTypeController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Tipe tarif tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui tipe tarif."
             ]);
         }
     }
@@ -91,12 +86,14 @@ class RateTypeController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Tipe tarif tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus tipe tarif."
             ]);
         }
     }

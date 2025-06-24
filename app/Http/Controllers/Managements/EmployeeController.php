@@ -11,9 +11,7 @@ use App\Models\Managements\Employee;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Managements\Department;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -24,18 +22,25 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $departments = Department::all();
-        $employees = Employee::with("user", "department")
-            ->whereHas("user", function ($query) {
-                $query->where("role", RoleEnum::EMPLOYEE);
-            })
-            ->latest()
-            ->get();
+        try {
+            $departments = Department::all();
+            $employees = Employee::with("user", "department")
+                ->whereHas("user", function ($query) {
+                    $query->where("role", RoleEnum::EMPLOYEE);
+                })
+                ->latest()
+                ->get();
 
-        return Inertia::render('employee/index', [
-            'employees' => $employees,
-            'departments' => $departments,
-        ]);
+            return Inertia::render('employee/index', [
+                'employees' => $employees,
+                'departments' => $departments,
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Terjadi kesalahan menampilkan data karyawan.",
+            ]);
+        }
     }
 
     /**
@@ -74,18 +79,15 @@ class EmployeeController extends Controller
             return redirect()->route('employee.index')
                 ->with('success', 'Karyawan berhasil dibuat');
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan karyawan.",
             ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -102,12 +104,14 @@ class EmployeeController extends Controller
                 'departments' => $departments,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Data karyawan tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menampilkan data karyawan.",
             ]);
         }
     }
@@ -132,14 +136,17 @@ class EmployeeController extends Controller
 
             return redirect()->route('employee.index')->with('success', 'Karyawan berhasil diperbarui');
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Data karyawan tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui karyawan.",
             ]);
         }
     }
@@ -155,12 +162,14 @@ class EmployeeController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Data karyawan tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus karyawan.",
             ]);
         }
     }

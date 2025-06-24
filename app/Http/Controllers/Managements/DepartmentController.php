@@ -24,11 +24,6 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(DepartmentRequest $request)
@@ -38,23 +33,15 @@ class DepartmentController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan departemen.",
             ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -67,14 +54,17 @@ class DepartmentController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return redirect()->back()->withErrors([
                 'message' => 'Departemen tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui departemen.",
             ]);
         }
     }
@@ -90,12 +80,14 @@ class DepartmentController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return redirect()->back()->withErrors([
                 'message' => 'Departemen tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus departemen.",
             ]);
         }
     }

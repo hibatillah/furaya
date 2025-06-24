@@ -44,70 +44,77 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
-        // accept request params for set date range
-        $type = $request->input('type', 'upcoming');
-        $start = $request->input('start');
-        $end = $request->input('end');
+        try {
+            // accept request params for set date range
+            $type = $request->input('type', 'upcoming');
+            $start = $request->input('start');
+            $end = $request->input('end');
 
-        // get the date range based on the type
-        [$start_date, $end_date] = $this->reservationService
-            ->getDateRange($type, $start, $end);
+            // get the date range based on the type
+            [$start_date, $end_date] = $this->reservationService
+                ->getDateRange($type, $start, $end);
 
-        // get the reservations based on the date range
-        $query = Reservation::with([
-            'reservationRoom' => fn($q) => $q->select([
+            // get the reservations based on the date range
+            $query = Reservation::with([
+                'reservationRoom' => fn($q) => $q->select([
+                    'id',
+                    'room_number',
+                    'room_type',
+                    'reservation_id',
+                ]),
+                'reservationGuest' => fn($q) => $q->select([
+                    'id',
+                    'name',
+                    'reservation_id',
+                ]),
+            ])->select([
                 'id',
-                'room_number',
-                'room_type',
-                'reservation_id',
-            ]),
-            'reservationGuest' => fn($q) => $q->select([
-                'id',
-                'name',
-                'reservation_id',
-            ]),
-        ])->select([
-            'id',
-            'booking_number',
-            'start_date',
-            'end_date',
-            'booking_type',
-            'payment_method',
-            'status',
-        ]);
+                'booking_number',
+                'start_date',
+                'end_date',
+                'booking_type',
+                'payment_method',
+                'status',
+            ]);
 
-        // filter the reservations by date range
-        if ($start_date) {
-            $query->where('start_date', '>=', $start_date);
+            // filter the reservations by date range
+            if ($start_date) {
+                $query->where('start_date', '>=', $start_date);
+            }
+
+            if ($end_date) {
+                $query->where('end_date', '<=', $end_date);
+            }
+
+            // return the reservations query
+            $reservations = $query
+                ->orderBy('start_date', 'asc')
+                ->latest()
+                ->get();
+
+            // update reservation status
+            $this->reservationService->updateOnGoingStatus();
+
+            // get static values
+            $status = ReservationStatusEnum::getValues();
+            $bookingType = BookingTypeEnum::getValues();
+            $paymentMethod = PaymentEnum::getValues();
+            $roomType = RoomType::all()->pluck('name');
+
+            return Inertia::render('reservation/index', [
+                'reservations' => $reservations,
+                'type' => $type,
+                'status' => $status,
+                'bookingType' => $bookingType,
+                'paymentMethod' => $paymentMethod,
+                'roomType' => $roomType,
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Terjadi kesalahan menampilkan data reservasi.",
+            ]);
         }
-
-        if ($end_date) {
-            $query->where('end_date', '<=', $end_date);
-        }
-
-        // return the reservations query
-        $reservations = $query
-            ->orderBy('start_date', 'asc')
-            ->latest()
-            ->get();
-
-        // update reservation status
-        $this->reservationService->updateOnGoingStatus();
-
-        // get static values
-        $status = ReservationStatusEnum::getValues();
-        $bookingType = BookingTypeEnum::getValues();
-        $paymentMethod = PaymentEnum::getValues();
-        $roomType = RoomType::all()->pluck('name');
-
-        return Inertia::render('reservation/index', [
-            'reservations' => $reservations,
-            'type' => $type,
-            'status' => $status,
-            'bookingType' => $bookingType,
-            'paymentMethod' => $paymentMethod,
-            'roomType' => $roomType,
-        ]);
     }
 
     /**
@@ -131,6 +138,8 @@ class ReservationController extends Controller
             // ---DEFINE DATA---
             // define reservation data
             $reservation = Arr::only($validated, [
+                "start_date",
+                "end_date",
                 "length_of_stay",
                 "adults",
                 "pax",
@@ -218,7 +227,7 @@ class ReservationController extends Controller
                 $reservation = Reservation::create(array_merge(
                     $reservation,
                     [
-                        "booking_number" => Reservation::generateBookingNumber(),
+                        "booking_number" => ReservationService::generateBookingNumber(),
                     ]
                 ));
                 $reservation->reservationRoom()->create($reservationRoom);
@@ -240,8 +249,10 @@ class ReservationController extends Controller
             return redirect()->route("reservation.index")
                 ->with("success", "Reservasi berhasil ditambahkan");
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
                 "message" => "Terjadi kesalahan menambahkan reservasi.",
             ]);
@@ -272,10 +283,12 @@ class ReservationController extends Controller
                 "status" => $status,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return redirect()->route("reservation.index")->with("error", "Reservasi tidak ditemukan");
         } catch (\Exception $e) {
+            report($e);
             return redirect()->route("reservation.index")
-                ->with("error", $e->getMessage());
+                ->with("error", "Terjadi kesalahan menampilkan data reservasi.");
         }
     }
 
@@ -284,19 +297,31 @@ class ReservationController extends Controller
      */
     public function edit(string $id)
     {
-        $dataForm = $this->getDataForm();
-        $reservation = Reservation::with(
-            "reservationRoom.room.roomType",
-            "reservationRoom.room.bedType",
-            "reservationRoom.room.meal",
-            "reservationGuest.guest.user",
-            "employee.user",
-        )->findOrFail($id);
+        try {
+            $dataForm = $this->getDataForm();
+            $reservation = Reservation::with(
+                "reservationRoom.room.roomType",
+                "reservationRoom.room.bedType",
+                "reservationRoom.room.meal",
+                "reservationGuest.guest.user",
+                "employee.user",
+            )->findOrFail($id);
 
-        return Inertia::render("reservation/edit", [
-            ...$dataForm,
-            "reservation" => $reservation,
-        ]);
+            return Inertia::render("reservation/edit", [
+                ...$dataForm,
+                "reservation" => $reservation,
+            ]);
+        } catch (ModelNotFoundException $e) {
+            report($e);
+            return back()->withErrors([
+                "message" => "Reservasi tidak ditemukan.",
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                "message" => "Terjadi kesalahan menampilkan data reservasi.",
+            ]);
+        }
     }
 
     /**
@@ -453,14 +478,16 @@ class ReservationController extends Controller
             return redirect()->route("reservation.show", $id)
                 ->with("success", "Reservasi berhasil diperbarui");
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
             return back()->withErrors([
                 "message" => "Reservasi tidak ditemukan.",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan memperbarui reservasi.",
             ]);
         }
     }
@@ -488,6 +515,7 @@ class ReservationController extends Controller
                 'guest' => $guest
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return response()->json(
                 [
                     'error' => 'Tamu tidak ditemukan'
@@ -495,10 +523,10 @@ class ReservationController extends Controller
                 404
             );
         } catch (\Exception $e) {
+            report($e);
             return response()->json(
                 [
-                    'error' => 'Gagal mendapatkan data tamu',
-                    'message' => $e->getMessage(),
+                    'message' => 'Terjadi kesalahan mendapatkan data tamu',
                 ],
                 500
             );
@@ -535,6 +563,7 @@ class ReservationController extends Controller
                 "rooms" => $rooms,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return response()->json(
                 [
                     'error' => 'Kamar tidak ditemukan'
@@ -542,10 +571,10 @@ class ReservationController extends Controller
                 404
             );
         } catch (\Exception $e) {
+            report($e);
             return response()->json(
                 [
-                    'error' => 'Gagal mendapatkan data kamar',
-                    'message' => $e->getMessage(),
+                    'message' => 'Terjadi kesalahan mendapatkan data kamar',
                 ],
                 500
             );
@@ -581,6 +610,7 @@ class ReservationController extends Controller
                 "roomTypes" => $roomTypes,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return response()->json(
                 [
                     'error' => 'Tipe kamar tidak ditemukan'
@@ -588,10 +618,10 @@ class ReservationController extends Controller
                 404
             );
         } catch (\Exception $e) {
+            report($e);
             return response()->json(
                 [
-                    'error' => 'Gagal mendapatkan data tipe kamar',
-                    'message' => $e->getMessage(),
+                    'message' => 'Terjadi kesalahan mendapatkan data tipe kamar',
                 ],
                 500
             );
@@ -648,12 +678,14 @@ class ReservationController extends Controller
 
             return back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 "message" => 'Reservasi tidak ditemukan',
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan mengubah status reservasi.",
             ]);
         }
     }

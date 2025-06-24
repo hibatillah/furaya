@@ -39,20 +39,6 @@ class Reservation extends BaseModel
     }
 
     /**
-     * Generate a unique booking number
-     * based on the current date and count of today's reservations
-     */
-    public static function generateBookingNumber(): string
-    {
-        $date = now()->format('Ymd');
-        $count = Reservation::whereDate('created_at', today())->count() + 1;
-        $number = str_pad($count, 5, '0', STR_PAD_LEFT);
-
-        return "{$date}-{$number}";
-    }
-
-
-    /**
      * appends custom attributes
      */
     protected $appends = [

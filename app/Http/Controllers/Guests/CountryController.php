@@ -24,11 +24,6 @@ class CountryController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(CountryRequest $request)
@@ -39,22 +34,15 @@ class CountryController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan negara.",
             ]);
         }
     }
-    /**
-     * Display the specified resource.
-     */
-    public function show(Country $country) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Country $country) {}
 
     /**
      * Update the specified resource in storage.
@@ -67,14 +55,17 @@ class CountryController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Negara tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui negara.",
             ]);
         }
     }
@@ -90,12 +81,14 @@ class CountryController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Negara tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus negara.",
             ]);
         }
     }

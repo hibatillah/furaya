@@ -110,10 +110,12 @@ class RoomController extends Controller
 
             return redirect()->route("room.show", ["id" => $result->room->id])->with("success", "Kamar berhasil ditambahkan");
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan menambahkan kamar.",
             ]);
         }
     }
@@ -137,12 +139,14 @@ class RoomController extends Controller
                 "reservations" => $reservations,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return redirect()->back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return redirect()->back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan menampilkan data kamar.",
             ]);
         }
     }
@@ -174,12 +178,14 @@ class RoomController extends Controller
                 "smokingTypes" => $smokingTypes,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return redirect()->back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return redirect()->back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan memperbarui kamar.",
             ]);
         }
     }
@@ -240,7 +246,7 @@ class RoomController extends Controller
             ]);
         } catch (\Exception $e) {
             return back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan menghapus kamar.",
             ]);
         }
     }
@@ -261,7 +267,7 @@ class RoomController extends Controller
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan mengubah status kamar.",
             ]);
         }
     }
@@ -290,7 +296,7 @@ class RoomController extends Controller
             ]);
         } catch (\Exception $e) {
             return back()->withErrors([
-                "message" => $e->getMessage(),
+                "message" => "Terjadi kesalahan mengubah status kamar.",
             ]);
         }
     }

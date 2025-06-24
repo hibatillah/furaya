@@ -29,26 +29,6 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(UserRequest $request) {}
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UserRequest $request, string $id)
@@ -59,12 +39,14 @@ class UserController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'User tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui user.",
             ]);
         }
     }
@@ -80,12 +62,14 @@ class UserController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'User tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus user.",
             ]);
         }
     }

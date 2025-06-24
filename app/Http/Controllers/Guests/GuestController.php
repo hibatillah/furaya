@@ -27,11 +27,6 @@ class GuestController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(GuestRequest $request)
@@ -41,10 +36,12 @@ class GuestController extends Controller
 
             return redirect()->route('guest.index')->with('success', 'Guest berhasil ditambahkan');
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage(),
+                'message' => "Terjadi kesalahan menambahkan tamu.",
             ]);
         }
     }
@@ -66,9 +63,11 @@ class GuestController extends Controller
                 'reservations' => $reservations,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->with('error', 'Guest tidak ditemukan');
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            report($e);
+            return back()->with('error', "Terjadi kesalahan menampilkan data tamu.");
         }
     }
 
@@ -84,12 +83,14 @@ class GuestController extends Controller
                 'guest' => $guest,
             ]);
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Guest tidak ditemukan',
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage(),
+                'message' => "Terjadi kesalahan menampilkan data tamu.",
             ]);
         }
     }
@@ -118,20 +119,18 @@ class GuestController extends Controller
 
             return redirect()->route('guest.show', ['id' => $id])->with('success', 'Guest berhasil diperbarui');
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Guest tidak ditemukan',
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage(),
+                'message' => "Terjadi kesalahan memperbarui tamu.",
             ])->withInput();
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id) {}
 }

@@ -24,11 +24,6 @@ class GeographyController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(GeographyRequest $request)
@@ -40,23 +35,15 @@ class GeographyController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan geografi.",
             ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Geography $geography) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Geography $geography) {}
 
     /**
      * Update the specified resource in storage.
@@ -69,14 +56,17 @@ class GeographyController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Geografi tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui geografi.",
             ]);
         }
     }
@@ -92,12 +82,14 @@ class GeographyController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Geografi tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus geografi.",
             ]);
         }
     }

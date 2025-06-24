@@ -14,42 +14,19 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $admins = User::whereIn("role", [RoleEnum::ADMIN, RoleEnum::MANAGER])
-            ->latest()
-            ->get();
+        try {
+            $admins = User::whereIn("role", [RoleEnum::ADMIN, RoleEnum::MANAGER])
+                ->latest()
+                ->get();
 
-        return Inertia::render('admin/index', [
-            'admins' => $admins,
-        ]);
+            return Inertia::render('admin/index', [
+                'admins' => $admins,
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Terjadi kesalahan menampilkan data admin.",
+            ]);
+        }
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store() {}
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update() {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id) {}
 }

@@ -4,8 +4,10 @@ import { cn } from "@/lib/utils";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useRef } from "react";
 
-function Input({ className, type, ref, disabled, disableHandle = false, ...props }: React.ComponentProps<"input"> & {
+function Input({ className, type, ref, disabled, disableHandle = false, onIncrease, onDecrease, ...props }: React.ComponentProps<"input"> & {
   disableHandle?: boolean;
+  onIncrease?: () => void;
+  onDecrease?: () => void;
 }) {
   const baseRef = useRef<HTMLInputElement>(null);
   const inputRef = (ref as React.RefObject<HTMLInputElement>) ?? baseRef;
@@ -41,7 +43,10 @@ function Input({ className, type, ref, disabled, disableHandle = false, ...props
         <div className="absolute end-0 inset-y-0 pe-px pt-px pb-[0.5px] grid grid-rows-2 border-s border-input divide-y divide-input">
           <button
             type="button"
-            onClick={increase}
+            onClick={() => {
+              increase();
+              onIncrease?.();
+            }}
             className="hover:bg-muted text-muted-foreground hover:text-foreground w-full px-2 rounded-tr-md"
           >
             <ChevronUpIcon size={12} aria-hidden="true" />
@@ -49,7 +54,10 @@ function Input({ className, type, ref, disabled, disableHandle = false, ...props
           </button>
           <button
             type="button"
-            onClick={decrease}
+            onClick={() => {
+              decrease();
+              onDecrease?.();
+            }}
             className="hover:bg-muted text-muted-foreground hover:text-foreground w-full px-2 rounded-br-md"
           >
             <ChevronDownIcon size={12} aria-hidden="true" />

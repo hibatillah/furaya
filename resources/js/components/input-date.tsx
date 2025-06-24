@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { dateConfig } from "@/static";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { ChevronDownIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { DateRange, Matcher } from "react-day-picker";
 import { Button } from "./ui/button";
@@ -56,7 +56,7 @@ export function InputDate(props: InputDateProps) {
           disabled={disabled}
         >
           {showDate}
-          <ChevronDownIcon />
+          <CalendarIcon className="text-primary" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

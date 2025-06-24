@@ -115,7 +115,7 @@ export default function ReservationsCreate(props: {
       try {
         toast.loading("Mencari data tamu tersedia...", { id: "get-guest" });
 
-        const response = await fetch(`/reservasi/tamu?nik_passport=${value}`);
+        const response = await fetch(`/admin/reservasi/tamu?nik_passport=${value}`);
         const data = await response.json();
         const guest = data.guest as Guest.Default;
 
@@ -151,9 +151,9 @@ export default function ReservationsCreate(props: {
           });
         }
       } catch (error) {
-        toast.error("Tamu tidak ditemukan", {
+        toast.error("Terjadi Kesalahan", {
           id: "get-guest",
-          description: error instanceof Error ? error.message : "Terjadi kesalahan",
+          description: "Tamu tak ditemukan."
         });
       }
     },
@@ -170,7 +170,8 @@ export default function ReservationsCreate(props: {
         const start = format(startDate as Date, "yyyy-MM-dd");
         const end = format(endDate as Date, "yyyy-MM-dd");
 
-        const response = await fetch(`/reservasi/kamar/tersedia?start=${start}&end=${end}&room_type_id=${roomTypeId}`);
+        const response = await fetch(`/admin/reservasi/kamar/tersedia?start=${start}&end=${end}&room_type_id=${roomTypeId}`);
+
         const data = await response.json();
 
         if (!data.error) {
@@ -182,9 +183,8 @@ export default function ReservationsCreate(props: {
           });
         }
       } catch (err) {
-        toast.error("Gagal terhubung ke server", {
+        toast.error("Terjadi Kesalahan", {
           id: "get-available-rooms",
-          description: err instanceof Error ? err.message : "Terjadi kesalahan",
         });
       }
     },
@@ -200,7 +200,7 @@ export default function ReservationsCreate(props: {
       const start = format(startDate as Date, "yyyy-MM-dd");
       const end = format(endDate as Date, "yyyy-MM-dd");
 
-      const response = await fetch(`/reservasi/tipe-kamar/tersedia?start=${start}&end=${end}`);
+      const response = await fetch(`/admin/reservasi/tipe-kamar/tersedia?start=${start}&end=${end}`);
       const data = await response.json();
 
       if (!data.error) {
@@ -212,9 +212,8 @@ export default function ReservationsCreate(props: {
         });
       }
     } catch (err) {
-      toast.error("Gagal terhubung ke server", {
+      toast.error("Terjadi Kesalahan", {
         id: "get-available-room-types",
-        description: err instanceof Error ? err.message : "Terjadi kesalahan",
       });
     }
   }, [startDate, endDate]);
@@ -255,6 +254,7 @@ export default function ReservationsCreate(props: {
     const discount = priceBeforeDiscount * (discountPercentage / 100);
     const priceAfterDiscount = priceBeforeDiscount - discount;
 
+    setData("total_price", priceAfterDiscount);
     return formatCurrency(priceAfterDiscount);
   }, [selectedRoomNumber, data.length_of_stay, data.discount]);
 

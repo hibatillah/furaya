@@ -24,11 +24,6 @@ class BedTypeController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(BedTypeRequest $request)
@@ -38,23 +33,15 @@ class BedTypeController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan tipe kasur."
             ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -68,12 +55,14 @@ class BedTypeController extends Controller
             // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Tipe kasur tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui tipe kasur."
             ]);
         }
     }
@@ -85,17 +74,18 @@ class BedTypeController extends Controller
     {
         try {
             $bedType = BedType::findOrFail($id);
-
             $bedType->delete();
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Tipe kasur tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus tipe kasur."
             ]);
         }
     }

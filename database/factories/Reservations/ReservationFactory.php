@@ -10,6 +10,7 @@ use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
 use App\Models\Managements\Employee;
 use App\Models\Reservations\GuestType;
+use App\Models\Reservations\Reservation;
 use App\Models\Rooms\Room;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ReservationFactory extends Factory
 {
+    protected $model = Reservation::class;
+
     /**
      * Define the model's default state.
      *
@@ -62,6 +65,12 @@ class ReservationFactory extends Factory
 
         $employee = Employee::with('user')->get()->random();
 
+        // price details
+        $discountPercentage = $this->faker->numberBetween(0, 25);
+        $priceBeforeDiscount = $room->price * $lengthOfStay;
+        $discount = $priceBeforeDiscount * ($discountPercentage / 100);
+        $finalPrice = $priceBeforeDiscount - $discount;
+
         return [
             "start_date" => $startDate,
             "end_date" => $endDate,
@@ -71,7 +80,7 @@ class ReservationFactory extends Factory
             "adults" => $adults,
             "pax" => $pax,
             "length_of_stay" => $lengthOfStay,
-            "total_price" => $room->price * $pax * $lengthOfStay,
+            "total_price" => $finalPrice,
             "guest_type" => GuestType::all()->random()->name,
             "employee_name" => $employee->user->name,
             "employee_id" => $employee->id,
@@ -81,7 +90,7 @@ class ReservationFactory extends Factory
             "room_package" => $this->faker->randomElement(RoomPackageEnum::getValues()),
             "payment_method" => $this->faker->randomElement(PaymentEnum::getValues()),
             "status_acc" => StatusAccEnum::APPROVED,
-            "discount" => $this->faker->numberBetween(0, 25),
+            "discount" => $discountPercentage,
             "discount_reason" => null,
             "commission_percentage" => 0,
             "commission_amount" => 0,

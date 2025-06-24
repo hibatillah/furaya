@@ -33,11 +33,6 @@ class ReservationRequest extends FormRequest
 
         return [
             // reservation data
-            "booking_number" => [
-                "required",
-                "integer",
-                Rule::unique("reservations", "booking_number")->ignore($id),
-            ],
             "start_date" => ["required", "date"],
             "end_date" => ["required", "date", "after:start_date"],
             "length_of_stay" => ["required", "integer"],
@@ -92,9 +87,6 @@ class ReservationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            "booking_number.required" => "Booking number wajib diisi.",
-            "booking_number.integer" => "Booking number harus berupa angka.",
-            "booking_number.unique" => "Booking number sudah ada.",
             "start_date.required" => "Tanggal check-in wajib diisi.",
             "start_date.date" => "Tanggal check-in harus berupa tanggal.",
             "end_date.required" => "Tanggal check-out wajib diisi.",

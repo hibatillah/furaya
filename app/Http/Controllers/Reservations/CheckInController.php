@@ -35,74 +35,86 @@ class CheckInController extends Controller
      */
     public function index(Request $request)
     {
-        // accept request params for set date range
-        $type = $request->input('type', 'upcoming');
-        $start = $request->input('start');
-        $end = $request->input('end');
+        try {
+            // accept request params for set date range
+            $type = $request->input('type', 'upcoming');
+            $start = $request->input('start');
+            $end = $request->input('end');
 
-        // get the date range based on the type
-        [$start_date, $end_date] = $this->reservationService
-            ->getDateRange($type, $start, $end);
+            // get the date range based on the type
+            [$start_date, $end_date] = $this->reservationService
+                ->getDateRange($type, $start, $end);
 
-        // get the reservations based on the date range
-        $query = Reservation::with([
-            "checkIn",
-            "checkOut",
-            "reservationRoom.room",
-            'reservationGuest' => fn($q) => $q->select([
+            // get the reservations based on the date range
+            $query = Reservation::with([
+                "checkIn",
+                "checkOut",
+                "reservationRoom.room",
+                'reservationGuest' => fn($q) => $q->select([
+                    'id',
+                    'name',
+                    'reservation_id',
+                ]),
+            ])->select([
                 'id',
-                'name',
-                'reservation_id',
-            ]),
-        ])->select([
-            'id',
-            'booking_number',
-            'start_date',
-            'end_date',
-            'booking_type',
-            'status',
-        ]);
+                'booking_number',
+                'start_date',
+                'end_date',
+                'booking_type',
+                'status',
+            ]);
 
-        // filter the reservations by date range
-        if ($start_date) {
-            $query->where('start_date', '>=', $start_date);
+            // filter the reservations by date range
+            if ($start_date) {
+                $query->where('start_date', '>=', $start_date);
+            }
+
+            if ($end_date) {
+                $query->where('end_date', '<=', $end_date);
+            }
+
+            // return the reservations query
+            $reservations = $query
+                ->orderBy('start_date', 'asc')
+                ->latest()
+                ->get();
+
+            // update reservation status
+            $this->reservationService->updateOnGoingStatus();
+
+            // get static values
+            $status = ReservationStatusEnum::getValues();
+            $roomStatus = RoomStatusEnum::getValues();
+            $bookingType = BookingTypeEnum::getValues();
+            $paymentMethod = PaymentEnum::getValues();
+            $roomType = RoomType::all()->pluck('name');
+
+            // get current logged in employee user
+            $employee = Employee::with('user')
+                ->where('user_id', Auth::user()->id)
+                ->first();
+
+            return Inertia::render('check-in/index', [
+                'reservations' => $reservations,
+                'type' => $type,
+                'status' => $status,
+                'roomStatus' => $roomStatus,
+                'bookingType' => $bookingType,
+                'paymentMethod' => $paymentMethod,
+                'roomType' => $roomType,
+                'employee' => $employee,
+            ]);
+        } catch (ModelNotFoundException $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Data reservasi tidak ditemukan",
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Terjadi kesalahan menampilkan data check-in.",
+            ]);
         }
-
-        if ($end_date) {
-            $query->where('end_date', '<=', $end_date);
-        }
-
-        // return the reservations query
-        $reservations = $query
-            ->orderBy('start_date', 'asc')
-            ->latest()
-            ->get();
-
-        // update reservation status
-        $this->reservationService->updateOnGoingStatus();
-
-        // get static values
-        $status = ReservationStatusEnum::getValues();
-        $roomStatus = RoomStatusEnum::getValues();
-        $bookingType = BookingTypeEnum::getValues();
-        $paymentMethod = PaymentEnum::getValues();
-        $roomType = RoomType::all()->pluck('name');
-
-        // get current logged in employee user
-        $employee = Employee::with('user')
-            ->where('user_id', Auth::user()->id)
-            ->first();
-
-        return Inertia::render('check-in/index', [
-            'reservations' => $reservations,
-            'type' => $type,
-            'status' => $status,
-            'roomStatus' => $roomStatus,
-            'bookingType' => $bookingType,
-            'paymentMethod' => $paymentMethod,
-            'roomType' => $roomType,
-            'employee' => $employee,
-        ]);
     }
 
     /**
@@ -134,15 +146,17 @@ class CheckInController extends Controller
 
             return back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => "Data reservasi tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'error' => "Gagal menambahkan check-in",
-                'message' => $e->getMessage(),
+                'message' => "Terjadi kesalahan menambahkan data check-in.",
             ]);
         }
     }

@@ -43,15 +43,17 @@ class CheckOutController extends Controller
 
             return back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => "Data reservasi tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'error' => "Gagal menambahkan check-out",
-                'message' => $e->getMessage(),
+                'message' => "Terjadi kesalahan menambahkan data check-out.",
             ]);
         }
     }

@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Guests;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Guests\NationalityRequest;
-use App\Http\Requests\Guests\UpdateNationalityRequest;
 use App\Models\Guests\Nationality;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -26,11 +24,6 @@ class NationalityController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(NationalityRequest $request)
@@ -42,23 +35,15 @@ class NationalityController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menambahkan kewarganegaraan.",
             ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Nationality $nationality) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Nationality $nationality) {}
 
     /**
      * Update the specified resource in storage.
@@ -71,14 +56,17 @@ class NationalityController extends Controller
 
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Kewarganegaraan tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan memperbarui kewarganegaraan.",
             ]);
         }
     }
@@ -94,12 +82,14 @@ class NationalityController extends Controller
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Kewarganegaraan tidak ditemukan'
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage()
+                'message' => "Terjadi kesalahan menghapus kewarganegaraan.",
             ]);
         }
     }

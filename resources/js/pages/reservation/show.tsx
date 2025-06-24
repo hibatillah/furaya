@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 export default function ReservationsShow(props: { reservation: Reservation.Default; status: Enum.ReservationStatus[] }) {
   const { reservation, status } = props;
+  console.log(reservation);
 
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";

@@ -24,11 +24,6 @@ class FacilityController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(FacilityRequest $request)
@@ -40,23 +35,15 @@ class FacilityController extends Controller
             // handle message in frontend
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage(),
-            ])->withInput();
+                'message' => "Terjadi kesalahan menambahkan fasilitas."
+            ]);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -70,15 +57,18 @@ class FacilityController extends Controller
             // handle message in frontend
             return redirect()->back();
         } catch (ValidationException $e) {
+            report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Fasilitas tidak ditemukan',
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage(),
-            ])->withInput();
+                'message' => "Terjadi kesalahan memperbarui fasilitas."
+            ]);
         }
     }
 
@@ -94,12 +84,14 @@ class FacilityController extends Controller
             // handle message in frontend
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 'message' => 'Fasilitas tidak ditemukan',
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                'message' => $e->getMessage(),
+                'message' => "Terjadi kesalahan menghapus fasilitas."
             ]);
         }
     }

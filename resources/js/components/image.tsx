@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ImageIcon } from "lucide-react";
+import { ImageOffIcon } from "lucide-react";
 
 export function ImageContainer({ src, alt, className, ...rest }: React.ComponentProps<"img">) {
   return (
@@ -12,7 +12,7 @@ export function ImageContainer({ src, alt, className, ...rest }: React.Component
           {...rest}
         />
       ) : (
-        <ImageIcon className="text-muted-foreground stroke-1.5 size-5" />
+        <ImageOffIcon className="text-muted-foreground stroke-1.5 size-5" />
       )}
     </div>
   );
