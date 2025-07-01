@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -101,10 +102,15 @@ class PublicReservationController extends Controller
             )
                 ->findOrFail($roomTypeId);
 
+            // get static data
             $genders = GenderEnum::getValues();
             $smokingTypes = SmokingTypeEnum::getValues();
             $nationalities = Nationality::all();
             $countries = Country::all();
+
+            // get user data
+            $user = Auth::user();
+            $guest = $user?->guest;
 
             return Inertia::render("public/reservation/create", [
                 "roomType" => $roomType,
@@ -118,6 +124,7 @@ class PublicReservationController extends Controller
                 "children" => $children,
                 "promoCode" => $promoCode,
                 "lengthOfStay" => $lengthOfStay,
+                "user" => $user,
             ]);
         } catch (ModelNotFoundException $e) {
             report($e);
@@ -249,6 +256,53 @@ class PublicReservationController extends Controller
         } catch (\Exception $e) {
             report($e);
             return back()->withErrors(["message" => "Terjadi kesalahan menambahkan reservasi."]);
+        }
+    }
+
+    public function history()
+    {
+        $user = Auth::user();
+        $guest = $user->guest;
+
+        $reservations = Reservation::with(
+            "reservationRoom",
+            "reservationGuest"
+        )
+            ->whereHas("reservationGuest", function ($query) use ($guest) {
+                $query->where("guest_id", $guest->id);
+            })
+            ->latest()
+            ->get();
+
+        return Inertia::render("public/reservation/history", [
+            "reservations" => $reservations,
+        ]);
+    }
+
+    public function payment(Request $request, string $id)
+    {
+        try {
+            $reservation = Reservation::findOrFail($id);
+
+            $reservation->update([
+                "transaction_status" => $request->transaction_status,
+                "payment_status" => $request->payment_status,
+                "midtrans_order_id" => $request->midtrans_order_id,
+                "payment_type" => $request->payment_type,
+                "snap_token" => $request->snap_token,
+            ]);
+
+            return back();
+        } catch (ModelNotFoundException $e) {
+            report($e);
+            return back()->withErrors([
+                "message" => "Reservasi tidak ditemukan."
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                "message" => "Terjadi kesalahan memproses pembayaran."
+            ]);
         }
     }
 }

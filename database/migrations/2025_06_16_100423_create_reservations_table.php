@@ -58,6 +58,11 @@ return new class extends Migration
             $table->string("remarks")->nullable();
             $table->string("advance_remarks")->nullable();
             $table->string("advance_amount")->nullable();
+            $table->string("snap_token")->nullable();
+            $table->string("transaction_status")->nullable();
+            $table->string("payment_status")->nullable();
+            $table->string("midtrans_order_id")->nullable();
+            $table->string("payment_type")->nullable();
             $table->timestamp("canceled_at")->nullable();
             $table->timestamps();
             $table->softDeletes();

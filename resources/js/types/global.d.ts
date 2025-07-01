@@ -3,6 +3,10 @@ import type { route as routeFn } from "ziggy-js";
 declare global {
   const route: typeof routeFn;
 
+  interface Window {
+    snap: any;
+  }
+
   interface SelectData {
     value: string | null;
     label: string;

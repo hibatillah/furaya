@@ -3,7 +3,7 @@ import { ImageContainer } from "@/components/image";
 import { InputDate } from "@/components/input-date";
 import InputError from "@/components/input-error";
 import { SubmitButton } from "@/components/submit-button";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,11 @@ import GuestLayout from "@/layouts/guest-layout";
 import { cn, formatCurrency } from "@/lib/utils";
 import { dateConfig } from "@/static";
 import { MIN_ADVANCE_AMOUNT } from "@/static/reservation";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { addDays, addYears, format } from "date-fns";
-import { BedIcon, CircleSlashIcon, InfoIcon, Maximize2Icon, UsersRoundIcon, WalletIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { MidtransResult } from "@/types";
+import { Head, Link, router, useForm } from "@inertiajs/react";
+import { addYears, format } from "date-fns";
+import { AlertCircleIcon, BedIcon, CircleSlashIcon, InfoIcon, Maximize2Icon, UsersRoundIcon, WalletIcon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 interface PublicReservationCreateProps {
@@ -34,27 +35,32 @@ interface PublicReservationCreateProps {
   children: number;
   promoCode: string;
   lengthOfStay: number;
+  user: User.Default;
 }
 
 export default function PublicReservationsCreate(props: PublicReservationCreateProps) {
-  const { roomType, genders, nationalities, smokingTypes, startDate, endDate, adults, children, lengthOfStay } = props;
+  const { roomType, genders, nationalities, smokingTypes, startDate, endDate, adults, children, lengthOfStay, user } = props;
 
+  // declare initial data
   const pax = adults + children;
   const BASE_BREAKFAST_RATE = 70_000;
   const formatStartDate = format(new Date(startDate), "dd MMMM yyyy", dateConfig);
   const formatEndDate = format(new Date(endDate), "dd MMMM yyyy", dateConfig);
 
   const [smokingTypeSelected, setSmokingTypeSelected] = useState<Enum.SmokingType>("non smoking");
+  const [selectedPayment, setSelectedPayment] = useState<Enum.Payment>("other");
   const [includeBreakfast, setIncludeBreakfast] = useState(true);
   const [selectedNationality, setSelectedNationality] = useState<string>("");
 
   // declare form
   const initialBirthdateYear = addYears(new Date(), -17); // Customer must be at least 17 years old
 
+  // calculate accumulated breakfast rate
   const accumulatedBreakfastRate = useMemo(() => {
     return BASE_BREAKFAST_RATE * lengthOfStay;
   }, [lengthOfStay]);
 
+  // calculate total price
   const totalPrice = useMemo(() => {
     let totalPrice = Number(roomType.base_rate);
 
@@ -64,7 +70,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     return totalPrice;
   }, [accumulatedBreakfastRate, includeBreakfast, lengthOfStay, roomType.base_rate]);
 
-  const [selectedPayment, setSelectedPayment] = useState<Enum.Payment>("other");
+  // declare form
   const { data, setData, post, processing, errors } = useForm<Reservation.Create>({
     // reservation data
     start_date: format(new Date(startDate), "yyyy-MM-dd"),
@@ -93,16 +99,16 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     include_breakfast: includeBreakfast,
 
     // guest data
-    name: "",
-    email: "",
-    nik_passport: "",
-    phone: "",
-    gender: "" as Enum.Gender,
-    birthdate: "",
-    profession: "",
-    nationality: "",
-    address: "",
-    country: "",
+    name: user?.name ?? "",
+    email: user?.email ?? "",
+    nik_passport: user?.guest?.nik_passport ?? "",
+    phone: user?.guest?.phone ?? "",
+    gender: user?.guest?.gender ?? ("" as Enum.Gender),
+    birthdate: user?.guest?.birthdate ?? "",
+    profession: user?.guest?.profession ?? "",
+    nationality: user?.guest?.nationality ?? "",
+    address: user?.guest?.address ?? "",
+    country: user?.guest?.country ?? "",
 
     // room data
     room_id: "",
@@ -117,7 +123,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
   // handle create reservation
   function handleCreateReservation(e: React.FormEvent) {
     e.preventDefault();
-    console.log(data);
 
     // sent data
     toast.loading("Menambahkan reservasi...", { id: "create-reservation" });
@@ -128,6 +133,53 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
         toast.warning("Reservasi gagal ditambahkan", {
           id: "create-reservation",
           description: errors.message,
+        });
+      },
+    });
+  }
+
+  function processPayment(snapToken: string, reservationId: string) {
+    if (!window.snap) {
+      toast.error("Pembayaran belum dapat diproses", {
+        description: "Coba beberapa saat lagi",
+      });
+      return;
+    }
+
+    toast.loading("Memproses pembayaran...", {
+      id: "process-payment",
+    });
+
+    window.snap.pay(snapToken, {
+      onSuccess: async (result: MidtransResult) => {
+        try {
+          await router.put(route("public.reservation.payment", reservationId), {
+            transaction_status: result.transaction_status,
+            payment_status: result.payment_status,
+            midtrans_order_id: result.order_id,
+            payment_type: result.payment_type,
+            snap_token: snapToken,
+          });
+
+          toast.success("Pembayaran berhasil", {
+            id: "process-payment",
+          });
+        } catch (error) {
+          toast.error("Data reservasi gagal diperbarui", {
+            description: "Coba refresh halaman",
+            id: "process-payment",
+          });
+        }
+      },
+      onPending: () => {
+        toast.info("Pembayaran sedang diproses", {
+          id: "process-payment",
+        });
+      },
+      onError: () => {
+        toast.error("Pembayaran gagal dilakukan", {
+          description: "Coba beberapa saat lagi",
+          id: "process-payment",
         });
       },
     });
@@ -152,6 +204,26 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     },
   ];
 
+  useEffect(() => {
+    if (user) {
+      setData((prev: Reservation.Create) => ({
+        ...prev,
+        name: user.name ?? "",
+        email: user.email ?? "",
+        nik_passport: user.guest?.nik_passport ?? "",
+        phone: user.guest?.phone ?? "",
+        gender: user.guest?.gender ?? ("" as Enum.Gender),
+        birthdate: new Date(user.guest?.birthdate as string) ?? "",
+        profession: user.guest?.profession ?? "",
+        nationality: user.guest?.nationality ?? "",
+        address: user.guest?.address ?? "",
+        country: user.guest?.country ?? "",
+      }));
+
+      setSelectedNationality(nationalities.find((nationality) => nationality.name === user.guest?.nationality)?.id ?? "");
+    }
+  }, [user]);
+
   function SummaryCard({ className }: { className?: string }) {
     return (
       <Card className={cn("h-fit gap-4", className)}>
@@ -174,18 +246,29 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
           />
         </CardContent>
         <Separator />
-        <CardFooter className="flex flex-col items-start gap-8">
+        <CardFooter className="flex flex-col items-start gap-6">
           <dl>
             <dt className="text-muted-foreground text-sm">Total Harga</dt>
             <dd className="text-2xl font-semibold">{formatCurrency(totalPrice)}</dd>
           </dl>
 
+          {!user && (
+            <Alert
+              variant="destructive"
+              className="-mb-3"
+            >
+              <AlertCircleIcon />
+              <AlertTitle>Login terlebih dahulu</AlertTitle>
+              <AlertDescription>Silakan login terlebih dahulu untuk membuat reservasi kamar</AlertDescription>
+            </Alert>
+          )}
+
           <SubmitButton
-            className="w-full"
-            disabled={processing}
+            disabled={processing || !user}
             loading={processing}
             loadingText="Membuat reservasi..."
             onClick={handleCreateReservation}
+            className="w-full disabled:cursor-not-allowed"
           >
             Reservasi Kamar
           </SubmitButton>

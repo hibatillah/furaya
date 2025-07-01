@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Requests\Users\UserRequest;
+use App\Http\Requests\UserRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -32,13 +32,12 @@ class RegisteredUserController
     public function store(UserRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $employeeRoleId = Role::where('name', 'Employee')->first()->id;
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role_id' => $employeeRoleId,
+            'role' => "employee",
         ]);
 
         event(new Registered($user));

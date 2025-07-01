@@ -8,18 +8,31 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Publics\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
+    // guest auth routes
+    Route::post('login', [AuthController::class, 'login'])
+        ->name('public.login');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [AuthController::class, 'register'])
+        ->name('public.register');
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    // admin auth routes
+    Route::prefix('admin')->group(function () {
+        Route::get('register', [RegisteredUserController::class, 'create'])
+            ->name('admin.register');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+        Route::post('register', [RegisteredUserController::class, 'store'])
+            ->name('admin.register.store');
+
+        Route::get('login', [AuthenticatedSessionController::class, 'create'])
+            ->name('admin.login');
+
+        Route::post('login', [AuthenticatedSessionController::class, 'store'])
+            ->name('admin.login.store');
+    });
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

@@ -56,3 +56,11 @@ export interface FlashMessages {
   error?: string;
   [key: string]: any; // Allow extra keys if needed
 }
+
+export interface MidtransResult {
+  transaction_status: string;
+  payment_status: string;
+  order_id: string;
+  payment_type: string;
+  snap_token: string;
+}

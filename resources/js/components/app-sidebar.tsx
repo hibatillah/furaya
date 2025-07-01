@@ -14,7 +14,6 @@ import {
   HotelIcon,
   LayoutGrid,
   MapIcon,
-  Package2Icon,
   ShieldUserIcon,
   SquareUserIcon,
   TagIcon,
@@ -192,13 +191,14 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="py-10">
-        {Object.entries(menuItems[auth.role as keyof typeof menuItems]).map(([key, value]) => (
-          <NavMain
-            key={key}
-            title={key}
-            items={value}
-          />
-        ))}
+        {auth.role !== "guest" &&
+          Object.entries(menuItems[auth.role as keyof typeof menuItems]).map(([key, value]) => (
+            <NavMain
+              key={key}
+              title={key}
+              items={value}
+            />
+          ))}
       </SidebarContent>
 
       <SidebarFooter>

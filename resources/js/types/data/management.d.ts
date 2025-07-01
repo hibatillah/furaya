@@ -78,7 +78,7 @@ declare namespace Employee {
 }
 
 declare namespace User {
-  interface Default {
+  interface Base {
     id: string;
     name: string;
     email: string;
@@ -88,6 +88,11 @@ declare namespace User {
     deleted_at?: Date | string;
   }
 
+  interface Addition {
+    guest?: Guest.Default;
+  }
+
+  interface Default extends Base, Addition {}
   type Create = Omit<Default, "id" | "role">;
   type Update = Partial<Omit<Default, "role">>;
 }

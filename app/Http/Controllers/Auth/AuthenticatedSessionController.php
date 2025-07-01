@@ -14,7 +14,7 @@ use Inertia\Response;
 class AuthenticatedSessionController
 {
     /**
-     * Show the login page.
+     * Show the login page for admin.
      */
     public function create(Request $request): Response
     {
@@ -46,6 +46,6 @@ class AuthenticatedSessionController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('home');
     }
 }

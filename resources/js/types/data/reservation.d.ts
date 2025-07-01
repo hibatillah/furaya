@@ -29,6 +29,12 @@ declare namespace Reservation {
     status: Enum.ReservationStatus;
     smoking_type?: Enum.SmokingType;
     include_breakfast?: boolean;
+    snap_token?: string;
+    transaction_status?: string;
+    payment_status?: string;
+    midtrans_order_id?: string;
+    payment_type?: string;
+    canceled_at?: Date | string;
   }
 
   interface Addition {

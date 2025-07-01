@@ -20,7 +20,7 @@ class HandleUserRole
         $authorized = in_array($userRole, $roles);
 
         if (!$authorized) {
-            return redirect()->route('dashboard')->with('warning', 'Anda tidak memiliki akses');
+            return redirect()->route('home')->with('warning', 'Anda tidak memiliki akses');
         }
 
         return $next($request);

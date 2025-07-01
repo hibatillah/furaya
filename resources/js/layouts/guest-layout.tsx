@@ -2,17 +2,21 @@ import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
+import { useMobileNavigation } from "@/hooks/use-mobile-navigation";
 import { cn } from "@/lib/utils";
+import PublicLogin from "@/pages/public/auth/login";
+import PublicRegister from "@/pages/public/auth/register";
 import { dateConfig } from "@/static";
-import { FlashMessages } from "@/types";
+import { FlashMessages, SharedData } from "@/types";
 import { Link, router, usePage } from "@inertiajs/react";
 import { addDays, format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { CalendarIcon, GiftIcon, UserRoundIcon } from "lucide-react";
+import { CalendarIcon, GiftIcon, LogOut, UserRoundIcon } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { DateRange } from "react-day-picker";
 import { toast } from "sonner";
@@ -39,12 +43,8 @@ function BookCard({ className }: { className?: string }) {
   });
 
   function handleDateReservation() {
-    const start = date?.from
-      ? format(date.from, "yyyy-MM-dd")
-      : format(initialDate.from, "yyyy-MM-dd");
-    const end = date?.to
-      ? format(date.to, "yyyy-MM-dd")
-      : format(addDays(initialDate.from, 1), "yyyy-MM-dd");
+    const start = date?.from ? format(date.from, "yyyy-MM-dd") : format(initialDate.from, "yyyy-MM-dd");
+    const end = date?.to ? format(date.to, "yyyy-MM-dd") : format(addDays(initialDate.from, 1), "yyyy-MM-dd");
 
     const data = {
       start_date: start,
@@ -214,6 +214,109 @@ function BookCard({ className }: { className?: string }) {
   );
 }
 
+function Profile({ className }: { className?: string }) {
+  const { auth } = usePage<SharedData>().props;
+  const isLoggedIn = auth.user !== null;
+
+  const [loginDialog, setLoginDialog] = useState(false);
+  const [registerDialog, setRegisterDialog] = useState(false);
+
+  const cleanup = useMobileNavigation();
+
+  const handleLogout = () => {
+    cleanup();
+    router.flushAll();
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("text-muted-foreground hover:text-foreground size-8", className)}
+          >
+            <UserRoundIcon />
+            <span className="sr-only">Profile</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          sideOffset={2}
+        >
+          {isLoggedIn ? (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href={route("public.profile.edit")}>Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={route("public.reservation.history")}>Reservasi</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                asChild
+              >
+                <Link
+                  className="block w-full"
+                  method="post"
+                  href={route("logout")}
+                  as="button"
+                  onClick={handleLogout}
+                >
+                  <LogOut />
+                  Log out
+                </Link>
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem onClick={() => setRegisterDialog(true)}>Register</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLoginDialog(true)}>Login</DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <PublicRegister state={[registerDialog, setRegisterDialog]} />
+      <PublicLogin state={[loginDialog, setLoginDialog]} />
+    </>
+  );
+}
+
+function Header() {
+  const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
+
+  return (
+    <header className="bg-background/5 backdrop-blur-md dark:backdrop-blur-xl border-border sticky top-0 z-10 w-full border-b">
+      <div className="container mx-auto flex items-center justify-between gap-5 px-4 py-2">
+        <Link
+          href={route("home")}
+          className="text-foreground/80 tracking-wide uppercase"
+        >
+          Hotel Furaya
+        </Link>
+        <nav className="flex items-center gap-0.5">
+          {menu.map((item) => (
+            <Button
+              key={item}
+              type="button"
+              variant="link"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground cursor-default text-xs uppercase hover:no-underline"
+            >
+              {item}
+            </Button>
+          ))}
+          <ThemeToggle />
+          <Profile />
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 interface GuestLayoutProps {
   bookCard?: boolean;
   children: ReactNode;
@@ -221,10 +324,9 @@ interface GuestLayoutProps {
 }
 
 export default ({ children, className, bookCard = true }: GuestLayoutProps) => {
-  const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
-
   const { flash } = usePage<{ flash?: FlashMessages }>().props;
 
+  // handle flash messages
   useEffect(() => {
     if (flash?.success) toast.success(flash.success);
     if (flash?.warning) toast.warning(flash.warning);
@@ -237,30 +339,7 @@ export default ({ children, className, bookCard = true }: GuestLayoutProps) => {
 
   return (
     <>
-      <header className="bg-background border-border sticky top-0 z-100 w-full border-b">
-        <div className="container mx-auto flex items-center justify-between gap-5 px-4 py-2">
-          <Link
-            href={route("home")}
-            className="text-foreground/80 tracking-wide uppercase"
-          >
-            Hotel Furaya
-          </Link>
-          <nav className="flex items-center gap-1">
-            {menu.map((item) => (
-              <Button
-                key={item}
-                type="button"
-                variant="link"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground cursor-default text-xs uppercase hover:no-underline"
-              >
-                {item}
-              </Button>
-            ))}
-            <ThemeToggle />
-          </nav>
-        </div>
-      </header>
+      <Header />
       <main className="p-5">
         {bookCard && <BookCard className="mb-10" />}
         {children}

@@ -16,7 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // grouping admin routes
     Route::prefix('admin')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard');
+            ->name('dashboard')
+            ->middleware('role:admin,manager,employee');
 
         /** reservation transaction history for managers and employees */
         Route::get("reservasi/{id}/transaksi", [
