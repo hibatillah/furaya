@@ -46,7 +46,7 @@ export default function NationalityEdit(props: { data: Nationality.Default; onCl
       >
         {/* code */}
         <div className="grid gap-2">
-          <Label htmlFor="code">Kode</Label>
+          <Label htmlFor="code" required>Kode</Label>
           <Input
             id="code"
             type="text"
@@ -60,7 +60,7 @@ export default function NationalityEdit(props: { data: Nationality.Default; onCl
 
         {/* name */}
         <div className="grid gap-2">
-          <Label htmlFor="name">Nama</Label>
+          <Label htmlFor="name" required>Nama</Label>
           <Input
             id="name"
             type="text"

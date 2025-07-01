@@ -2,12 +2,14 @@ import { ChartCountBedType } from "@/components/charts/count-bed-type-chart";
 import { ChartCountFacilityUsed } from "@/components/charts/count-facility-used-chart";
 import { ChartCountGuestNationality } from "@/components/charts/count-guest-nationality-chart";
 import { ChartCountGuestReservation } from "@/components/charts/count-guest-reservation-chart";
-import { ChartCountMealReservation } from "@/components/charts/count-meal-reservation-chart";
 import { ChartCountRoomType } from "@/components/charts/count-room-type-chart";
+import { ChartCountSmokingType } from "@/components/charts/count-smoking-type-chart";
+import { ChartCountSmokingTypeReservation } from "@/components/charts/count-smoking-type-reservation-chart";
 import { ChartCountUserRole } from "@/components/charts/count-user-role-chart";
 import { ChartDailyReservationVolume } from "@/components/charts/daily-reservation-volume-chart";
 import { ChartMonthlyReservationVolume } from "@/components/charts/monthly-reservation-volume-chart";
 import { ChartMostRoomTypeReservation } from "@/components/charts/most-room-type-reservation-chart";
+import ReservationCard from "@/components/charts/reservation-card";
 import { ChartReservationStatusDistribution } from "@/components/charts/reservation-status-distribution-chart";
 import DashboardTabs, { DashboardTabsData } from "@/components/dashboard-tabs";
 import AppLayout from "@/layouts/app-layout";
@@ -23,8 +25,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard({ charts }: { charts: Record<string, Record<string, number>> }) {
-  console.log(charts);
-
   const { auth } = usePage<SharedData>().props;
   const role = auth.user?.role as Enum.Role;
 
@@ -33,29 +33,35 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
       title: "Reservasi",
       icon: CalendarCheckIcon,
       content: (
-        <div className="grid w-full gap-4 lg:grid-cols-2 xl:grid-cols-6">
+        <div className="grid w-full gap-4 lg:grid-cols-6">
+          <ReservationCard
+            daily={charts.daily_reservation_volume}
+            monthly={charts.monthly_reservation_volume}
+            roomType={charts.room_type_popularity}
+            guest={charts.top_guests_by_reservation_count}
+          />
           <ChartDailyReservationVolume
-            data={charts.dailyReservationVolume}
+            data={charts.daily_reservation_volume}
             className="lg:col-span-full"
           />
           <ChartMonthlyReservationVolume
-            data={charts.monthlyReservationVolume}
+            data={charts.monthly_reservation_volume}
             className="lg:col-span-3"
           />
           <ChartCountGuestReservation
-            data={charts.topGuestsByReservationCount}
-            className="xl:col-span-3"
+            data={charts.top_guests_by_reservation_count}
+            className="lg:col-span-3"
           />
           <ChartMostRoomTypeReservation
-            data={charts.roomTypePopularity}
+            data={charts.room_type_popularity}
             className="lg:col-span-2"
           />
           <ChartReservationStatusDistribution
-            data={charts.reservationStatusDistribution}
+            data={charts.reservation_status_distribution}
             className="lg:col-span-2"
           />
-          <ChartCountMealReservation
-            data={charts.topMealByReservationCount}
+          <ChartCountSmokingTypeReservation
+            data={charts.smoking_type_reservation}
             className="lg:col-span-2"
           />
         </div>
@@ -66,10 +72,11 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
       icon: HotelIcon,
       content: (
         <div className="grid w-full gap-4 xl:grid-cols-3 2xl:grid-cols-3">
-          <ChartCountRoomType data={charts.roomTypeCount} />
-          <ChartCountBedType data={charts.bedTypeCount} />
+          <ChartCountRoomType data={charts.room_type_count} />
+          <ChartCountBedType data={charts.bed_type_count} />
+          <ChartCountSmokingType data={charts.room_smoking_type_distribution} />
           <ChartCountFacilityUsed
-            data={charts.mostUsedFacilityByRoom}
+            data={charts.most_used_facility_by_room}
             className="xl:col-span-2"
           />
         </div>
@@ -81,11 +88,11 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
       content: (
         <div className="grid w-full gap-4 xl:grid-cols-6">
           <ChartCountGuestNationality
-            data={charts.guestNationalityDistribution}
+            data={charts.guest_nationality_distribution}
             className="xl:col-span-3"
           />
           <ChartCountUserRole
-            data={charts.userRoleCount}
+            data={charts.user_role_count}
             className="xl:col-span-2"
           />
         </div>
@@ -118,15 +125,7 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
         <DashboardTabs
           data={dashboardMenu}
           className="w-full"
-        >
-          {/* <InputDate
-            mode="range"
-            value={dateRange}
-            onChange={(date) => setDateRange(date as DateRange)}
-            className="border-input/30 bg-card ms-auto w-56 max-lg:w-full lg:h-8"
-            align="end"
-          /> */}
-        </DashboardTabs>
+        ></DashboardTabs>
       </div>
     </AppLayout>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CartesianGrid, LabelList, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { pieChartColors } from "./utils";
 
 export function ChartMonthlyReservationVolume({ data, className }: { data: Record<string, number>; className?: string }) {
-  const groupedByYear = Object.entries(data).reduce<Record<string, Record<string, number>>>((acc, [monthKey, value]) => {
+  const dataToUse = data || {};
+
+  const groupedByYear = Object.entries(dataToUse).reduce<Record<string, Record<string, number>>>((acc, [monthKey, value]) => {
     const [year, month] = monthKey.split("-");
     if (!acc[year]) {
       acc[year] = {};
@@ -24,16 +26,20 @@ export function ChartMonthlyReservationVolume({ data, className }: { data: Recor
   const [year, setYear] = React.useState<keyof typeof groupedByYear>(Object.keys(groupedByYear).at(-1) as keyof typeof groupedByYear);
 
   const chartData = React.useMemo(() => {
-    return Object.entries(groupedByYear[year]).map(([date, count]) => ({
+    const yearData = groupedByYear[year] || {};
+    return Object.entries(yearData).map(([date, count]) => ({
       date,
-      Jumlah: count,
+      count,
       fill: pieChartColors[pieChartColors.length - 1],
     }));
-  }, [data, year]);
+  }, [dataToUse, year]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(Object.keys(data).map((date) => [date.toLowerCase(), { label: date }]));
-  }, [data]) satisfies ChartConfig;
+    return {
+      ...Object.fromEntries(Object.keys(dataToUse).map((date) => [date.toLowerCase(), { label: date }])),
+      count: { label: "Jumlah" },
+    };
+  }, [dataToUse]) satisfies ChartConfig;
 
   return (
     <Card className={cn("flex flex-col gap-2", className)}>
@@ -84,7 +90,7 @@ export function ChartMonthlyReservationVolume({ data, className }: { data: Recor
               tickFormatter={(value) => format(new Date(value), "MMM", dateConfig)}
             />
             <YAxis
-              dataKey="Jumlah"
+              dataKey="count"
               tickLine={false}
               axisLine={false}
               tickMargin={20}
@@ -104,7 +110,7 @@ export function ChartMonthlyReservationVolume({ data, className }: { data: Recor
               }
             />
             <Line
-              dataKey="Jumlah"
+              dataKey="count"
               type="linear"
               stroke="var(--color-primary)"
               strokeWidth={2}
@@ -115,14 +121,7 @@ export function ChartMonthlyReservationVolume({ data, className }: { data: Recor
                 r: 4,
                 fill: "var(--color-foreground)",
               }}
-            >
-              {/* <LabelList
-                position="top"
-                offset={12}
-                className="fill-foreground"
-                fontSize={12}
-              /> */}
-            </Line>
+            ></Line>
           </LineChart>
         </ChartContainer>
       </CardContent>

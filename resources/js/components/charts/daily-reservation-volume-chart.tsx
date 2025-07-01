@@ -15,6 +15,7 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
   const didMountRef = React.useRef(false);
 
   const groupedByYearMonth = React.useMemo(() => {
+    if (!data) return {};
     return Object.entries(data).reduce<Record<string, Record<string, Record<string, number>>>>((acc, [dateKey, value]) => {
       const [year, month] = dateKey.split("-");
       if (!acc[year]) acc[year] = {};
@@ -26,6 +27,7 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
 
   // compute default year and month together
   const { defaultYear, defaultMonth } = React.useMemo(() => {
+    if (!data) return { defaultYear: "", defaultMonth: "" };
     const now = new Date();
     const currentYear = format(now, "yyyy");
     const currentMonth = format(now, "MM");
@@ -36,9 +38,9 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
 
     // fallback to the latest year and its first month
     const years = Object.keys(groupedByYearMonth);
-    const lastYear = years.at(-1)!;
-    const months = Object.keys(groupedByYearMonth[lastYear]);
-    return { defaultYear: lastYear, defaultMonth: months[0] };
+    const lastYear = years.at(-1) || "";
+    const months = Object.keys(groupedByYearMonth[lastYear] || {});
+    return { defaultYear: lastYear, defaultMonth: months[0] || "" };
   }, [groupedByYearMonth]);
 
   const [year, setYear] = React.useState(defaultYear);
@@ -46,8 +48,9 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
 
   // when year changes, update month accordingly
   React.useEffect(() => {
-    if (!groupedByYearMonth[year]?.[month]) {
-      const months = Object.keys(groupedByYearMonth[year]);
+    const yearData = groupedByYearMonth[year] || {};
+    if (!yearData[month]) {
+      const months = Object.keys(yearData);
       setMonth(months[0]);
     }
   }, [year]);
@@ -63,6 +66,7 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
   }, [year]);
 
   const chartData = React.useMemo(() => {
+    if (!data) return [];
     const rawData = groupedByYearMonth?.[year]?.[month] || {};
 
     const yearNum = Number(year);
@@ -78,7 +82,7 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
 
       return {
         date,
-        Jumlah: rawData[date] ?? 0,
+        count: rawData[date] ?? 0,
         fill: pieChartColors[pieChartColors.length - 1],
       };
     });
@@ -86,7 +90,10 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
 
   const config = React.useMemo(() => {
     const days = groupedByYearMonth?.[year]?.[month] || {};
-    return Object.fromEntries(Object.keys(days).map((date) => [date.toLowerCase(), { label: date }]));
+    return {
+      ...Object.fromEntries(Object.keys(days).map((date) => [date.toLowerCase(), { label: date }])),
+      count: { label: "Jumlah" },
+    };
   }, [groupedByYearMonth, year, month]) satisfies ChartConfig;
 
   return (
@@ -159,7 +166,7 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
               tickFormatter={(value) => format(new Date(value), "dd", dateConfig)}
             />
             <YAxis
-              dataKey="Jumlah"
+              dataKey="count"
               tickLine={false}
               axisLine={false}
               tickMargin={20}
@@ -168,6 +175,7 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
             />
             <ChartTooltip
               cursor={false}
+              defaultIndex={Math.floor(Math.random() * chartData.length)}
               content={
                 <ChartTooltipContent
                   indicator="dot"
@@ -179,39 +187,16 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
               }
             />
             <Line
-              dataKey="Jumlah"
+              dataKey="count"
               type="monotone"
               stroke="var(--color-primary)"
               strokeWidth={2}
               dot={false}
-              // dot={({ cx, cy, payload }) =>
-              //   payload.Jumlah === 0 ? (
-              //     (null as unknown as React.ReactElement)
-              //   ) : (
-              //     <circle
-              //       cx={cx}
-              //       cy={cy}
-              //       r={4}
-              //       stroke="var(--color-primary)"
-              //       fill="var(--color-primary-foreground)"
-              //     />
-              //   )
-              // }
               activeDot={{
                 r: 4,
                 fill: "var(--color-foreground)",
               }}
             >
-              {/* <LabelList
-                position="top"
-                offset={12}
-                className="fill-foreground"
-                fontSize={12}
-                formatter={(value: string) => {
-                  if (value) return value;
-                  return null;
-                }}
-              /> */}
             </Line>
           </LineChart>
         </ChartContainer>

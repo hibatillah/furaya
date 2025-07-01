@@ -4,14 +4,19 @@ import { ReservationRangeType, SelectReservationRange } from "@/components/selec
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { bookingTypeBadgeColor, paymentMethodBadgeColor, reservationStatusBadgeColor } from "@/static/reservation";
+import { bookingTypeBadgeColor, reservationStatusBadgeColor, statusAccBadgeColor } from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import ConfirmPendingReservation from "./confirm";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -25,13 +30,32 @@ export default function ReservationsIndex(props: {
   type: ReservationRangeType;
   status: Enum.ReservationStatus[];
   bookingType: Enum.BookingType[];
-  paymentMethod: Enum.Payment[];
   roomType: string[];
+  statusAcc: Enum.StatusAcc[];
+  is_pending: boolean;
+  count_pending_reservation: number;
 }) {
-  const { reservations, type, status, bookingType, paymentMethod, roomType } = props;
+  const { reservations, type, status, bookingType, roomType, statusAcc, is_pending, count_pending_reservation } = props;
 
   const { auth } = usePage<SharedData>().props;
-  const isManager = auth.user.role === "manager";
+  const isEmployee = auth.user.role === "employee";
+
+  // handle dialog form
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"confirm" | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Reservation.Default | null>(null);
+
+  function handleDialog(type: "confirm", row: Reservation.Default) {
+    setDialogType(type);
+    setSelectedRow(row);
+    setDialogOpen(true);
+  }
+
+  function handleDialogClose() {
+    setDialogOpen(false);
+    setDialogType(null);
+    setSelectedRow(null);
+  }
 
   // define reservation table columns
   const columns: ColumnDef<Reservation.Default>[] = [
@@ -64,19 +88,23 @@ export default function ReservationsIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
-      id: "room_number",
-      accessorFn: (row) => row.reservation_room?.room_number,
-      header: "Kamar",
-    },
-    {
-      id: "room_type",
-      accessorFn: (row) => row.reservation_room?.room_type,
+      id: "room_type_name",
+      accessorFn: (row) => row.reservation_room?.room_type_name,
       header: "Tipe Kamar",
       cell: ({ row }) => {
-        const roomType = row.getValue("room_type") as string;
+        const roomType = row.getValue("room_type_name") as string;
         return <Badge variant="outline">{roomType}</Badge>;
       },
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
+    },
+    {
+      id: "room_number",
+      accessorFn: (row) => row.reservation_room?.room_number,
+      header: "No. Kamar",
+      cell: ({ row }) => {
+        const roomNumber = row.getValue("room_number") as string;
+        return roomNumber ?? "-";
+      },
     },
     {
       id: "start_date",
@@ -107,18 +135,18 @@ export default function ReservationsIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
-      id: "payment_method",
-      accessorKey: "payment_method",
-      header: "Pembayaran",
+      id: "status_acc",
+      accessorKey: "status_acc",
+      header: "Status Acc",
       cell: ({ row }) => {
-        const paymentMethod = row.getValue("payment_method") as Enum.Payment;
+        const statusAcc = row.getValue("status_acc") as Enum.StatusAcc;
 
         return (
           <Badge
             variant="outline"
-            className={cn("capitalize", paymentMethodBadgeColor[paymentMethod])}
+            className={cn("capitalize", statusAccBadgeColor[statusAcc])}
           >
-            {paymentMethod}
+            {statusAcc}
           </Badge>
         );
       },
@@ -126,32 +154,58 @@ export default function ReservationsIndex(props: {
     },
     {
       id: "actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-            >
-              <EllipsisVerticalIcon className="size-4" />
-              <span className="sr-only">Aksi</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={route("reservation.show", { id: row.original.id })}>Detail</Link>
-            </DropdownMenuItem>
-            {!isManager && (
+      cell: ({ row }) => {
+        const id = row.original.id;
+        const statusAcc = row.getValue("status_acc") as Enum.StatusAcc;
+        const isPending = statusAcc === "pending";
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+              >
+                <EllipsisVerticalIcon className="size-4" />
+                <span className="sr-only">Aksi</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isEmployee && isPending && (
+                <>
+                  <DropdownMenuItem onClick={() => handleDialog("confirm", row.original)}>Konfirmasi</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem asChild>
-                <Link href={route("reservation.edit", { id: row.original.id })}>Edit</Link>
+                <Link href={route("reservation.show", { id })}>Detail</Link>
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+              {isEmployee && !isPending && (
+                <DropdownMenuItem asChild>
+                  <Link href={route("reservation.edit", { id })}>Edit</Link>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
     },
   ];
+
+  // handle pending reservation
+  const [isPending, setIsPending] = useState(is_pending);
+  const handlePendingReservation = useCallback((value: boolean) => {
+    router.get(
+      route("reservation.index"),
+      {
+        is_pending: value,
+      },
+      { preserveState: true },
+    );
+  }, []);
+
+  useEffect(() => setIsPending(is_pending), [is_pending]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -176,14 +230,14 @@ export default function ReservationsIndex(props: {
                       data: status,
                     },
                     {
+                      id: "status_acc",
+                      label: "Status Acc",
+                      data: statusAcc,
+                    },
+                    {
                       id: "booking_type",
                       label: "Tipe Booking",
                       data: bookingType,
-                    },
-                    {
-                      id: "payment_method",
-                      label: "Pembayaran",
-                      data: paymentMethod,
                     },
                     {
                       id: "room_type" as keyof Reservation.Default,
@@ -196,11 +250,30 @@ export default function ReservationsIndex(props: {
                   type={type}
                   routeName="reservation.index"
                 />
-                {!isManager && (
-                  <Button
-                    className="ms-auto"
-                    asChild
+
+                {/* toggle pending reservation view */}
+                <Button
+                  variant="outline"
+                  asChild
+                >
+                  <Label
+                    htmlFor="is_pending"
+                    className="ms-auto px-3"
                   >
+                    <span className="text-primary text-sm font-medium">{count_pending_reservation}</span>
+                    <span>Pending Reservasi</span>
+                    <Switch
+                      id="is_pending"
+                      checked={isPending}
+                      onCheckedChange={(value) => {
+                        setIsPending(value);
+                        handlePendingReservation(value);
+                      }}
+                    />
+                  </Label>
+                </Button>
+                {isEmployee && (
+                  <Button asChild>
                     <Link href={route("reservation.create")}>Tambah Reservasi</Link>
                   </Button>
                 )}
@@ -209,6 +282,25 @@ export default function ReservationsIndex(props: {
           </DataTable>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      >
+        <DialogContent
+          className="w-100"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          tabIndex={-1}
+          noClose
+        >
+          {dialogType === "confirm" && selectedRow && (
+            <ConfirmPendingReservation
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

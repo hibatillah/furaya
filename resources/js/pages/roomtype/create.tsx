@@ -11,8 +11,8 @@ import { useForm } from "@inertiajs/react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export default function RoomTypeCreate(props: { facilities: Facility.Default[]; rateTypes: RateType.Default[]; smokingTypes: Enum.SmokingType[] }) {
-  const { facilities, rateTypes, smokingTypes } = props;
+export default function RoomTypeCreate(props: { facilities: Facility.Default[]; rateTypes: RateType.Default[]; bedTypes: BedType.Default[] }) {
+  const { facilities, rateTypes, bedTypes } = props;
 
   const { data, setData, post, errors, processing, reset } = useForm<RoomType.Create>();
 
@@ -77,7 +77,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
         >
           {/* code */}
           <div className="grid gap-2">
-            <Label htmlFor="code">Kode</Label>
+            <Label htmlFor="code" required>Kode</Label>
             <Input
               id="code"
               type="text"
@@ -92,7 +92,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
 
           {/* name */}
           <div className="grid gap-2">
-            <Label htmlFor="name">Nama</Label>
+            <Label htmlFor="name" required>Nama</Label>
             <Input
               id="name"
               type="text"
@@ -107,7 +107,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
 
           {/* rate type */}
           <div className="grid gap-2">
-            <Label htmlFor="rate_type_id">Tipe Tarif</Label>
+            <Label htmlFor="rate_type_id" required>Tipe Tarif</Label>
             <Select
               value={data.rate_type_id}
               onValueChange={(value) => {
@@ -162,9 +162,37 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             <InputError message={errors.base_rate} />
           </div>
 
+          {/* bed type */}
+          <div className="grid gap-2">
+              <Label htmlFor="bed_type_id" required>Tipe Kasur</Label>
+              <Select
+                value={data.bed_type_id}
+                onValueChange={(value) => setData("bed_type_id", value)}
+                disabled={bedTypes.length === 0}
+              >
+                <SelectTrigger id="bed_type_id">
+                  <SelectValue placeholder="Pilih Tipe Kasur">
+                    <span className="capitalize">{bedTypes.find((type) => type.id === data.bed_type_id)?.name}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {bedTypes.map((type) => (
+                    <SelectItem
+                      key={type.id}
+                      value={type.id}
+                      className="capitalize"
+                    >
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.bed_type_id} />
+            </div>
+
           {/* capacity */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="capacity">Kapasitas</Label>
+            <Label htmlFor="capacity" required>Kapasitas</Label>
             <div className="relative">
               <Input
                 id="capacity"
@@ -185,7 +213,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
 
           {/* size */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="size">Luas Kamar</Label>
+            <Label htmlFor="size" required>Luas Kamar</Label>
             <div className="relative">
               <Input
                 id="size"
@@ -202,31 +230,6 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
               </span>
             </div>
             <InputError message={errors.size} />
-          </div>
-
-          {/* smoking type */}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="smoking_type">Smoking Type</Label>
-            <Select
-              value={data.smoking_type}
-              onValueChange={(value) => setData("smoking_type", value as Enum.SmokingType)}
-            >
-              <SelectTrigger id="smoking_type">
-                <SelectValue placeholder="Pilih Smoking Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {smokingTypes.map((type) => (
-                  <SelectItem
-                    key={type}
-                    value={type}
-                    className="capitalize"
-                  >
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <InputError message={errors.rate_type_id} />
           </div>
 
           {/* facilities */}

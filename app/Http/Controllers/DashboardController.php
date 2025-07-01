@@ -16,16 +16,8 @@ class DashboardController extends Controller
 
     public function index()
     {
-        try {
-            throw new \Exception("test");
-            return Inertia::render('dashboard', [
-                'charts' => $this->dashboardService->getAllCharts(),
-            ]);
-        } catch (\Exception $e) {
-            report($e);
-            return back()->withErrors([
-                'message' => $e->getMessage(),
-            ]);
-        }
+        return Inertia::render('dashboard', [
+            'charts' => $this->dashboardService->getAllCharts(),
+        ]);
     }
 }

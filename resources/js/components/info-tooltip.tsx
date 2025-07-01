@@ -10,9 +10,9 @@ export function InfoTooltip({ children, className }: { children: React.ReactNode
         <Button
           variant="ghost"
           size="icon"
-          className="size-5 rounded-full"
+          className="size-4 !p-0 rounded-full text-muted-foreground hover:text-foreground"
         >
-          <InfoIcon className="size-3" />
+          <InfoIcon className="size-3 -translate-y-[0.5px] translate-x-[0.5px]" />
           <span className="sr-only">Info</span>
         </Button>
       </TooltipTrigger>

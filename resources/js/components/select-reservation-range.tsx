@@ -76,7 +76,7 @@ export function SelectReservationRange({ type: initialType, routeName }: { type:
           setOpenSelect(value);
         }}
       >
-        <SelectTrigger className="w-56 rounded-e-none">
+        <SelectTrigger className="w-56 rounded-e-none bg-inherit">
           <SelectValue
             placeholder="Pilih Rentang"
             className="truncate whitespace-nowrap"
@@ -111,7 +111,7 @@ export function SelectReservationRange({ type: initialType, routeName }: { type:
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          align="center"
+          align="end"
           className="w-auto overflow-hidden p-0"
         >
           <Calendar

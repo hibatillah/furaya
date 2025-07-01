@@ -77,9 +77,4 @@ class Employee extends BaseModel
     {
         return $this->hasMany(Country::class);
     }
-
-    public function meal()
-    {
-        return $this->hasMany(Meal::class);
-    }
 }

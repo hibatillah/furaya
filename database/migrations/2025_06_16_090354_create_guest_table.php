@@ -42,10 +42,10 @@ return new class extends Migration
                 ->nullable()
                 ->constrained("users")
                 ->nullOnDelete();
-            $table->string('nik_passport')->unique();
+            $table->string('nik_passport')->unique()->nullable();
+            $table->string('phone')->unique();
             $table->date('birthdate')->nullable();
             $table->enum('gender', GenderEnum::getValues())->nullable();
-            $table->string('phone')->unique()->nullable();
             $table->string("profession")->nullable();
             $table->string("nationality")->nullable();
             $table->string("country")->nullable();

@@ -35,6 +35,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ])
                 ->name("reservation.update.status");
 
+            // reservation confirm page
+            Route::get("reservasi/{id}/konfirmasi", [
+                ReservationController::class,
+                "confirm"
+            ])
+                ->name("reservation.confirm");
+
+            // reservation reject
+            Route::put("reservasi/{id}/tolak", [
+                ReservationController::class,
+                "reject"
+            ])
+                ->name("reservation.reject");
+
             // reservation create page
             Route::get("reservasi/tambah", [
                 ReservationController::class,

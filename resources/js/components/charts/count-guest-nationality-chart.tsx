@@ -4,23 +4,25 @@ import * as React from "react";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 
 export function ChartCountGuestNationality({ data, className }: { data: Record<string, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([nationality, count], index) => ({
+    return Object.entries(dataToUse).map(([nationality, count], index) => ({
       nationality,
       count,
     }));
-  }, [data]);
+  }, [dataToUse]);
 
-  const chartConfig = React.useMemo(
-    () => ({
-      nationality: { label: "Kewarganegaraan" },
-    }),
-    [],
-  );
+  const config = React.useMemo(() => {
+    return {
+      ...Object.fromEntries(Object.keys(dataToUse).map((nationality) => [nationality.toLowerCase(), { label: nationality }])),
+      count: { label: "Jumlah" },
+    };
+  }, [dataToUse]) as ChartConfig;
 
   return (
     <Card className={cn(className)}>
@@ -30,7 +32,7 @@ export function ChartCountGuestNationality({ data, className }: { data: Record<s
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={chartConfig}
+          config={config}
           className="h-full min-h-[100px] w-full"
         >
           <BarChart
@@ -49,7 +51,7 @@ export function ChartCountGuestNationality({ data, className }: { data: Record<s
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent indicator="line" />}
             />
             <Bar
               dataKey="count"

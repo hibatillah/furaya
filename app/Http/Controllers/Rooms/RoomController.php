@@ -13,7 +13,6 @@ use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomFacility;
 use App\Models\Rooms\RoomType;
 use App\Models\Rooms\RateType;
-use App\Models\Rooms\Meal;
 use App\Models\Reservations\Reservation;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
@@ -59,7 +58,6 @@ class RoomController extends Controller
 
         $bedTypes = BedType::all();
         $rateTypes = RateType::all();
-        $mealTypes = Meal::all();
         $facilities = Facility::all();
 
         $roomConditions = RoomConditionEnum::getValues();
@@ -70,7 +68,6 @@ class RoomController extends Controller
             "bedTypes" => $bedTypes,
             "roomTypes" => $roomTypes,
             "rateTypes" => $rateTypes,
-            "mealTypes" => $mealTypes,
             "roomConditions" => $roomConditions,
             "roomStatuses" => $roomStatusLabels,
             "facilities" => $facilities,
@@ -91,7 +88,7 @@ class RoomController extends Controller
                 $facilities = $validated['facilities'];
 
                 // create room
-                $room = Room::create(Arr::except($validated, ["facilities", "image"]));
+                $room = Room::create(Arr::except($validated, ["facilities", "images"]));
 
                 if (count($facilities) > 0) {
                     foreach ($facilities as $facilityId) {
@@ -159,7 +156,6 @@ class RoomController extends Controller
 
             $bedTypes = BedType::all();
             $rateTypes = RateType::all();
-            $mealTypes = Meal::all();
             $facilities = Facility::all();
 
             $roomConditions = RoomConditionEnum::getValues();
@@ -171,12 +167,14 @@ class RoomController extends Controller
                 "bedTypes" => $bedTypes,
                 "roomTypes" => $roomTypes,
                 "rateTypes" => $rateTypes,
-                "mealTypes" => $mealTypes,
                 "roomConditions" => $roomConditions,
                 "roomStatuses" => $roomStatusLabels,
                 "facilities" => $facilities,
                 "smokingTypes" => $smokingTypes,
             ]);
+        } catch (ValidationException $e) {
+            report($e);
+            return back()->withErrors($e->errors())->withInput();
         } catch (ModelNotFoundException $e) {
             report($e);
             return redirect()->back()->withErrors([

@@ -46,7 +46,7 @@ export default function RateTypeEdit(props: { data: RateType.Default; onClose: (
       >
         {/* code */}
         <div className="grid gap-2">
-          <Label htmlFor="code">Kode</Label>
+          <Label htmlFor="code" required>Kode</Label>
           <Input
             id="code"
             type="text"
@@ -61,7 +61,7 @@ export default function RateTypeEdit(props: { data: RateType.Default; onClose: (
 
         {/* name */}
         <div className="grid gap-2">
-          <Label htmlFor="name">Nama</Label>
+          <Label htmlFor="name" required>Nama</Label>
           <Input
             id="name"
             type="text"
@@ -76,7 +76,7 @@ export default function RateTypeEdit(props: { data: RateType.Default; onClose: (
 
         {/* rate */}
         <div className="grid gap-2">
-          <Label htmlFor="rate">Tarif</Label>
+          <Label htmlFor="rate" required>Tarif</Label>
           <div className="relative">
             <Input
               id="rate"

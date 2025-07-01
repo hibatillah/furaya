@@ -217,6 +217,15 @@ export default function RoomsIndex(props: {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={route("room.show", { id: row.original.id })}>Detail</Link>
+            </DropdownMenuItem>
+            {isAdmin && (
+              <DropdownMenuItem asChild>
+                <Link href={route("room.edit", { id: row.original.id })}>Edit</Link>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
@@ -237,15 +246,8 @@ export default function RoomsIndex(props: {
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={route("room.show", { id: row.original.id })}>Detail</Link>
-            </DropdownMenuItem>
             {isAdmin && (
               <>
-                <DropdownMenuItem asChild>
-                  <Link href={route("room.edit", { id: row.original.id })}>Edit</Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"

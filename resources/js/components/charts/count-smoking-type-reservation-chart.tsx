@@ -9,19 +9,19 @@ import { cn } from "@/lib/utils";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 import { pieChartColors } from "./utils";
 
-export function ChartCountMealReservation({ data, className }: { data: Record<string, number>; className?: string }) {
+export function ChartCountSmokingTypeReservation({ data, className }: { data: Record<string, number>; className?: string }) {
   const dataToUse = data || {};
 
   const chartData = React.useMemo(() => {
-    return Object.entries(dataToUse).map(([meal, count], index) => ({
-      meal,
+    return Object.entries(dataToUse).map(([smokingType, count], index) => ({
+      smokingType,
       count,
       fill: pieChartColors[index % pieChartColors.length],
     }));
   }, [dataToUse]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(Object.keys(dataToUse).map((meal) => [meal.toLowerCase(), { label: meal }]));
+    return Object.fromEntries(Object.keys(dataToUse).map((smokingType) => [smokingType.toLowerCase(), { label: smokingType }]));
   }, [dataToUse]) satisfies ChartConfig;
 
   const total = React.useMemo(() => {
@@ -37,8 +37,8 @@ export function ChartCountMealReservation({ data, className }: { data: Record<st
   return (
     <Card className={cn("flex flex-col gap-2", className)}>
       <CardHeader className="items-center pb-0">
-        <CardTitle>Distribusi Tipe Meal</CardTitle>
-        <CardDescription className="text-center text-pretty">Tipe makanan include dalam reservasi</CardDescription>
+        <CardTitle>Distribusi Smoking Type</CardTitle>
+        <CardDescription className="text-center text-pretty">Tipe kamar direservasi berdasarkan smoking type</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -56,7 +56,7 @@ export function ChartCountMealReservation({ data, className }: { data: Record<st
               }}
               data={chartData}
               dataKey="count"
-              nameKey="meal"
+              nameKey="smokingType"
               activeIndex={highestIndex}
               activeShape={({ outerRadius = 0, ...props }: PieSectorDataItem) => (
                 <Sector
@@ -66,7 +66,7 @@ export function ChartCountMealReservation({ data, className }: { data: Record<st
               )}
             >
               <LabelList
-                dataKey="meal"
+                dataKey="smokingType"
                 className="fill-black"
                 stroke="none"
                 fontSize={12}

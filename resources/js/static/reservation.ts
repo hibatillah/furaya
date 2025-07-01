@@ -110,3 +110,9 @@ export const reservationStatusBadgeColor = [
 
   return acc;
 }, {} as Record<Enum.ReservationStatus, string>);
+
+export const statusAccBadgeColor = {
+  approved: "bg-green-200 border-green-400 text-green-950 dark:bg-green-950 dark:border-green-900 dark:text-green-100",
+  pending: "bg-yellow-200 border-yellow-400 text-yellow-950 dark:bg-yellow-950 dark:border-yellow-900 dark:text-yellow-100",
+  rejected: "bg-red-200 border-red-400 text-red-950 dark:bg-red-950 dark:border-red-900 dark:text-red-100",
+} as Record<Enum.StatusAcc, string>;

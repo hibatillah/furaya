@@ -9,19 +9,21 @@ import { cn } from "@/lib/utils";
 import { pieChartColors } from "./utils";
 
 export function ChartReservationStatusDistribution({ data, className }: { data: Record<string, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([bedType, count], index) => ({
+    return Object.entries(dataToUse).map(([bedType, count], index) => ({
       bedType,
       count,
       fill: pieChartColors[index % pieChartColors.length],
     }));
-  }, [data]);
+  }, [dataToUse]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(Object.keys(data).map((bedType) => [bedType.toLowerCase(), { label: bedType }]));
-  }, [data]) satisfies ChartConfig;
+    return Object.fromEntries(Object.keys(dataToUse).map((bedType) => [bedType.toLowerCase(), { label: bedType }]));
+  }, [dataToUse]) satisfies ChartConfig;
 
-  const totalType = Object.keys(data).length;
+  const totalType = Object.keys(dataToUse).length;
 
   const total = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + Number(curr.count), 0);

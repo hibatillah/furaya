@@ -52,9 +52,4 @@ class Room extends BaseModel
     {
         return $this->belongsTo(RateType::class);
     }
-
-    public function meal()
-    {
-        return $this->belongsTo(Meal::class);
-    }
 }

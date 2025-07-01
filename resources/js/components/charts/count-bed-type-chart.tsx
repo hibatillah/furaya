@@ -10,17 +10,19 @@ import { PieSectorDataItem } from "recharts/types/polar/Pie";
 import { pieChartColors } from "./utils";
 
 export function ChartCountBedType({ data, className }: { data: Record<string, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([bedType, count], index) => ({
+    return Object.entries(dataToUse).map(([bedType, count], index) => ({
       bedType,
       count,
       fill: pieChartColors[index % pieChartColors.length],
     }));
-  }, [data]);
+  }, [dataToUse]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(Object.keys(data).map((bedType) => [bedType.toLowerCase(), { label: bedType }]));
-  }, [data]) satisfies ChartConfig;
+    return Object.fromEntries(Object.keys(dataToUse).map((bedType) => [bedType.toLowerCase(), { label: bedType }]));
+  }, [dataToUse]) satisfies ChartConfig;
 
   const highestIndex = React.useMemo(() => {
     return chartData.reduce((highestIndex, currentItem, currentIndex) => {
@@ -31,7 +33,7 @@ export function ChartCountBedType({ data, className }: { data: Record<string, nu
   return (
     <Card className={cn("flex flex-col gap-2", className)}>
       <CardHeader className="items-center pb-0">
-        <CardTitle>Jumlah Penggunaan Kasur</CardTitle>
+        <CardTitle>Distribusi Tipe Kasur</CardTitle>
         <CardDescription className="text-center text-pretty">Penggunaan tipe kasur berdasarkan kamar</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">

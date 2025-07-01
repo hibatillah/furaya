@@ -59,4 +59,9 @@ class RoomType extends BaseModel
   {
     return $this->hasMany(Room::class);
   }
+
+  public function bedType()
+  {
+    return $this->belongsTo(BedType::class);
+  }
 }

@@ -10,17 +10,19 @@ import { PieSectorDataItem } from "recharts/types/polar/Pie";
 import { pieChartColors } from "./utils";
 
 export function ChartMostRoomTypeReservation({ data, className }: { data: Record<string, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([roomType, count], index) => ({
+    return Object.entries(dataToUse).map(([roomType, count], index) => ({
       roomType,
       count,
       fill: pieChartColors[index % pieChartColors.length],
     }));
-  }, [data]);
+  }, [dataToUse]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(Object.keys(data).map((roomType) => [roomType.toLowerCase(), { label: roomType }]));
-  }, [data]) satisfies ChartConfig;
+    return Object.fromEntries(Object.keys(dataToUse).map((roomType) => [roomType.toLowerCase(), { label: roomType }]));
+  }, [dataToUse]) satisfies ChartConfig;
 
   const total = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + Number(curr.count), 0);
@@ -35,8 +37,8 @@ export function ChartMostRoomTypeReservation({ data, className }: { data: Record
   return (
     <Card className={cn("flex flex-col gap-2", className)}>
       <CardHeader className="items-center pb-0">
-        <CardTitle>Tipe Kamar Terpopuler</CardTitle>
-        <CardDescription>Tipe kamar yang paling sering dipesan</CardDescription>
+        <CardTitle>Distribusi Tipe Kamar</CardTitle>
+        <CardDescription>Penggunaan tipe kamar dalam reservasi</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 pb-0">
         <ChartContainer

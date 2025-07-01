@@ -123,7 +123,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
       >
         {/* date */}
         <div className="grid gap-2">
-          <Label htmlFor="date">Tanggal</Label>
+          <Label htmlFor="date" required>Tanggal</Label>
           <InputDate
             mode="single"
             value={date}
@@ -139,7 +139,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
 
         {/* time */}
         <div className="grid gap-2">
-          <Label htmlFor="time">Waktu</Label>
+          <Label htmlFor="time" required>Waktu</Label>
           <InputTime
             id="time"
             className="bg-inherit"
@@ -151,7 +151,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
 
         {/* final total */}
         <div className="col-span-2 grid gap-2">
-          <Label htmlFor="final_total">Harga Akhir</Label>
+          <Label htmlFor="final_total" required>Harga Akhir</Label>
           <div className="relative">
             <Input
               id="final_total"
@@ -169,7 +169,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
 
         {/* room status */}
         <div className="col-span-2 grid gap-2">
-          <Label htmlFor="time">Status Kamar</Label>
+          <Label htmlFor="time" required>Status Kamar</Label>
           <Select
             value={data.room_status}
             onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
@@ -197,7 +197,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
 
         {/* notes */}
         <div className="col-span-2 grid gap-2">
-          <Label htmlFor="notes">Catatan</Label>
+          <Label htmlFor="notes" optional>Catatan</Label>
           <Textarea
             id="notes"
             value={data.notes}

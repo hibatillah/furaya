@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Rooms;
 
-use App\Enums\SmokingTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rooms\RoomTypeRequest;
+use App\Models\Rooms\BedType;
 use App\Models\Rooms\Facility;
 use App\Models\Rooms\RateType;
 use App\Models\Rooms\RoomTypeFacility;
@@ -22,16 +22,17 @@ class RoomTypeController extends Controller
      */
     public function index()
     {
-        $roomTypes = RoomType::with('facility', 'rateType')->latest()->get();
+        $roomTypes = RoomType::with('facility', 'rateType', 'bedType')
+            ->latest()->get();
         $facilities = Facility::all();
         $rateTypes = RateType::all();
-        $smokingTypes = SmokingTypeEnum::getValues();
+        $bedTypes = BedType::all();
 
         return Inertia::render('roomtype/index', [
             'roomTypes' => $roomTypes,
             'facilities' => $facilities,
             'rateTypes' => $rateTypes,
-            'smokingTypes' => $smokingTypes,
+            'bedTypes' => $bedTypes,
         ]);
     }
 
@@ -47,7 +48,7 @@ class RoomTypeController extends Controller
                 $facilities = $validated['facilities'];
 
                 // create room type
-                $roomType = RoomType::create(Arr::except($validated, 'facilities'));
+                $roomType = RoomType::create(Arr::except($validated, ['facilities', 'images']));
 
                 // check if facilities is not empty
                 if (count($facilities) > 0) {
@@ -63,9 +64,7 @@ class RoomTypeController extends Controller
             return redirect()->back();
         } catch (ValidationException $e) {
             report($e);
-            return back()->withErrors([
-                'message' => $e->validator->errors()->first()
-            ])->withInput();
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             report($e);
             return back()->withErrors([
@@ -86,7 +85,7 @@ class RoomTypeController extends Controller
 
             DB::transaction(function () use ($validated, $roomType, $roomTypeFacilities) {
                 // update room type
-                $roomType->update(Arr::except($validated, 'facilities'));
+                $roomType->update(Arr::except($validated, ['facilities', 'images']));
 
                 // update room type facility
                 $facilities = $validated['facilities'];

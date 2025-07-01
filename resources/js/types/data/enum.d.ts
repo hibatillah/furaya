@@ -41,7 +41,7 @@ declare namespace Enum {
 
   export type ReservationStatus = "pending" | "booked" | "checked in" | "checked out" | "no show" | "cancelled" | "overdue";
 
-  export type SmokingType = "smoking" | "non-smoking";
+  export type SmokingType = "smoking" | "non smoking";
 
   export type ReservationTransaction = "booking" | "deposit" | "charge" | "refund" | "discount";
 }

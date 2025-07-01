@@ -10,17 +10,19 @@ import { PieSectorDataItem } from "recharts/types/polar/Pie";
 import { pieChartColors } from "./utils";
 
 export function ChartCountRoomType({ data, className }: { data: Record<string, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([roomType, count], index) => ({
+    return Object.entries(dataToUse).map(([roomType, count], index) => ({
       roomType,
       count,
       fill: pieChartColors[index % pieChartColors.length],
     }));
-  }, [data]);
+  }, [dataToUse]);
 
   const config = React.useMemo(() => {
-    return Object.fromEntries(Object.keys(data).map((roomType) => [roomType.toLowerCase(), { label: roomType }]));
-  }, [data]) satisfies ChartConfig;
+    return Object.fromEntries(Object.keys(dataToUse).map((roomType) => [roomType.toLowerCase(), { label: roomType }]));
+  }, [dataToUse]) satisfies ChartConfig;
 
   const highestIndex = React.useMemo(() => {
     return chartData.reduce((highestIndex, currentItem, currentIndex) => {

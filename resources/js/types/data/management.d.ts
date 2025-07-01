@@ -3,10 +3,10 @@ declare namespace Guest {
     id: string;
     user_id: string;
     user?: User.Default;
-    nik_passport: string;
+    nik_passport?: string;
+    phone: string;
     gender: Enum.Gender;
     birthdate: Date | string;
-    phone?: string;
     profession?: string;
     nationality?: string;
     country?: string;

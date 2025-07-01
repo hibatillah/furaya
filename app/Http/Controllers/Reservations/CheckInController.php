@@ -7,6 +7,7 @@ use App\Enums\BookingTypeEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\RoomStatusEnum;
 use App\Enums\ReservationStatusEnum;
+use App\Enums\StatusAccEnum;
 use App\Http\Requests\Reservations\CheckInRequest;
 use App\Models\Managements\Employee;
 use App\Models\Reservations\Reservation;
@@ -55,14 +56,17 @@ class CheckInController extends Controller
                     'name',
                     'reservation_id',
                 ]),
-            ])->select([
-                'id',
-                'booking_number',
-                'start_date',
-                'end_date',
-                'booking_type',
-                'status',
-            ]);
+            ])
+                ->select([
+                    'id',
+                    'booking_number',
+                    'start_date',
+                    'end_date',
+                    'status_acc',
+                    'total_price',
+                    'booking_type',
+                    'status',
+                ]);
 
             // filter the reservations by date range
             if ($start_date) {
@@ -71,6 +75,10 @@ class CheckInController extends Controller
 
             if ($end_date) {
                 $query->where('end_date', '<=', $end_date);
+            }
+
+            if ($type === 'upcoming') {
+                $query->where('status_acc', StatusAccEnum::APPROVED);
             }
 
             // return the reservations query

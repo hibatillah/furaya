@@ -44,11 +44,11 @@ class RoomRequest extends FormRequest
             'room_type_id' => ['required', Rule::exists("room_types", "id")],
             'bed_type_id' => ['required', Rule::exists("bed_types", "id")],
             'rate_type_id' => ['required', Rule::exists("rate_types", "id")],
-            'meal_id' => ['nullable', Rule::exists("meals", "id")],
             'status' => ['required', Rule::in(RoomStatusEnum::getLabels())],
             'facilities' => ['nullable', 'array'],
             'facilities.*' => ['nullable', 'string', Rule::exists("facilities", "id")],
-            'image' => ['nullable', 'image', 'max:2048'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', 'image', 'max:5120'],
         ];
     }
 
@@ -76,9 +76,14 @@ class RoomRequest extends FormRequest
             'bed_type_id.exist' => 'Tipe kasur yang dipilih tidak ditemukan.',
             'rate_type_id.required' => 'Tipe tarif wajib dipilih.',
             'rate_type_id.exist' => 'Tipe tarif yang dipilih tidak ditemukan.',
-            'meal_id.exist' => 'Tipe makanan yang dipilih tidak ditemukan.',
             'status.required' => 'Status kamar wajib dipilih.',
             'status.in' => 'Status kamar yang dipilih tidak valid.',
+            'facilities.array' => 'Fasilitas kamar harus berupa array.',
+            'facilities.*.string' => 'Fasilitas kamar harus berupa string.',
+            'facilities.*.exists' => 'Fasilitas kamar tidak ditemukan.',
+            'images.array' => 'Gambar kamar harus berupa array.',
+            'images.*.image' => 'Gambar kamar harus berupa gambar.',
+            'images.*.max' => 'Gambar kamar maksimal 5MB.',
         ];
     }
 }

@@ -18,16 +18,16 @@ class ReservationRoomFactory extends Factory
      */
     public function definition(): array
     {
-        $room = Room::with("roomType", "bedType", "meal")->get()->random();
+        $room = Room::with("roomType", "bedType")->get()->random();
 
         return [
             "reservation_id" => Reservation::all()->random()->id,
             "room_id" => $room->id,
+            "room_type_id" => $room->roomType->id,
+            "room_type_name" => $room->roomType->name,
             "room_number" => $room->room_number,
-            "room_type" => $room->roomType->name,
             "room_rate" => $room->price,
             "bed_type" => $room->bedType->name,
-            "meal" => $room->meal->name,
             "view" => $room->view,
         ];
     }

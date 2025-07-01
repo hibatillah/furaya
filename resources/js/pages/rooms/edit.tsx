@@ -22,11 +22,10 @@ export default function RoomsEdit(props: {
   facilities: Facility.Default[];
   roomStatuses: Enum.RoomStatus[];
   rateTypes: RateType.Default[];
-  mealTypes: Meal.Default[];
   smokingTypes: Enum.SmokingType[];
 }) {
-  const { room, roomTypes, bedTypes, roomConditions, facilities, roomStatuses, rateTypes, mealTypes, smokingTypes } = props;
-  const { room_type, bed_type, rate_type, meal, facility: roomFacility, count_facility, image_url, ...rest } = room;
+  const { room, roomTypes, bedTypes, roomConditions, facilities, roomStatuses, rateTypes, smokingTypes } = props;
+  const { room_type, bed_type, rate_type, facility: roomFacility, count_facility, images, ...rest } = room;
 
   // define breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -80,7 +79,6 @@ export default function RoomsEdit(props: {
       setData("price", selectedRoomType.base_rate || "");
       setData("capacity", selectedRoomType.capacity || "");
       setData("size", selectedRoomType.size || "");
-      setData("smoking_type", selectedRoomType.smoking_type || ("" as Enum.SmokingType));
       setSelectedFacilities(
         selectedRoomType.facility?.map((item) => ({
           value: item.id,
@@ -122,7 +120,7 @@ export default function RoomsEdit(props: {
           >
             {/* room number */}
             <div className="grid gap-2">
-              <Label htmlFor="room_number">Nomor Kamar</Label>
+              <Label htmlFor="room_number" required>Nomor Kamar</Label>
               <Input
                 id="room_number"
                 type="number"
@@ -138,7 +136,7 @@ export default function RoomsEdit(props: {
 
             {/* floor number */}
             <div className="grid gap-2">
-              <Label htmlFor="floor_number">Nomor Lantai</Label>
+              <Label htmlFor="floor_number" required>Nomor Lantai</Label>
               <Input
                 id="floor_number"
                 type="number"
@@ -154,7 +152,7 @@ export default function RoomsEdit(props: {
 
             {/* room type */}
             <div className="grid gap-2">
-              <Label htmlFor="room_type_id">Tipe Kamar</Label>
+              <Label htmlFor="room_type_id" required>Tipe Kamar</Label>
               <Select
                 value={data.room_type_id}
                 onValueChange={(value) => {
@@ -197,7 +195,7 @@ export default function RoomsEdit(props: {
 
             {/* bed type */}
             <div className="grid gap-2">
-              <Label htmlFor="bed_type_id">Tipe Kasur</Label>
+              <Label htmlFor="bed_type_id" required>Tipe Kasur</Label>
               <Select
                 value={data.bed_type_id}
                 onValueChange={(value) => setData("bed_type_id", value)}
@@ -225,7 +223,7 @@ export default function RoomsEdit(props: {
 
             {/* rate type */}
             <div className="grid gap-2">
-              <Label htmlFor="rate_type_id">Tipe Tarif</Label>
+              <Label htmlFor="rate_type_id" required>Tipe Tarif</Label>
               <Select
                 value={data.rate_type_id}
                 onValueChange={(value) => {
@@ -253,37 +251,9 @@ export default function RoomsEdit(props: {
               <InputError message={errors.rate_type_id} />
             </div>
 
-            {/* meal*/}
-            <div className="grid gap-2">
-              <Label htmlFor="meal_id">Tipe Makanan</Label>
-              <Select
-                value={data.meal_id}
-                onValueChange={(value) => setData("meal_id", value)}
-                disabled={mealTypes.length === 0}
-              >
-                <SelectTrigger id="meal_id">
-                  <SelectValue placeholder="Pilih Tipe Makanan">
-                    <span className="capitalize">{mealTypes.find((type) => type.id === data.meal_id)?.name}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {mealTypes.map((type) => (
-                    <SelectItem
-                      key={type.id}
-                      value={type.id}
-                      className="capitalize"
-                    >
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <InputError message={errors.meal_id} />
-            </div>
-
             {/* price */}
             <div className="grid gap-2">
-              <Label htmlFor="price">Harga</Label>
+              <Label htmlFor="price" required>Harga</Label>
               <div className="relative">
                 <Input
                   id="price"
@@ -304,7 +274,7 @@ export default function RoomsEdit(props: {
 
             {/* condition */}
             <div className="grid gap-2">
-              <Label htmlFor="condition">Kondisi</Label>
+              <Label htmlFor="condition" required>Kondisi</Label>
               <Select
                 value={data.condition}
                 onValueChange={(value) => setData("condition", value as Enum.RoomCondition)}
@@ -331,7 +301,7 @@ export default function RoomsEdit(props: {
 
             {/* capacity */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="capacity">Kapasitas</Label>
+              <Label htmlFor="capacity" required>Kapasitas</Label>
               <div className="relative">
                 <Input
                   id="capacity"
@@ -350,7 +320,7 @@ export default function RoomsEdit(props: {
 
             {/* status */}
             <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" required>Status</Label>
               <Select
                 value={data.status}
                 onValueChange={(value) => setData("status", value as Enum.RoomStatus)}
@@ -376,7 +346,7 @@ export default function RoomsEdit(props: {
             </div>
             {/* size */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="size">Luas Kamar</Label>
+              <Label htmlFor="size" required>Luas Kamar</Label>
               <div className="relative">
                 <Input
                   id="size"
@@ -397,7 +367,7 @@ export default function RoomsEdit(props: {
 
             {/* smoking type */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="smoking_type">Smoking Type</Label>
+              <Label htmlFor="smoking_type" required>Smoking Type</Label>
               <Select
                 value={data.smoking_type}
                 onValueChange={(value) => setData("smoking_type", value as Enum.SmokingType)}
@@ -442,9 +412,9 @@ export default function RoomsEdit(props: {
                 type="file"
                 placeholder="Gambar"
                 accept="image/*"
-                onChange={(e) => setData("image", e.target.files?.[0] ?? null)}
+                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
               />
-              <InputError message={errors.image} />
+              <InputError message={errors.images} />
             </div>
 
             {/* facilities */}

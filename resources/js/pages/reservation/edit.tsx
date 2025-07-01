@@ -1,6 +1,8 @@
 import { InfoTooltip } from "@/components/info-tooltip";
 import { InputDate, type InputDate as InputDateType } from "@/components/input-date";
 import InputError from "@/components/input-error";
+import { SubmitButton } from "@/components/submit-button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +15,7 @@ import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY, MIN_PAX } f
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { addDays, addYears, differenceInCalendarDays, format, isAfter, isSameDay } from "date-fns";
-import { Loader2, UserSearchIcon } from "lucide-react";
+import { UserSearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -27,9 +29,22 @@ export default function ReservationsEdit(props: {
   roomPackages: Enum.RoomPackage[];
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
-  statusAccs: Enum.StatusAcc[];
+  roomTypes: RoomType.Default[];
+  statusAcc: Enum.StatusAcc[];
 }) {
-  const { visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, statusAccs, reservation, guestTypes, nationalities, countries } = props;
+  const {
+    visitPurposes,
+    bookingTypes,
+    roomPackages,
+    paymentMethods,
+    genders,
+    reservation,
+    statusAcc,
+    guestTypes,
+    nationalities,
+    countries,
+    roomTypes,
+  } = props;
 
   // define breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -43,20 +58,22 @@ export default function ReservationsEdit(props: {
     },
   ];
 
-  // declare form
+  // declare initial data
   const initialStartDate = new Date();
   const initialEndDate = addDays(initialStartDate, 1);
   const initialBirthdateYear = addYears(initialStartDate, -17); // Customer must be at least 17 years old
 
   const { start_date, end_date, reservation_guest, reservation_room, ...reservationData } = reservation;
+  const isPendingReservation = reservationData.status_acc === "pending" && !reservation_room?.room_id;
 
   const initialGuestType = guestTypes.find((e) => e.name === reservation.guest_type);
   const initialNationality = nationalities.find((e) => e.name === reservation_guest?.nationality);
   const initialCountry = countries.find((e) => e.name === reservation_guest?.country);
 
+  // handle form state
   const [startDate, setStartDate] = useState<InputDateType>(new Date(start_date) || initialStartDate);
   const [endDate, setEndDate] = useState<InputDateType>(new Date(end_date as string) || initialEndDate);
-  const [selectedRoomType, setSelectedRoomType] = useState<string | undefined>(reservation_room?.room?.room_type_id);
+  const [selectedRoomType, setSelectedRoomType] = useState<string | undefined>(reservation_room?.room_type_id);
   const [availableRoomTypes, setAvailableRoomTypes] = useState<RoomType.Default[]>([]);
   const [availableRooms, setAvailableRooms] = useState<Room.Default[]>([]);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<Room.Default | undefined>(reservation_room?.room);
@@ -64,6 +81,7 @@ export default function ReservationsEdit(props: {
   const [selectedNationality, setSelectedNationality] = useState<string | undefined>(initialNationality?.id);
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>(initialCountry?.id);
 
+  // define form
   const { data, setData, put, processing, errors } = useForm<Reservation.Update>({
     // reservation data
     id: reservation.id,
@@ -72,7 +90,7 @@ export default function ReservationsEdit(props: {
     end_date: endDate as Date,
     length_of_stay: reservationData.length_of_stay,
     adults: reservationData.adults || 1,
-    status: reservationData.status || ("Pending" as Enum.ReservationStatus),
+    status: "booked" as Enum.ReservationStatus,
     pax: reservationData.pax || MIN_PAX,
     total_price: reservationData.total_price || 0,
     children: reservationData.children || 0,
@@ -92,6 +110,8 @@ export default function ReservationsEdit(props: {
     remarks: reservationData.remarks || "",
     advance_remarks: reservationData.advance_remarks || "",
     advance_amount: reservationData.advance_amount || MIN_ADVANCE_AMOUNT,
+    smoking_type: reservationData.smoking_type || ("" as Enum.SmokingType),
+    include_breakfast: reservationData.include_breakfast || false,
 
     // guest data
     name: reservation_guest?.name || "",
@@ -108,10 +128,10 @@ export default function ReservationsEdit(props: {
     // room data
     room_id: reservation_room?.room_id || "",
     room_number: reservation_room?.room_number || "",
-    room_type: reservation_room?.room_type || "",
+    room_type_id: reservation_room?.room_type_id || "",
+    room_type_name: reservation_room?.room_type_name || "",
     room_rate: reservation_room?.room_rate || "",
     bed_type: reservation_room?.bed_type || "",
-    meal: reservation_room?.room?.meal?.id || "",
     view: reservation_room?.room?.view || "",
   });
 
@@ -232,17 +252,15 @@ export default function ReservationsEdit(props: {
    */
   const setRoomData = useCallback(
     (room: Room.Default) => {
-      const meal = room.meal?.name || "";
-
       setData((prev: Reservation.Update) => ({
         ...prev,
         room_id: room.id,
         room_number: room.room_number,
-        room_type: room.room_type?.name || "",
+        room_type_id: room.room_type_id,
+        room_type_name: room.room_type?.name || "",
         room_rate: room.price,
         bed_type: room.bed_type?.name || "",
         view: room.view || "",
-        meal,
       }));
     },
     [selectedRoomNumber, data.room_id],
@@ -254,6 +272,12 @@ export default function ReservationsEdit(props: {
    * @returns string - price in currency format
    */
   const totalPrice = useMemo(() => {
+    // set initial total price
+    if (isPendingReservation && !selectedRoomNumber) {
+      return formatCurrency(reservationData.total_price || 0);
+    }
+
+    // calculate total price
     const LoS = data.length_of_stay || 0;
     const roomRate = selectedRoomNumber?.price || 0;
     const discountPercentage = data.discount || 0;
@@ -266,8 +290,8 @@ export default function ReservationsEdit(props: {
     return formatCurrency(priceAfterDiscount);
   }, [selectedRoomNumber, data.length_of_stay, data.discount]);
 
-  // handle update room
-  function handleUpdateRoom(e: React.FormEvent) {
+  // handle update reservation
+  function handleUpdateReservation(e: React.FormEvent) {
     e.preventDefault();
 
     // sent data
@@ -296,6 +320,7 @@ export default function ReservationsEdit(props: {
       setData("end_date", format(end, "yyyy-MM-dd"));
 
       getAvailableRoomTypes();
+      getAvailableRooms(selectedRoomType as string);
     }
   }, [startDate, endDate]);
 
@@ -310,23 +335,20 @@ export default function ReservationsEdit(props: {
             <CardTitle className="text-lg">Detail Reservasi</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* booking number */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="booking_number">No. Booking</Label>
-              <Input
-                type="text"
-                id="booking_number"
-                value={data.booking_number}
-                className="w-full"
-                autoComplete="off"
-                readOnly
-              />
-              <InputError message={errors.address} />
-            </div>
+            <Alert className="col-span-full">
+              <AlertTitle>
+                <span className="font-bold">Booking number:</span> {reservation.booking_number}
+              </AlertTitle>
+            </Alert>
 
             {/* start date */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="start_date">Tanggal Masuk</Label>
+              <Label
+                htmlFor="start_date"
+                required
+              >
+                Tanggal Masuk
+              </Label>
               <InputDate
                 mode="single"
                 value={startDate}
@@ -365,7 +387,12 @@ export default function ReservationsEdit(props: {
 
             {/* end date */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="end_date">Tanggal Keluar</Label>
+              <Label
+                htmlFor="end_date"
+                required
+              >
+                Tanggal Keluar
+              </Label>
               <InputDate
                 mode="single"
                 value={endDate}
@@ -391,7 +418,12 @@ export default function ReservationsEdit(props: {
 
             {/* length of stay */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="length_of_stay">Length of Stay</Label>
+              <Label
+                htmlFor="length_of_stay"
+                required
+              >
+                Length of Stay
+              </Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -432,14 +464,18 @@ export default function ReservationsEdit(props: {
                 onChange={(e) => setData("arrival_from", e.target.value)}
                 className="w-full"
                 placeholder="Input Asal Kedatangan"
-                required
               />
               <InputError message={errors.arrival_from} />
             </div>
 
             {/* visit purpose */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="visit_purpose">Tujuan Kedatangan</Label>
+              <Label
+                htmlFor="visit_purpose"
+                required
+              >
+                Tujuan Kedatangan
+              </Label>
               <Select
                 value={data.visit_purpose}
                 onValueChange={(value) => setData("visit_purpose", value as Enum.VisitPurpose)}
@@ -467,7 +503,12 @@ export default function ReservationsEdit(props: {
 
             {/* booking type */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="booking_type">Tipe Reservasi</Label>
+              <Label
+                htmlFor="booking_type"
+                required
+              >
+                Tipe Reservasi
+              </Label>
               <Select
                 value={data.booking_type}
                 onValueChange={(value) => setData("booking_type", value as Enum.BookingType)}
@@ -526,10 +567,17 @@ export default function ReservationsEdit(props: {
 
             {/* status acc */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="status_acc">Status Acc</Label>
+              <Label
+                htmlFor="status_acc"
+                required
+              >
+                Status Acc
+              </Label>
               <Select
                 value={data.status_acc}
-                onValueChange={(value) => setData("status_acc", value as Enum.StatusAcc)}
+                onValueChange={(value) => {
+                  setData("status_acc", value as Enum.StatusAcc);
+                }}
                 required
               >
                 <SelectTrigger id="status_acc">
@@ -538,30 +586,35 @@ export default function ReservationsEdit(props: {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {statusAccs
-                    .toSorted((a, b) => a.localeCompare(b))
-                    .map((statusAcc) => (
-                      <SelectItem
-                        key={statusAcc}
-                        value={statusAcc}
-                        className="capitalize"
-                      >
-                        {statusAcc}
-                      </SelectItem>
-                    ))}
+                  {statusAcc.map((status) => (
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="capitalize"
+                    >
+                      {status}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <InputError message={errors.status_acc} />
             </div>
 
             {/* remarks */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="remarks">Remarks</Label>
+              <Label
+                htmlFor="remarks"
+                optional
+              >
+                Remarks
+              </Label>
               <Input
                 type="text"
                 value={data.remarks}
                 onChange={(e) => setData("remarks", e.target.value)}
                 className="w-full"
                 placeholder="Input Remarks"
+                autoComplete="off"
               />
               <InputError message={errors.remarks} />
             </div>
@@ -574,11 +627,21 @@ export default function ReservationsEdit(props: {
             <CardTitle className="text-lg">Detail Kamar</CardTitle>
           </CardHeader>
           <CardContent>
+            {isPendingReservation && (
+              <Alert
+                className="col-span-full"
+                variant="primary"
+              >
+                <AlertTitle>Konfirmasi reservasi dengan menentukan nomor kamar sesuai tipe kamar yang telah dipesan.</AlertTitle>
+              </Alert>
+            )}
+
             {/* room type */}
             <div className="flex flex-col gap-2">
               <Label
                 htmlFor="room_type"
                 className="flex items-center gap-1"
+                required
               >
                 <span>Tipe Kamar</span>
                 <InfoTooltip>Opsi hanya menampilkan tipe kamar yang tersedia sesuai tanggal reservasi.</InfoTooltip>
@@ -594,31 +657,47 @@ export default function ReservationsEdit(props: {
                   setSelectedRoomNumber(undefined);
                   getAvailableRooms(value);
                 }}
+                disabled={isPendingReservation}
                 required
               >
                 <SelectTrigger id="room_type">
                   <SelectValue placeholder="Pilih Tipe Kamar">
-                    <span className="capitalize">{availableRoomTypes.find((type) => type.id === selectedRoomType)?.name || ""}</span>
+                    <span className="capitalize">{roomTypes.find((type) => type.id === selectedRoomType)?.name || ""}</span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {availableRoomTypes.map((type) => (
+                  {availableRoomTypes.length > 0 ? (
+                    availableRoomTypes.map((type) => (
+                      <SelectItem
+                        key={type.id}
+                        value={type.id}
+                        className="capitalize"
+                        disabled={type.can_delete}
+                      >
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  ) : (
                     <SelectItem
-                      key={type.id}
-                      value={type.id}
-                      className="capitalize"
-                      disabled={type.can_delete}
+                      value="no-available-room-type"
+                      className="text-muted-foreground capitalize"
+                      disabled
                     >
-                      {type.name}
+                      Tidak ada tipe kamar yang tersedia
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
 
             {/* room number */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="room_number">Nomor Kamar</Label>
+              <Label
+                htmlFor="room_number"
+                required
+              >
+                Nomor Kamar
+              </Label>
               <Select
                 value={selectedRoomNumber?.id || ""}
                 onValueChange={(value) => {
@@ -640,15 +719,25 @@ export default function ReservationsEdit(props: {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {availableRooms.map((room) => (
+                  {availableRooms.length > 0 ? (
+                    availableRooms.map((room) => (
+                      <SelectItem
+                        key={room.id}
+                        value={room.id}
+                        className="capitalize"
+                      >
+                        {room.room_number}
+                      </SelectItem>
+                    ))
+                  ) : (
                     <SelectItem
-                      key={room.id}
-                      value={room.id}
-                      className="capitalize"
+                      value="no-available-room"
+                      className="text-muted-foreground capitalize"
+                      disabled
                     >
-                      {room.room_number}
+                      Tidak ada kamar yang tersedia
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <InputError message={errors.room_id} />
@@ -656,7 +745,12 @@ export default function ReservationsEdit(props: {
 
             {/* room rate */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="room_rate">Harga Kamar</Label>
+              <Label
+                htmlFor="room_rate"
+                required
+              >
+                Harga Kamar
+              </Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -687,7 +781,12 @@ export default function ReservationsEdit(props: {
 
             {/* room package */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="room_package">Paket Kamar</Label>
+              <Label
+                htmlFor="room_package"
+                required
+              >
+                Paket Kamar
+              </Label>
               <Select
                 value={data.room_package}
                 onValueChange={(value) => {
@@ -718,7 +817,12 @@ export default function ReservationsEdit(props: {
 
             {/* pax */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pax">Pax</Label>
+              <Label
+                htmlFor="pax"
+                required
+              >
+                Pax
+              </Label>
               <Input
                 type="number"
                 className="w-full"
@@ -734,7 +838,12 @@ export default function ReservationsEdit(props: {
 
             {/* adult */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="adults">Dewasa</Label>
+              <Label
+                htmlFor="adults"
+                required
+              >
+                Dewasa
+              </Label>
               <Input
                 type="number"
                 className="w-full"
@@ -755,7 +864,12 @@ export default function ReservationsEdit(props: {
 
             {/* children */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="children">Anak</Label>
+              <Label
+                htmlFor="children"
+                optional
+              >
+                Anak
+              </Label>
               <Input
                 type="number"
                 className="w-full"
@@ -781,15 +895,20 @@ export default function ReservationsEdit(props: {
             <CardTitle className="text-lg">Detail Customer</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* nik passport */}
+            {/* phone */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="nik_passport">NIK/Passport</Label>
+              <Label
+                htmlFor="phone"
+                required
+              >
+                No. HP
+              </Label>
               <div className="relative">
                 <Input
-                  type="text"
-                  value={data.nik_passport}
-                  onChange={(e) => setData("nik_passport", e.target.value)}
-                  placeholder="Input NIK/Passport"
+                  type="tel"
+                  value={data.phone}
+                  onChange={(e) => setData("phone", e.target.value)}
+                  placeholder="Input No. HP"
                   className="w-full"
                 />
                 <Tooltip>
@@ -799,7 +918,7 @@ export default function ReservationsEdit(props: {
                       variant="outline"
                       size="icon"
                       className="border-input absolute inset-y-0 right-0 rounded-s-none border-s"
-                      onClick={() => getCustomer(data.nik_passport || "")}
+                      onClick={() => getCustomer(data.phone || "")}
                     >
                       <UserSearchIcon className="h-4 w-4" />
                       <span className="sr-only">Cari Customer</span>
@@ -809,12 +928,17 @@ export default function ReservationsEdit(props: {
                 </Tooltip>
               </div>
               <p className="text-muted-foreground text-sm text-pretty">Isi data manual jika tamu belum tersedia.</p>
-              <InputError message={errors.nik_passport} />
+              <InputError message={errors.phone} />
             </div>
 
-            {/* fullname */}
+            {/* name */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Nama Lengkap</Label>
+              <Label
+                htmlFor="name"
+                required
+              >
+                Nama Lengkap
+              </Label>
               <Input
                 type="text"
                 value={data.name}
@@ -827,23 +951,48 @@ export default function ReservationsEdit(props: {
               <InputError message={errors.name} />
             </div>
 
-            {/* phone */}
+            {/* email */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="phone">No. HP</Label>
+              <Label
+                htmlFor="email"
+                required
+              >
+                Email
+              </Label>
               <Input
-                type="tel"
-                value={data.phone}
-                onChange={(e) => setData("phone", e.target.value)}
+                type="email"
+                value={data.email}
+                onChange={(e) => setData("email", e.target.value)}
                 className="w-full"
-                placeholder="Input No. HP"
+                placeholder="Input Email"
+                autoComplete="off"
+              />
+              <InputError message={errors.email} />
+            </div>
+
+            {/* nik passport */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="nik_passport">NIK/Passport</Label>
+              <Input
+                type="text"
+                value={data.nik_passport}
+                onChange={(e) => setData("nik_passport", e.target.value)}
+                className="w-full"
+                placeholder="Input NIK/Passport"
                 autoComplete="off"
                 required
               />
+              <InputError message={errors.nik_passport} />
             </div>
 
             {/* birthdate */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="birthdate">Tanggal Lahir</Label>
+              <Label
+                htmlFor="birthdate"
+                required
+              >
+                Tanggal Lahir
+              </Label>
               <InputDate
                 mode="single"
                 className="w-full"
@@ -883,37 +1032,14 @@ export default function ReservationsEdit(props: {
               <InputError message={errors.gender} />
             </div>
 
-            {/* email */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                value={data.email}
-                onChange={(e) => setData("email", e.target.value)}
-                className="w-full"
-                placeholder="Input Email"
-                autoComplete="off"
-              />
-              <InputError message={errors.email} />
-            </div>
-
-            {/* profession */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="profession">Profesi</Label>
-              <Input
-                type="text"
-                value={data.profession}
-                onChange={(e) => setData("profession", e.target.value)}
-                className="w-full"
-                placeholder="Input Profesi"
-                autoComplete="off"
-              />
-              <InputError message={errors.profession} />
-            </div>
-
             {/* nationality */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="nationality">Kewarganegaraan</Label>
+              <Label
+                htmlFor="nationality"
+                required
+              >
+                Kewarganegaraan
+              </Label>
               <Select
                 value={selectedNationality}
                 onValueChange={(value) => {
@@ -940,6 +1066,20 @@ export default function ReservationsEdit(props: {
                 </SelectContent>
               </Select>
               <InputError message={errors.nationality} />
+            </div>
+
+            {/* profession */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="profession">Profesi</Label>
+              <Input
+                type="text"
+                value={data.profession}
+                onChange={(e) => setData("profession", e.target.value)}
+                className="w-full"
+                placeholder="Input Profesi"
+                autoComplete="off"
+              />
+              <InputError message={errors.profession} />
             </div>
 
             {/* country */}
@@ -997,7 +1137,12 @@ export default function ReservationsEdit(props: {
           <CardContent>
             {/* discount */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="discount">Discount (%)</Label>
+              <Label
+                htmlFor="discount"
+                optional
+              >
+                Discount (%)
+              </Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -1019,7 +1164,12 @@ export default function ReservationsEdit(props: {
 
             {/* discount reason */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="discount_reason">Discount Reason</Label>
+              <Label
+                htmlFor="discount_reason"
+                optional
+              >
+                Discount Reason
+              </Label>
               <Input
                 type="text"
                 value={data.discount_reason}
@@ -1032,7 +1182,12 @@ export default function ReservationsEdit(props: {
 
             {/* advance amount */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="advance_amount">Advance Amount</Label>
+              <Label
+                htmlFor="advance_amount"
+                optional
+              >
+                Advance Amount
+              </Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -1054,7 +1209,12 @@ export default function ReservationsEdit(props: {
 
             {/* advance remarks */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="advance_remarks">Advance Remarks</Label>
+              <Label
+                htmlFor="advance_remarks"
+                optional
+              >
+                Advance Remarks
+              </Label>
               <Input
                 type="text"
                 value={data.advance_remarks}
@@ -1067,7 +1227,12 @@ export default function ReservationsEdit(props: {
 
             {/* commission percentage */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="commission_percentage">Commission (%)</Label>
+              <Label
+                htmlFor="commission_percentage"
+                optional
+              >
+                Commission (%)
+              </Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -1089,7 +1254,12 @@ export default function ReservationsEdit(props: {
 
             {/* commission amount */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="commission_amount">Commission Amount</Label>
+              <Label
+                htmlFor="commission_amount"
+                optional
+              >
+                Commission Amount
+              </Label>
               <Input
                 type="number"
                 className="w-full"
@@ -1105,7 +1275,12 @@ export default function ReservationsEdit(props: {
 
             {/* payment method */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="payment_method">Metode Pembayaran</Label>
+              <Label
+                htmlFor="payment_method"
+                required
+              >
+                Metode Pembayaran
+              </Label>
               <Select
                 value={data.payment_method}
                 onValueChange={(value) => setData("payment_method", value as Enum.Payment)}
@@ -1133,7 +1308,12 @@ export default function ReservationsEdit(props: {
 
             {/* total price */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="total_price">Total Harga</Label>
+              <Label
+                htmlFor="total_price"
+                required
+              >
+                Total Harga
+              </Label>
               <Input
                 type="text"
                 className="w-full"
@@ -1148,21 +1328,15 @@ export default function ReservationsEdit(props: {
         </Card>
 
         {/* submit */}
-        <Button
-          type="button"
+        <SubmitButton
           disabled={processing}
-          onClick={handleUpdateRoom}
+          loading={processing}
+          loadingText="Memperbarui reservasi..."
+          onClick={handleUpdateReservation}
           className="ms-auto w-fit"
         >
-          {processing ? (
-            <div className="inline-flex items-center">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Membuat reservasi...
-            </div>
-          ) : (
-            "Buat Reservasi"
-          )}
-        </Button>
+          Perbarui Reservasi
+        </SubmitButton>
       </form>
     </AppLayout>
   );

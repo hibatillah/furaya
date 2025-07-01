@@ -2,8 +2,7 @@
 
 namespace Database\Factories\Rooms;
 
-use App\Enums\SmokingTypeEnum;
-use App\Models\Rooms\Meal;
+use App\Models\Rooms\BedType;
 use App\Models\Rooms\RateType;
 use App\Models\Rooms\RoomType;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,10 +29,9 @@ class RoomTypeFactory extends Factory
             'name' => $this->faker->unique()->word,
             'capacity' => $this->faker->numberBetween(1, 3),
             'size' => $this->faker->numberBetween(20, 100), // Size in square meters
-            'smoking_type' => $this->faker
-                ->randomElement(SmokingTypeEnum::getValues()),
             'base_rate' => $rateType->rate,
             'rate_type_id' => $rateType->id,
+            'bed_type_id' => BedType::all()->random()->id,
         ];
     }
 }

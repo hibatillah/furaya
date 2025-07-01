@@ -8,6 +8,7 @@ use App\Enums\VisitPurposeEnum;
 use App\Enums\RoomPackageEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\StatusAccEnum;
+use App\Enums\SmokingTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
@@ -42,17 +43,32 @@ class ReservationRequest extends FormRequest
             "children" => ["nullable", "integer"],
             "extra_bed" => ["nullable", "integer"],
             "arrival_from" => ["nullable", "string", "max:255"],
-            "employee_name" => ["required", "string", "max:255"],
+            "employee_name" => ["nullable", "string", "max:255"],
             "employee_id" => [
-                "required",
+                "nullable",
                 "string",
                 Rule::exists("employees", "id")
             ],
-            "booking_type" => ["required", Rule::in(BookingTypeEnum::getValues())],
-            "visit_purpose" => ["required", Rule::in(VisitPurposeEnum::getValues())],
-            "room_package" => ["required", Rule::in(RoomPackageEnum::getValues())],
-            "payment_method" => ["required", Rule::in(PaymentEnum::getValues())],
-            "status_acc" => ["required", Rule::in(StatusAccEnum::getValues())],
+            "booking_type" => [
+                "required",
+                Rule::in(BookingTypeEnum::getValues())
+            ],
+            "visit_purpose" => [
+                "required",
+                Rule::in(VisitPurposeEnum::getValues())
+            ],
+            "room_package" => [
+                "required",
+                Rule::in(RoomPackageEnum::getValues())
+            ],
+            "payment_method" => [
+                "required",
+                Rule::in(PaymentEnum::getValues())
+            ],
+            "status_acc" => [
+                "required",
+                Rule::in(StatusAccEnum::getValues())
+            ],
             "discount" => ["nullable", "numeric"],
             "discount_reason" => ["nullable", "string", "max:255"],
             "commission_percentage" => ["nullable", "numeric"],
@@ -60,26 +76,36 @@ class ReservationRequest extends FormRequest
             "remarks" => ["nullable", "string", "max:255"],
             "advance_remarks" => ["nullable", "string", "max:255"],
             "advance_amount" => ["nullable", "numeric"],
+            "smoking_type" => [
+                "nullable",
+                Rule::in(SmokingTypeEnum::getValues())
+            ],
+            "include_breakfast" => ["nullable", "boolean"],
+            "personal_request" => ["nullable", "string", "max:255"],
 
             // guest data
             "name" => ["required", "string", "max:255"],
             "email" => ["nullable", "email", "max:255"],
-            "nik_passport" => ["required", "string", "max:255"],
             "phone" => ["required", "string", "max:255"],
             "gender" => ["required", Rule::in(GenderEnum::getValues())],
             "birthdate" => ["required", "date"],
+            "nik_passport" => ["nullable", "string", "max:255"],
             "profession" => ["nullable", "string", "max:255"],
             "nationality" => ["nullable", "string", "max:255"],
             "country" => ["nullable", "string", "max:255"],
             "address" => ["nullable", "string", "max:255"],
 
             // room data
-            "room_id" => ["required", "string", Rule::exists("rooms", "id")],
-            "room_number" => ["required", "numeric"],
-            "room_type" => ["required", "string", "max:255"],
-            "room_rate" => ["required", "numeric"],
-            "bed_type" => ["required", "string", "max:255"],
-            "meal" => ["nullable", "string", "max:255"],
+            "room_id" => ["nullable", "string", Rule::exists("rooms", "id")],
+            "room_type_id" => [
+                "required_without:room_id",
+                "string",
+                Rule::exists("room_types", "id")
+            ],
+            "room_number" => ["nullable", "numeric"],
+            "room_type_name" => ["nullable", "string", "max:255"],
+            "room_rate" => ["nullable", "numeric"],
+            "bed_type" => ["nullable", "string", "max:255"],
             "view" => ["nullable", "string", "max:255"],
         ];
     }
@@ -130,7 +156,6 @@ class ReservationRequest extends FormRequest
             "advance_remarks.string" => "Keterangan advanve harus berupa string.",
             "advance_remarks.max" => "Keterangan advanve maksimal 255 karakter.",
             "advance_amount.numeric" => "Jumlah advanve harus berupa angka.",
-            "nik_passport.required" => "NIK/Passport wajib diisi.",
             "nik_passport.string" => "NIK/Passport harus berupa string.",
             "nik_passport.max" => "NIK/Passport maksimal 255 karakter.",
             "name.required" => "Nama wajib diisi.",
@@ -153,21 +178,17 @@ class ReservationRequest extends FormRequest
             "nationality.max" => "Kebangsaan maksimal 255 karakter.",
             "country.string" => "Negara harus berupa string.",
             "country.max" => "Negara maksimal 255 karakter.",
-            "room_id.required" => "Room ID wajib diisi.",
             "room_id.string" => "Room ID harus berupa string.",
             "room_id.exists" => "Room ID tidak ditemukan.",
-            "room_number.required" => "Nomor kamar wajib diisi.",
+            "room_type_name.string" => "Nama tipe kamar harus berupa string.",
+            "room_type_name.max" => "Nama tipe kamar maksimal 255 karakter.",
             "room_number.numeric" => "Nomor kamar harus berupa angka.",
-            "room_type.required" => "Tipe kamar wajib diisi.",
-            "room_type.string" => "Tipe kamar harus berupa string.",
-            "room_type.max" => "Tipe kamar maksimal 255 karakter.",
-            "room_rate.required" => "Tarif kamar wajib diisi.",
+            "room_type_id.required_without" => "Tipe kamar wajib diisi.",
+            "room_type_id.string" => "Tipe kamar harus berupa string.",
+            "room_type_id.exists" => "Tipe kamar tidak ditemukan.",
             "room_rate.numeric" => "Tarif kamar harus berupa angka.",
-            "bed_type.required" => "Tipe kasur wajib diisi.",
             "bed_type.string" => "Tipe kasur harus berupa string.",
             "bed_type.max" => "Tipe kasur maksimal 255 karakter.",
-            "meal.string" => "Penginapan harus berupa string.",
-            "meal.max" => "Penginapan maksimal 255 karakter.",
             "view.string" => "Pemandangan harus berupa string.",
             "view.max" => "Pemandangan maksimal 255 karakter."
         ];

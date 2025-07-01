@@ -6,6 +6,7 @@ use App\Enums\BookingTypeEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\RoomPackageEnum;
+use App\Enums\SmokingTypeEnum;
 use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
 use App\Models\Managements\Employee;
@@ -48,13 +49,31 @@ class ReservationFactory extends Factory
                 $chances <= 95 => ReservationStatusEnum::CANCELLED,
                 default        => ReservationStatusEnum::NO_SHOW,
             };
+
+            $statusAcc = match (true) {
+                $chances <= 95 => StatusAccEnum::APPROVED,
+                default        => StatusAccEnum::REJECTED,
+            };
         } else if ($startDate->isAfter(now()->endOfDay())) {
             $status = match (true) {
                 $chances <= 80 => ReservationStatusEnum::BOOKED,
                 default        => ReservationStatusEnum::PENDING,
             };
+
+            switch ($status) {
+                case ReservationStatusEnum::PENDING:
+                    $statusAcc = StatusAccEnum::PENDING;
+                    break;
+                case ReservationStatusEnum::BOOKED:
+                    $statusAcc = StatusAccEnum::APPROVED;
+                    break;
+                default:
+                    $statusAcc = StatusAccEnum::REJECTED;
+                    break;
+            }
         } else {
             $status = ReservationStatusEnum::CHECKED_IN;
+            $statusAcc = StatusAccEnum::APPROVED;
         }
 
         // room and guest details
@@ -82,6 +101,8 @@ class ReservationFactory extends Factory
             "length_of_stay" => $lengthOfStay,
             "total_price" => $finalPrice,
             "guest_type" => GuestType::all()->random()->name,
+            "smoking_type" => $this->faker->randomElement(SmokingTypeEnum::getValues()),
+            "include_breakfast" => $this->faker->boolean,
             "employee_name" => $employee->user->name,
             "employee_id" => $employee->id,
             "status" => $status,
@@ -89,7 +110,7 @@ class ReservationFactory extends Factory
             "visit_purpose" => $this->faker->randomElement(VisitPurposeEnum::getValues()),
             "room_package" => $this->faker->randomElement(RoomPackageEnum::getValues()),
             "payment_method" => $this->faker->randomElement(PaymentEnum::getValues()),
-            "status_acc" => StatusAccEnum::APPROVED,
+            "status_acc" => $statusAcc,
             "discount" => $discountPercentage,
             "discount_reason" => null,
             "commission_percentage" => 0,

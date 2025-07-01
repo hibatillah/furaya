@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Rooms;
 
-use App\Enums\SmokingTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
@@ -31,11 +30,13 @@ class RoomTypeRequest extends FormRequest
             "name" => ["required", "string", "max:255", Rule::unique("room_types", "name")->ignore($id)],
             "capacity" => ["required", "integer"],
             "size" => ["nullable", "numeric", "min:0"],
-            "smoking_type" => ["nullable", "string", Rule::in(SmokingTypeEnum::getValues())],
             "base_rate" => ["required", "numeric", "min:0"],
             "rate_type_id" => ["required", "string", "exists:rate_types,id"],
+            "bed_type_id" => ["required", "string", "exists:bed_types,id"],
             "facilities" => ["nullable", "array"],
             "facilities.*" => ["nullable", "string", "exists:facilities,id"],
+            "images" => ["nullable", "array"],
+            "images.*" => ["nullable", "image", "max:5120"],
         ];
     }
 
@@ -58,9 +59,15 @@ class RoomTypeRequest extends FormRequest
             "rate_type_id.required" => "Tipe tarif tipe kamar wajib diisi.",
             "rate_type_id.string" => "Tipe tarif tipe kamar harus berupa string.",
             "rate_type_id.exists" => "Tipe tarif tipe kamar tidak ditemukan.",
+            "bed_type_id.required" => "Tipe kasur tipe kamar wajib diisi.",
+            "bed_type_id.string" => "Tipe kasur tipe kamar harus berupa string.",
+            "bed_type_id.exists" => "Tipe kasur tipe kamar tidak ditemukan.",
             "facilities.array" => "Fasilitas tipe kamar harus berupa array.",
             "facilities.*.string" => "Fasilitas tipe kamar harus berupa string.",
             "facilities.*.exists" => "Fasilitas tipe kamar tidak ditemukan.",
+            "images.array" => "Gambar tipe kamar harus berupa array.",
+            "images.*.image" => "Gambar tipe kamar harus berupa gambar.",
+            "images.*.max" => "Gambar tipe kamar maksimal 5MB.",
         ];
     }
 }

@@ -9,14 +9,16 @@ import { cn } from "@/lib/utils";
 import { pieChartColors } from "./utils";
 
 export function ChartCountUserRole({ data, className }: { data: Record<Enum.Role, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(
     () => [
-      { role: "manajer", count: data.manager, fill: pieChartColors[0] },
-      { role: "admin", count: data.admin, fill: pieChartColors[1] },
-      { role: "karyawan", count: data.employee, fill: pieChartColors[2] },
-      { role: "tamu", count: data.guest, fill: pieChartColors[3] },
+      { role: "manajer", count: dataToUse.manager, fill: pieChartColors[0] },
+      { role: "admin", count: dataToUse.admin, fill: pieChartColors[1] },
+      { role: "karyawan", count: dataToUse.employee, fill: pieChartColors[2] },
+      { role: "tamu", count: dataToUse.guest, fill: pieChartColors[3] },
     ],
-    [data],
+    [dataToUse],
   );
 
   const config = React.useMemo(

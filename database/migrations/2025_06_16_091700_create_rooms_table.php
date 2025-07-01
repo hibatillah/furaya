@@ -34,22 +34,15 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->integer('capacity');
             $table->float("size", 4, 2);
-            $table->enum("smoking_type", SmokingTypeEnum::getValues());
             $table->float('base_rate', 8, 2)->nullable();
+            $table->json("images")->nullable();
             $table->foreignUuid("rate_type_id")
                 ->nullable()
                 ->constrained("rate_types")
                 ->nullOnDelete();
-            $table->timestamps();
-        });
-
-        Schema::create("meals", function (Blueprint $table) {
-            $table->uuid("id")->primary();
-            $table->string("code")->unique();
-            $table->string("name")->unique();
-            $table->foreignUuid("created_by")
+            $table->foreignUuid("bed_type_id")
                 ->nullable()
-                ->constrained("employees")
+                ->constrained("bed_types")
                 ->nullOnDelete();
             $table->timestamps();
         });
@@ -67,13 +60,10 @@ return new class extends Migration
             $table->integer("capacity");
             $table->float("size", 4, 2);
             $table->enum("smoking_type", SmokingTypeEnum::getValues());
+            $table->json("images")->nullable();
             $table->foreignUuid("rate_type_id")
                 ->nullable()
                 ->constrained("rate_types")
-                ->nullOnDelete();
-            $table->foreignUuid("meal_id")
-                ->nullable()
-                ->constrained("meals")
                 ->nullOnDelete();
             $table->foreignUuid('room_type_id')
                 ->constrained("room_types")
@@ -124,7 +114,6 @@ return new class extends Migration
         Schema::dropIfExists('room_types');
         Schema::dropIfExists('bed_types');
         Schema::dropIfExists('rate_types');
-        Schema::dropIfExists('meals');
         Schema::dropIfExists('rooms');
         Schema::dropIfExists('facilities');
         Schema::dropIfExists('room_type_facilities');

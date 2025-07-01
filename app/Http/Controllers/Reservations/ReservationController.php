@@ -19,6 +19,7 @@ use App\Models\Reservations\Reservation;
 use App\Models\Rooms\RoomType;
 use App\Models\Managements\Employee;
 use App\Models\Reservations\GuestType;
+use App\Models\Rooms\Room;
 use App\Models\User;
 use App\Services\ReservationService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -49,6 +50,11 @@ class ReservationController extends Controller
             $type = $request->input('type', 'upcoming');
             $start = $request->input('start');
             $end = $request->input('end');
+            $isPending = filter_var(
+                $request->input('is_pending'),
+                FILTER_VALIDATE_BOOLEAN,
+                FILTER_NULL_ON_FAILURE
+            ) ?? false;
 
             // get the date range based on the type
             [$start_date, $end_date] = $this->reservationService
@@ -59,7 +65,7 @@ class ReservationController extends Controller
                 'reservationRoom' => fn($q) => $q->select([
                     'id',
                     'room_number',
-                    'room_type',
+                    'room_type_name',
                     'reservation_id',
                 ]),
                 'reservationGuest' => fn($q) => $q->select([
@@ -72,9 +78,16 @@ class ReservationController extends Controller
                 'booking_number',
                 'start_date',
                 'end_date',
+                'status_acc',
                 'booking_type',
-                'payment_method',
                 'status',
+                'smoking_type',
+                'include_breakfast',
+                'pax',
+                'adults',
+                'children',
+                'total_price',
+                'payment_method',
             ]);
 
             // filter the reservations by date range
@@ -86,11 +99,18 @@ class ReservationController extends Controller
                 $query->where('end_date', '<=', $end_date);
             }
 
+            if ($isPending) {
+                $query->where('status_acc', StatusAccEnum::PENDING);
+            }
+
             // return the reservations query
             $reservations = $query
                 ->orderBy('start_date', 'asc')
                 ->latest()
                 ->get();
+
+            // get the count of pending reservations
+            $countPendingReservation = Reservation::where('status_acc', StatusAccEnum::PENDING)->count();
 
             // update reservation status
             $this->reservationService->updateOnGoingStatus();
@@ -98,16 +118,18 @@ class ReservationController extends Controller
             // get static values
             $status = ReservationStatusEnum::getValues();
             $bookingType = BookingTypeEnum::getValues();
-            $paymentMethod = PaymentEnum::getValues();
             $roomType = RoomType::all()->pluck('name');
+            $statusAcc = StatusAccEnum::getValues();
 
             return Inertia::render('reservation/index', [
                 'reservations' => $reservations,
                 'type' => $type,
+                'is_pending' => $isPending,
+                'count_pending_reservation' => $countPendingReservation,
                 'status' => $status,
                 'bookingType' => $bookingType,
-                'paymentMethod' => $paymentMethod,
                 'roomType' => $roomType,
+                'statusAcc' => $statusAcc,
             ]);
         } catch (\Exception $e) {
             report($e);
@@ -135,8 +157,6 @@ class ReservationController extends Controller
         try {
             $validated = $request->validated();
 
-            // ---DEFINE DATA---
-            // define reservation data
             $reservation = Arr::only($validated, [
                 "start_date",
                 "end_date",
@@ -147,6 +167,8 @@ class ReservationController extends Controller
                 "children",
                 "arrival_from",
                 "guest_type",
+                "smoking_type",
+                "include_breakfast",
                 "employee_name",
                 "employee_id",
                 "booking_type",
@@ -163,22 +185,17 @@ class ReservationController extends Controller
                 "advance_amount",
             ]);
 
-            // define reservation room data
             $reservationRoom = Arr::only($validated, [
                 "room_id",
                 "room_number",
-                "room_type",
+                "room_type_id",
+                "room_type_name",
                 "room_rate",
                 "bed_type",
-                "meal",
                 "view",
             ]);
 
-            // define user guest data
-            $userData = Arr::only($validated, [
-                "name",
-                "email",
-            ]);
+            $userData = Arr::only($validated, ["name", "email"]);
             $guestData = Arr::only($validated, [
                 "nik_passport",
                 "phone",
@@ -189,30 +206,20 @@ class ReservationController extends Controller
                 "address",
             ]);
 
-            // ---CREATE RESERVATION DATA---
-            DB::transaction(function () use (
-                $userData,
-                $guestData,
-                $reservation,
-                $reservationRoom,
-                $validated
-            ) {
-                // upsert user data based on `email`
+            DB::transaction(function () use ($userData, $guestData, $reservation, $reservationRoom, $validated) {
                 $user = User::updateOrCreate(
                     ['email' => $userData['email']],
                     array_merge($userData, [
-                        "password" => Hash::make("haihaihai"),
+                        "password" => Hash::make("123"),
                         "role" => "guest",
                     ])
                 );
 
-                // upsert guest data based on `nik_passport`
                 $guest = $user->guest()->updateOrCreate(
-                    ['nik_passport' => $guestData['nik_passport']],
+                    ['phone' => $guestData['phone']],
                     $guestData
                 );
 
-                // define reservation guest data
                 $reservationGuest = $guest->only([
                     "nik_passport",
                     "name",
@@ -223,26 +230,32 @@ class ReservationController extends Controller
                 ]);
                 $reservationGuest["country"] = $validated["country"];
 
-                // create reservation
                 $reservation = Reservation::create(array_merge(
                     $reservation,
-                    [
-                        "booking_number" => ReservationService::generateBookingNumber(),
-                    ]
+                    ["booking_number" => ReservationService::generateBookingNumber()]
                 ));
+
                 $reservation->reservationRoom()->create($reservationRoom);
-                $reservation->reservationGuest()->create($reservationGuest);
+                $reservation->reservationGuest()->create([
+                    ...$reservationGuest,
+                    "guest_id" => $guest->id,
+                ]);
+
+                Room::where('id', $reservationRoom['room_id'])
+                    ->update(['condition' => 'BOOKED']);
+
                 $reservation->reservationTransaction()->create([
                     "amount" => $validated["total_price"],
                     "type" => ReservationTransactionEnum::BOOKING,
                     "is_paid" => $validated["advance_amount"] > 0,
                     "description" => "Create Booking",
                 ]);
+
                 $reservation->reservationTransaction()->create([
                     "amount" => $validated["advance_amount"],
                     "type" => ReservationTransactionEnum::DEPOSIT,
                     "is_paid" => $validated["advance_amount"] > 0,
-                    "description" => $validated["advance_remarks"] || "Add Booking Advance",
+                    "description" => $validated["advance_remarks"] ?: "Add Booking Advance",
                 ]);
             });
 
@@ -253,9 +266,7 @@ class ReservationController extends Controller
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             report($e);
-            return back()->withErrors([
-                "message" => "Terjadi kesalahan menambahkan reservasi.",
-            ]);
+            return back()->withErrors(["message" => "Terjadi kesalahan menambahkan reservasi."]);
         }
     }
 
@@ -270,7 +281,6 @@ class ReservationController extends Controller
             $reservation = Reservation::with(
                 "reservationRoom.room.roomType",
                 "reservationRoom.room.bedType",
-                "reservationRoom.room.meal",
                 "reservationGuest.guest.user",
                 "employee.user",
                 "checkIn.employee.user",
@@ -300,16 +310,19 @@ class ReservationController extends Controller
         try {
             $dataForm = $this->getDataForm();
             $reservation = Reservation::with(
-                "reservationRoom.room.roomType",
+                "reservationRoom.roomType",
                 "reservationRoom.room.bedType",
-                "reservationRoom.room.meal",
                 "reservationGuest.guest.user",
                 "employee.user",
             )->findOrFail($id);
+            $roomTypes = RoomType::all();
+            $statusAcc = StatusAccEnum::getValues();
 
             return Inertia::render("reservation/edit", [
                 ...$dataForm,
                 "reservation" => $reservation,
+                "roomTypes" => $roomTypes,
+                "statusAcc" => $statusAcc,
             ]);
         } catch (ModelNotFoundException $e) {
             report($e);
@@ -347,13 +360,14 @@ class ReservationController extends Controller
                 "children",
                 "arrival_from",
                 "guest_type",
+                "smoking_type",
+                "include_breakfast",
                 "employee_name",
                 "employee_id",
                 "booking_type",
                 "visit_purpose",
                 "room_package",
                 "payment_method",
-                "status_acc",
                 "discount",
                 "discount_reason",
                 "commission_percentage",
@@ -367,10 +381,10 @@ class ReservationController extends Controller
             $reservationRoom = Arr::only($validated, [
                 "room_id",
                 "room_number",
-                "room_type",
+                "room_type_id",
+                "room_type_name",
                 "room_rate",
                 "bed_type",
-                "meal",
                 "view",
             ]);
 
@@ -493,6 +507,32 @@ class ReservationController extends Controller
     }
 
     /**
+     * Show the form for confirming the reservation.
+     */
+    public function reject(string $id)
+    {
+        try {
+            $reservation = Reservation::findOrFail($id);
+            $reservation->update([
+                "status_acc" => StatusAccEnum::REJECTED,
+                "status" => ReservationStatusEnum::CANCELLED,
+            ]);
+
+            return back();
+        } catch (ModelNotFoundException $e) {
+            report($e);
+            return back()->withErrors([
+                "message" => "Reservasi tidak ditemukan",
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            return back()->withErrors([
+                "message" => "Terjadi kesalahan menolak reservasi",
+            ]);
+        }
+    }
+
+    /**
      * Get the guest data
      *
      * @param Request $request
@@ -501,11 +541,11 @@ class ReservationController extends Controller
     public function getGuest(Request $request)
     {
         try {
-            $nik_passport = $request->query("nik_passport");
+            $phone = $request->query("phone");
 
-            // get guest data based on nik_passport
+            // get guest data based on `phone`
             $guest = Guest::with("user")
-                ->where("nik_passport", $nik_passport)
+                ->where("phone", $phone)
                 ->first();
 
             // throw exception if guest not found

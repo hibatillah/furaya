@@ -52,7 +52,7 @@ export function InputDate(props: InputDateProps) {
         <Button
           id="date"
           variant="outline"
-          className={cn("w-32 justify-between font-normal", className)}
+          className={cn("w-32 justify-between font-normal bg-accent", className)}
           disabled={disabled}
         >
           {showDate}

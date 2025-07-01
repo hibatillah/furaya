@@ -2,6 +2,7 @@ import { DataList } from "@/components/data-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,18 +18,22 @@ import {
 import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
-import { bookingTypeBadgeColor, reservationStatusBadgeColor, visitPurposeBadgeColor } from "@/static/reservation";
+import { bookingTypeBadgeColor, reservationStatusBadgeColor, statusAccBadgeColor, visitPurposeBadgeColor } from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import ConfirmPendingReservation from "./confirm";
 
 export default function ReservationsShow(props: { reservation: Reservation.Default; status: Enum.ReservationStatus[] }) {
   const { reservation, status } = props;
-  console.log(reservation);
 
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";
+  const isPending = reservation.status_acc === "pending";
+
+  // handle dialog form
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // define page breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -123,7 +128,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
       value: (
         <Badge
           variant="outline"
-          className="capitalize"
+          className={cn("capitalize", statusAccBadgeColor[reservation.status_acc])}
         >
           {reservation.status_acc}
         </Badge>
@@ -204,15 +209,11 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Tipe Kamar",
-      value: <Badge variant="outline">{room?.room_type}</Badge>,
+      value: room?.room_type_name ? <Badge variant="outline">{room?.room_type_name}</Badge> : "-",
     },
     {
       label: "Tipe Kasur",
       value: <Badge variant="outline">{room?.bed_type}</Badge>,
-    },
-    {
-      label: "Paket Makan",
-      value: room?.meal,
     },
     {
       label: "View",
@@ -303,15 +304,13 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={route("reservation.transaction", { id: reservation.id })}>Transkasi</Link>
-            </DropdownMenuItem>
-            {isEmployee && (
+            {isEmployee && isPending && <DropdownMenuItem onClick={() => setDialogOpen(true)}>Konfirmasi</DropdownMenuItem>}
+            {isEmployee && !isPending && (
               <DropdownMenuItem asChild>
                 <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
               </DropdownMenuItem>
             )}
-            {isEmployee && (
+            {isEmployee && !isPending && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuSub>
@@ -397,6 +396,23 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
           </CardContent>
         </Card>
       </div>
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      >
+        <DialogContent
+          className="w-100"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          tabIndex={-1}
+          noClose
+        >
+          <ConfirmPendingReservation
+            data={reservation}
+            onClose={() => setDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

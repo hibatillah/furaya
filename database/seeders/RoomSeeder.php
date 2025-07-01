@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Rooms\BedType;
 use App\Models\Rooms\Facility;
-use App\Models\Rooms\Meal;
 use App\Models\Rooms\RateType;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
@@ -20,7 +19,6 @@ class RoomSeeder extends Seeder
     DB::table('rate_types')->truncate();
     DB::table('room_types')->truncate();
     DB::table('facilities')->truncate();
-    DB::table('meals')->truncate();
     DB::table('rooms')->truncate();
 
     // define initial facilities
@@ -31,9 +29,6 @@ class RoomSeeder extends Seeder
 
     // define initial room types
     $roomTypes = ['Junior', 'Deluxe', 'Executive', 'Business', 'Furaya Suite'];
-
-    // define initial meals
-    $meals = ['Breakfast', 'Lunch', 'Dinner', 'All Inclusive', 'No Meal'];
 
     // insert seed data
     foreach ($facilities as $facility) {
@@ -48,12 +43,6 @@ class RoomSeeder extends Seeder
       ]);
     }
 
-    foreach ($meals as $meal) {
-      Meal::factory()->create([
-        'name' => $meal,
-      ]);
-    }
-
     // insert rate types first to include in room type factory
     RateType::factory()->count(5)->create();
 
@@ -65,6 +54,6 @@ class RoomSeeder extends Seeder
     }
 
     // rooms using rate type id from room type
-    Room::factory()->count(28)->create();
+    Room::factory()->count(50)->create();
   }
 }

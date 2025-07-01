@@ -46,7 +46,7 @@ export default function CountryEdit(props: { data: Country.Default; onClose: () 
       >
         {/* code */}
         <div className="grid gap-2">
-          <Label htmlFor="code">Kode</Label>
+          <Label htmlFor="code" required>Kode</Label>
           <Input
             id="code"
             type="text"
@@ -60,7 +60,7 @@ export default function CountryEdit(props: { data: Country.Default; onClose: () 
 
         {/* name */}
         <div className="grid gap-2">
-          <Label htmlFor="name">Nama</Label>
+          <Label htmlFor="name" required>Nama</Label>
           <Input
             id="name"
             type="text"

@@ -91,7 +91,9 @@ export default function CheckInIndex(props: {
       cell: ({ row }) => {
         const status = row.getValue("room_status") as Enum.RoomStatus;
 
-        return (
+        return !status ? (
+          "-"
+        ) : (
           <Badge
             variant="outline"
             className={cn("font-medium capitalize", roomStatusBadgeColor[status])}

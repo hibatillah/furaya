@@ -23,6 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
   const { bedTypes } = props;
 
+  // handle dialog form
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
   const [selectedRow, setSelectedRow] = useState<BedType.Default | null>(null);

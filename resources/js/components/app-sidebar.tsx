@@ -4,6 +4,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { SharedData, type NavItem } from "@/types";
 import { Link, usePage } from "@inertiajs/react";
 import {
+  ArchiveIcon,
   BedSingleIcon,
   BriefcaseIcon,
   CalendarCheckIcon,
@@ -97,7 +98,7 @@ const adminMenuItems: Record<string, NavItem[]> = {
     {
       title: "Fasilitas",
       href: route("facility.index"),
-      icon: Package2Icon,
+      icon: ArchiveIcon,
     },
   ],
   Tamu: [

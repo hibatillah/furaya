@@ -51,7 +51,7 @@ export default function FacilityCreate() {
           className="max-w-lg space-y-6"
         >
           <div className="grid gap-2">
-            <Label htmlFor="name">Nama</Label>
+            <Label htmlFor="name" required>Nama</Label>
             <Input
               id="name"
               type="text"

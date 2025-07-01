@@ -15,16 +15,17 @@ export default function RoomTypeEdit(props: {
   data: RoomType.Default;
   facilities: Facility.Default[];
   rateTypes: RateType.Default[];
-  smokingTypes: Enum.SmokingType[];
+  bedTypes: BedType.Default[];
   onClose: () => void;
 }) {
-  const { data: roomType, facilities: facilitiesData, smokingTypes, rateTypes, onClose } = props;
+  const { data: roomType, facilities: facilitiesData, rateTypes, bedTypes, onClose } = props;
   const { can_delete, rooms_count, facility, facilities_count, ...rest } = roomType;
 
   // define form data
   const { data, setData, put, processing, errors } = useForm<RoomType.Update>({
     ...rest,
     facilities: facility?.map((item) => item.id),
+    images: null,
   });
 
   const [selectedRateType, setSelectedRateType] = useState<RateType.Default | null>(
@@ -82,7 +83,12 @@ export default function RoomTypeEdit(props: {
       >
         {/* code */}
         <div className="grid gap-2">
-          <Label htmlFor="code">Kode</Label>
+          <Label
+            htmlFor="code"
+            required
+          >
+            Kode
+          </Label>
           <Input
             id="code"
             type="text"
@@ -97,7 +103,12 @@ export default function RoomTypeEdit(props: {
 
         {/* name */}
         <div className="grid gap-2">
-          <Label htmlFor="name">Nama</Label>
+          <Label
+            htmlFor="name"
+            required
+          >
+            Nama
+          </Label>
           <Input
             id="name"
             type="text"
@@ -112,7 +123,12 @@ export default function RoomTypeEdit(props: {
 
         {/* rate type */}
         <div className="grid gap-2">
-          <Label htmlFor="rate_type_id">Tipe Tarif</Label>
+          <Label
+            htmlFor="rate_type_id"
+            required
+          >
+            Tipe Tarif
+          </Label>
           <Select
             value={selectedRateType?.id}
             onValueChange={(value) => {
@@ -145,7 +161,12 @@ export default function RoomTypeEdit(props: {
 
         {/* base rate */}
         <div className="grid gap-2">
-          <Label htmlFor="base_rate">Tarif Dasar</Label>
+          <Label
+            htmlFor="base_rate"
+            required
+          >
+            Tarif Dasar
+          </Label>
           <div className="relative">
             <Input
               id="base_rate"
@@ -167,9 +188,47 @@ export default function RoomTypeEdit(props: {
           <InputError message={errors.base_rate} />
         </div>
 
+        {/* bed type */}
+        <div className="grid gap-2">
+          <Label
+            htmlFor="bed_type_id"
+            required
+          >
+            Tipe Kasur
+          </Label>
+          <Select
+            value={data.bed_type_id}
+            onValueChange={(value) => setData("bed_type_id", value)}
+            disabled={bedTypes.length === 0}
+          >
+            <SelectTrigger id="bed_type_id">
+              <SelectValue placeholder="Pilih Tipe Kasur">
+                <span className="capitalize">{bedTypes.find((type) => type.id === data.bed_type_id)?.name}</span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {bedTypes.map((type) => (
+                <SelectItem
+                  key={type.id}
+                  value={type.id}
+                  className="capitalize"
+                >
+                  {type.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <InputError message={errors.bed_type_id} />
+        </div>
+
         {/* capacity */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="capacity">Kapasitas</Label>
+          <Label
+            htmlFor="capacity"
+            required
+          >
+            Kapasitas
+          </Label>
           <div className="relative">
             <Input
               id="capacity"
@@ -190,7 +249,12 @@ export default function RoomTypeEdit(props: {
 
         {/* size */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="size">Luas Kamar</Label>
+          <Label
+            htmlFor="size"
+            required
+          >
+            Luas Kamar
+          </Label>
           <div className="relative">
             <Input
               id="size"
@@ -208,31 +272,6 @@ export default function RoomTypeEdit(props: {
             </span>
           </div>
           <InputError message={errors.size} />
-        </div>
-
-        {/* smoking type */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="smoking_type">Smoking Type</Label>
-          <Select
-            value={data.smoking_type}
-            onValueChange={(value) => setData("smoking_type", value as Enum.SmokingType)}
-          >
-            <SelectTrigger id="smoking_type">
-              <SelectValue placeholder="Pilih Smoking Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {smokingTypes.map((type) => (
-                <SelectItem
-                  key={type}
-                  value={type}
-                  className="capitalize"
-                >
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <InputError message={errors.rate_type_id} />
         </div>
 
         {/* facilities */}

@@ -3,8 +3,11 @@
 namespace App\Models\Reservations;
 
 use App\Enums\ReservationStatusEnum;
+use App\Enums\RoomConditionEnum;
+use App\Enums\StatusAccEnum;
 use App\Models\BaseModel;
 use App\Models\Managements\Employee;
+use App\Models\Rooms\Room;
 use Carbon\Carbon;
 
 class Reservation extends BaseModel
@@ -16,23 +19,60 @@ class Reservation extends BaseModel
     public function updateReservationStatus()
     {
         $now = now();
-        $check_in_deadline = Carbon::parse($this->end_date)
-            ->copy()->setTime(12, 0);
-        $check_out_deadline = Carbon::parse($this->end_date)
-            ->copy()->setTime(13, 0);
+        $start_date = Carbon::parse($this->start_date);
+        $end_date = Carbon::parse($this->end_date);
 
+        $check_in_deadline = $end_date->copy()->setTime(11, 0);
+        $check_out_deadline = $end_date->copy()->setTime(12, 0);
+        $confirm_deadline = $start_date->copy()->addDay()->setTime(12, 0);
+
+        // reject pending reservation if past the deadline
+        if (
+            $this->status_acc === StatusAccEnum::PENDING &&
+            $now->gt($confirm_deadline)
+        ) {
+            $this->status_acc = StatusAccEnum::REJECTED;
+            $this->status = ReservationStatusEnum::CANCELLED;
+            $this->save();
+
+            if ($this->reservationRoom?->room_id) {
+                Room::where('id', $this->reservationRoom->room_id)
+                    ->update(['condition' => RoomConditionEnum::READY]);
+            }
+
+            return;
+        }
+
+        // if reservation is cancelled
         if ($this->cancelled_at) {
             $this->status = ReservationStatusEnum::CANCELLED;
-        } else if (!$this->checkIn && $now->gt($check_in_deadline)) {
+
+            if ($this->reservationRoom?->room_id) {
+                Room::where('id', $this->reservationRoom->room_id)
+                    ->update(['condition' => RoomConditionEnum::READY]);
+            }
+
+            // if guest is no show till check in deadline
+        } elseif (!$this->checkIn && $now->gt($check_in_deadline)) {
             $this->status = ReservationStatusEnum::NO_SHOW;
-        } else if ($this->checkIn) {
+
+            // if guest is checked in
+        } elseif ($this->checkIn) {
+            // if guest is not checked out till check out deadline
             if (!$this->checkOut && $now->gt($check_out_deadline)) {
                 $this->status = ReservationStatusEnum::OVERDUE;
             } else {
                 $this->status = ReservationStatusEnum::CHECKED_IN;
             }
-        } else if ($this->checkOut) {
+
+            // if guest is checked out
+        } elseif ($this->checkOut) {
             $this->status = ReservationStatusEnum::CHECKED_OUT;
+
+            if ($this->reservationRoom?->room_id) {
+                Room::where('id', $this->reservationRoom->room_id)
+                    ->update(['condition' => RoomConditionEnum::READY]);
+            }
         }
 
         $this->save();

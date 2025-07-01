@@ -10,32 +10,30 @@ declare namespace Room {
     smoking_type: Enum.SmokingType;
     condition: Enum.RoomCondition;
     status: Enum.RoomStatus;
+    images?: string[];
     room_type_id?: string;
     room_type?: RoomType.Default;
     bed_type_id?: string;
     bed_type?: BedType.Default;
     rate_type_id?: string;
     rate_type?: RateType.Default;
-    meal_id?: string;
-    meal?: Meal.Default;
   }
 
   interface Addition {
-    image_url?: string;
     facility?: RoomFacility.Default[];
     count_facility?: number;
   }
 
   interface Default extends Base, Addition {}
 
-  type Create = Omit<Base, "id" | "room_type" | "bed_type" | "rate_type" | "meal"> & {
+  type Create = Omit<Base, "id" | "room_type" | "bed_type" | "rate_type" | "images"> & {
     facilities: string[];
-    image?: File | null;
+    images?: File[] | null;
   };
 
-  type Update = Partial<Omit<Base, "room_type" | "bed_type" | "rate_type" | "meal">> & {
+  type Update = Partial<Omit<Base, "room_type" | "bed_type" | "rate_type" | "images">> & {
     facilities?: string[];
-    image?: File | null;
+    images?: File[] | null;
   };
 }
 
@@ -62,11 +60,13 @@ declare namespace RoomType {
     name: string;
     capacity: number | "";
     size: number | "";
-    smoking_type: Enum.SmokingType;
     base_rate?: number | "";
-    facility: Facility.Default[];
+    images?: string[];
+    facility?: Facility.Default[];
     rate_type_id?: string;
     rate_type?: RateType.Default;
+    bed_type_id?: string;
+    bed_type?: BedType.Default;
   }
 
   interface Addition {
@@ -76,11 +76,13 @@ declare namespace RoomType {
   }
 
   interface Default extends Base, Addition {}
-  type Create = Omit<Base, "id" | "facility" | "rate_type"> & {
+  type Create = Omit<Base, "id" | "facility" | "rate_type" | "bed_type" | "images"> & {
     facilities: string[];
+    images?: File[] | null;
   };
-  type Update = Partial<Omit<Base, "facility" | "rate_type">> & {
+  type Update = Partial<Omit<Base, "facility" | "rate_type" | "bed_type" | "images">> & {
     facilities?: string[];
+    images?: File[] | null;
   };
 }
 

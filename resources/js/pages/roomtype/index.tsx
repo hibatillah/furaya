@@ -1,6 +1,7 @@
 import { DataTable, DataTableControls } from "@/components/data-table";
 import { DataTableFilter } from "@/components/data-table/data-table-filter";
 import { HelpTooltip } from "@/components/help-tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -9,7 +10,7 @@ import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
 import RoomTypeCreate from "./create";
@@ -29,8 +30,9 @@ export default function RoomTypeIndex(props: {
   facilities: Facility.Default[];
   smokingTypes: Enum.SmokingType[];
   rateTypes: RateType.Default[];
+  bedTypes: BedType.Default[];
 }) {
-  const { roomTypes, facilities, rateTypes, smokingTypes } = props;
+  const { roomTypes, facilities, rateTypes, smokingTypes, bedTypes } = props;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"detail" | "delete" | "edit" | null>(null);
@@ -56,6 +58,23 @@ export default function RoomTypeIndex(props: {
     {
       accessorKey: "name",
       header: "Nama",
+    },
+    {
+      id: "bed_type",
+      accessorFn: (row) => row.bed_type?.name,
+      header: "Tipe Kasur",
+      cell: ({ row }) => {
+        const bedType = row.getValue("bed_type") as string;
+        return (
+          <Badge
+            variant="secondary"
+            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 font-medium"
+          >
+            {bedType}
+          </Badge>
+        );
+      },
+      filterFn: "checkbox" as FilterFnOption<RoomType.Default>,
     },
     {
       id: "capacity",
@@ -147,17 +166,28 @@ export default function RoomTypeIndex(props: {
           >
             {({ table }) => (
               <DataTableControls table={table}>
-                <DataTableFilter table={table} />
+                <DataTableFilter
+                  table={table}
+                  extend={[
+                    {
+                      id: "bed_type",
+                      label: "Tipe Kasur",
+                      data: bedTypes.map((item) => item.name),
+                    },
+                  ]}
+                />
                 <RoomTypeCreate
                   facilities={facilities}
                   rateTypes={rateTypes}
                   smokingTypes={smokingTypes}
+                  bedTypes={bedTypes}
                 />
               </DataTableControls>
             )}
           </DataTable>
         </CardContent>
       </Card>
+
       <Dialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -190,6 +220,7 @@ export default function RoomTypeIndex(props: {
               facilities={facilities}
               rateTypes={rateTypes}
               smokingTypes={smokingTypes}
+              bedTypes={bedTypes}
               onClose={handleDialogClose}
             />
           )}

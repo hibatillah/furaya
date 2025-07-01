@@ -5,6 +5,7 @@ use App\Enums\PaymentEnum;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\ReservationTransactionEnum;
 use App\Enums\RoomPackageEnum;
+use App\Enums\SmokingTypeEnum;
 use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
 use Illuminate\Database\Migrations\Migration;
@@ -30,8 +31,14 @@ return new class extends Migration
             $table->integer("length_of_stay");
             $table->float("total_price", 10, 3);
             $table->string("guest_type")->nullable();
-            $table->string("employee_name");
-            $table->foreignUuid("employee_id")->constrained("employees");
+            $table->enum("smoking_type", SmokingTypeEnum::getValues())
+                ->default(SmokingTypeEnum::NON_SMOKING);
+            $table->boolean("include_breakfast")->default(false);
+            $table->string("employee_name")->nullable();
+            $table->foreignUuid("employee_id")
+                ->nullable()
+                ->constrained("employees")
+                ->nullOnDelete();
             $table->enum("status", ReservationStatusEnum::getValues())
                 ->default(ReservationStatusEnum::BOOKED);
             $table->enum("booking_type", BookingTypeEnum::getValues())
@@ -65,9 +72,9 @@ return new class extends Migration
                 ->nullable()
                 ->constrained("guests")
                 ->nullOnDelete();
-            $table->string("nik_passport");
             $table->string("name");
             $table->string("phone");
+            $table->string("nik_passport")->nullable();
             $table->string("email")->nullable();
             $table->string("address")->nullable();
             $table->string("nationality")->nullable();
@@ -84,11 +91,14 @@ return new class extends Migration
                 ->nullable()
                 ->constrained("rooms")
                 ->nullOnDelete();
-            $table->string("room_number");
-            $table->string("room_type");
-            $table->string("room_rate");
-            $table->string("bed_type");
-            $table->string("meal")->nullable();
+            $table->foreignUuid("room_type_id")
+                ->nullable()
+                ->constrained("room_types")
+                ->nullOnDelete();
+            $table->string("room_type_name");
+            $table->string("room_number")->nullable();
+            $table->string("room_rate")->nullable();
+            $table->string("bed_type")->nullable();
             $table->string("view")->nullable();
             $table->timestamps();
         });

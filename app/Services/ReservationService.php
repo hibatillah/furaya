@@ -6,6 +6,7 @@ use App\Models\Reservations\Reservation;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
+use App\Enums\StatusAccEnum;
 use App\Models\Reservations\ReservationRoom;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
@@ -19,11 +20,11 @@ class ReservationService
      */
     public static function generateBookingNumber(): string
     {
-        $date = now()->format('Ymd');
+        $timestamp = now()->format('YmdH');
         $count = Reservation::whereDate('created_at', today())->count() + 1;
         $number = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return "{$date}{$number}";
+        return "{$timestamp}{$number}";
     }
 
     /**
@@ -36,13 +37,11 @@ class ReservationService
      */
     public function getReservedRoomIds(string $startDate, string $endDate)
     {
-        return ReservationRoom::whereHas(
-            'reservation',
-            function ($query) use ($startDate, $endDate) {
-                $query->where('start_date', '<=', $endDate)
-                    ->where('end_date', '>=', $startDate);
-            }
-        )->pluck('room_id');
+        return ReservationRoom::whereNotNull('room_id')
+            ->whereHas('reservation', function ($query) use ($startDate, $endDate) {
+                $query->where('start_date', '<', $endDate)
+                    ->where('end_date', '>', $startDate);
+            })->pluck('room_id');
     }
 
     /**
@@ -57,24 +56,18 @@ class ReservationService
         \Illuminate\Support\Collection $reservedRoomIds,
         ?string $roomTypeId
     ) {
-        $rooms = Room::with('roomType', 'bedType', 'meal')
+        return Room::with('roomType', 'bedType')
             ->whereIn('status', [
                 RoomStatusEnum::VC,
                 RoomStatusEnum::OO,
                 RoomStatusEnum::CO,
                 RoomStatusEnum::HU,
             ])
-            ->whereNotIn('condition', [
-                RoomConditionEnum::BOOKED,
-                RoomConditionEnum::BOOKED_CLEANING,
-            ])
-            ->whereNotIn('id', $reservedRoomIds) // exclude overlapping reservations
+            ->whereNotIn('id', $reservedRoomIds)
             ->when($roomTypeId, function ($query) use ($roomTypeId) {
                 $query->where('room_type_id', $roomTypeId);
             })
             ->get();
-
-        return $rooms;
     }
 
     /**
@@ -87,25 +80,22 @@ class ReservationService
     public function getAvailableRoomTypes(
         \Illuminate\Support\Collection $reservedRoomIds
     ) {
-        $roomTypes = RoomType::whereHas(
-            'room',
-            function ($query) use ($reservedRoomIds) {
-                $query->whereIn('status', [
-                    RoomStatusEnum::VC,
-                    RoomStatusEnum::OO,
-                    RoomStatusEnum::CO,
-                    RoomStatusEnum::HU,
-                ])
-                    ->whereNotIn('condition', [
-                        RoomConditionEnum::BOOKED,
-                        RoomConditionEnum::BOOKED_CLEANING,
-                    ])
-                    ->whereNotIn('id', $reservedRoomIds);
+        return RoomType::withCount([
+            'room as available_rooms_count' => function ($query) use ($reservedRoomIds) {
+                $query->whereNotIn('id', $reservedRoomIds)
+                    ->whereIn('status', [
+                        RoomStatusEnum::VC,
+                        RoomStatusEnum::OO,
+                        RoomStatusEnum::CO,
+                        RoomStatusEnum::HU,
+                    ]);
             }
-        )
-            ->get();
-
-        return $roomTypes;
+        ])
+            ->get()
+            ->filter(function ($roomType) {
+                return $roomType->available_rooms_count > 0;
+            })
+            ->values();
     }
 
     /**
@@ -165,14 +155,23 @@ class ReservationService
     }
 
     /**
+     * Update reservation acc status
+     */
+    public function updateAccStatus(string $reservationId, string $status)
+    {
+        $reservation = Reservation::findOrFail($reservationId);
+        $reservation->status_acc = $status;
+        $reservation->save();
+    }
+
+    /**
      * Update reservation status manually
      */
     public function updateStatus(string $reservationId, string $status)
     {
         $reservation = Reservation::findOrFail($reservationId);
-        $reservation->update([
-            "status" => $status,
-        ]);
+        $reservation->status = $status;
+        $reservation->save();
     }
 
     /**
@@ -185,7 +184,9 @@ class ReservationService
             ReservationStatusEnum::NO_SHOW,
             ReservationStatusEnum::CANCELLED,
             ReservationStatusEnum::OVERDUE,
-        ])->get();
+        ])
+            ->whereNot("status_acc", StatusAccEnum::REJECTED)
+            ->get();
 
         if (!$reservations->isEmpty()) {
             foreach ($reservations as $reservation) {

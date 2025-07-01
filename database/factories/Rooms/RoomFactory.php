@@ -6,7 +6,6 @@ use App\Enums\RoomConditionEnum;
 use App\Enums\RoomStatusEnum;
 use App\Enums\SmokingTypeEnum;
 use App\Models\Rooms\BedType;
-use App\Models\Rooms\Meal;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -46,7 +45,6 @@ class RoomFactory extends Factory
             'room_type_id' => $roomType->id,
             'bed_type_id' => BedType::all()->random()->id,
             'rate_type_id' => $roomType->rate_type_id,
-            'meal_id' => Meal::all()->random()->id,
         ];
     }
 }

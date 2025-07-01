@@ -121,9 +121,9 @@ class DashboardService
      */
     public function getRoomTypePopularity()
     {
-        return ReservationRoom::select('room_type')
+        return ReservationRoom::select('room_type_name')
             ->get()
-            ->groupBy('room_type')
+            ->groupBy('room_type_name')
             ->map(fn($group) => $group->count())
             ->sortByDesc(fn($count) => $count);
     }
@@ -222,38 +222,43 @@ class DashboardService
             ->take(7);
     }
 
-    public function getTopMealByReservationCount()
+    public function getRoomSmokingTypeDistribution()
     {
-        return ReservationRoom::with("reservation")
-            ->select('meal')
+        return Room::all()
+            ->groupBy('smoking_type')
+            ->map(fn($group) => $group->count());
+    }
+
+    public function getSmokingTypeReservation()
+    {
+        return Reservation::select('smoking_type')
             ->get()
-            ->groupBy('meal')
-            ->map(fn($group) => $group->count())
-            ->sortByDesc(fn($count) => $count)
-            ->take(7);
+            ->groupBy('smoking_type')
+            ->map(fn($group) => $group->count());
     }
 
     public function getAllCharts()
     {
         return [
-            'userRoleCount' => $this->getUserRoleCount(),
-            'roomTypeCount' => $this->getRoomTypeCount(),
-            'bedTypeCount' => $this->getBedTypeCount(),
-            'mostUsedFacilityByRoom' => $this->getMostUsedFacilityByRoom(),
-            'reservationStatusDistribution' => $this->getReservationStatusDistribution(),
-            'monthlyReservationVolume' => $this->getMonthlyReservationVolume(),
-            'dailyReservationVolume' => $this->getDailyReservationVolume(),
-            'roomTypePopularity' => $this->getRoomTypePopularity(),
-            'topGuestNationalities' => $this->getTopGuestNationalities(),
-            'averageLengthOfStayByMonth' => $this->getAverageLengthOfStayByMonth(),
-            'totalRevenueByMonth' => $this->getTotalRevenueByMonth(),
-            'reservationCountPerEmployee' => $this->getReservationCountPerEmployee(),
-            'guestTypeDistribution' => $this->getGuestTypeDistribution(),
-            'averageCheckInByMonth' => $this->getAverageCheckInByMonth(),
-            'paxTrend' => $this->getPaxTrend(),
-            'guestNationalityDistribution' => $this->getGuestNationalityDistribution(),
-            'topGuestsByReservationCount' => $this->getTopGuestsByReservationCount(),
-            'topMealByReservationCount' => $this->getTopMealByReservationCount(),
+            'user_role_count' => $this->getUserRoleCount(),
+            'room_type_count' => $this->getRoomTypeCount(),
+            'bed_type_count' => $this->getBedTypeCount(),
+            'most_used_facility_by_room' => $this->getMostUsedFacilityByRoom(),
+            'reservation_status_distribution' => $this->getReservationStatusDistribution(),
+            'monthly_reservation_volume' => $this->getMonthlyReservationVolume(),
+            'daily_reservation_volume' => $this->getDailyReservationVolume(),
+            'room_type_popularity' => $this->getRoomTypePopularity(),
+            'top_guest_nationalities' => $this->getTopGuestNationalities(),
+            'average_length_of_stay_by_month' => $this->getAverageLengthOfStayByMonth(),
+            'total_revenue_by_month' => $this->getTotalRevenueByMonth(),
+            'reservation_count_per_employee' => $this->getReservationCountPerEmployee(),
+            'guest_type_distribution' => $this->getGuestTypeDistribution(),
+            'average_check_in_by_month' => $this->getAverageCheckInByMonth(),
+            'pax_trend' => $this->getPaxTrend(),
+            'guest_nationality_distribution' => $this->getGuestNationalityDistribution(),
+            'top_guests_by_reservation_count' => $this->getTopGuestsByReservationCount(),
+            'room_smoking_type_distribution' => $this->getRoomSmokingTypeDistribution(),
+            'smoking_type_reservation' => $this->getSmokingTypeReservation(),
         ];
     }
 }

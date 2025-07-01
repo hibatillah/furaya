@@ -3,35 +3,37 @@
 import * as React from "react";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { barChartColors } from "./utils";
 
 export function ChartCountFacilityUsed({ data, className }: { data: Record<string, number>; className?: string }) {
+  const dataToUse = data || {};
+
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([facility, count], index) => ({
+    return Object.entries(dataToUse).map(([facility, count], index) => ({
       facility,
       count,
       fill: index % 2 === 0 ? barChartColors[5] : barChartColors[8],
     }));
-  }, [data]);
+  }, [dataToUse]);
 
   const config = React.useMemo(() => {
     return {
-      ...Object.fromEntries(Object.keys(data).map((facility) => [facility.toLowerCase(), { label: facility }])),
+      ...Object.fromEntries(Object.keys(dataToUse).map((facility) => [facility.toLowerCase(), { label: facility }])),
       count: { label: "Jumlah" },
     };
-  }, [data]) as ChartConfig;
+  }, [dataToUse]) as ChartConfig;
 
   const highest = React.useMemo(() => {
-    return Object.entries(data).reduce(
+    return Object.entries(dataToUse).reduce(
       (acc, [facility, count]) => {
         return count > acc.count ? { facility, count } : acc;
       },
       { facility: "", count: 0 },
     );
-  }, [data]);
+  }, [dataToUse]);
 
   return (
     <Card className={cn("flex h-full flex-col gap-2", className)}>

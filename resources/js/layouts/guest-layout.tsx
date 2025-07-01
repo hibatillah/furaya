@@ -8,12 +8,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { dateConfig } from "@/static";
+import { FlashMessages } from "@/types";
 import { Link, router, usePage } from "@inertiajs/react";
 import { addDays, format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { CalendarIcon, GiftIcon, UserRoundIcon } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 
 function BookCard({ className }: { className?: string }) {
   const { startDate, endDate, adults, children } = usePage<{
@@ -29,6 +31,7 @@ function BookCard({ className }: { className?: string }) {
   };
 
   const [date, setDate] = useState<DateRange | undefined>(initialDate);
+  const [promoCode, setPromoCode] = useState("");
 
   const [pax, setPax] = useState<Record<string, number>>({
     adults: adults ?? 1,
@@ -36,12 +39,19 @@ function BookCard({ className }: { className?: string }) {
   });
 
   function handleDateReservation() {
+    const start = date?.from
+      ? format(date.from, "yyyy-MM-dd")
+      : format(initialDate.from, "yyyy-MM-dd");
+    const end = date?.to
+      ? format(date.to, "yyyy-MM-dd")
+      : format(addDays(initialDate.from, 1), "yyyy-MM-dd");
+
     const data = {
-      start_date: date?.from ? new Date(date.from).toISOString() : initialDate.from.toISOString(),
-      end_date: date?.to ? new Date(date.to).toISOString() : initialDate.to.toISOString(),
+      start_date: start,
+      end_date: end,
       adults: pax.adults,
       children: pax.children,
-      promo_code: "",
+      promo_code: promoCode,
     };
 
     router.get(route("public.reservation"), data);
@@ -67,7 +77,7 @@ function BookCard({ className }: { className?: string }) {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="gap-4"
+                className="bg-accent w-36 justify-between gap-4"
               >
                 {date?.from ? format(date.from, "PP", dateConfig) : "Pick a date"}
                 <CalendarIcon className="text-primary" />
@@ -86,7 +96,7 @@ function BookCard({ className }: { className?: string }) {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="gap-4"
+                className="bg-accent w-36 justify-between gap-4"
               >
                 {date?.to ? format(date.to, "PP", dateConfig) : "Pick a date"}
                 <CalendarIcon className="text-primary" />
@@ -124,7 +134,10 @@ function BookCard({ className }: { className?: string }) {
           </Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                className="bg-accent"
+              >
                 {pax.adults} Adults, {pax.children} Children
                 <UserRoundIcon className="text-primary" />
               </Button>
@@ -185,6 +198,8 @@ function BookCard({ className }: { className?: string }) {
               type="text"
               placeholder="Enter your code"
               className="w-40 pe-9"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
             />
             <span className="absolute inset-y-0 end-0 flex items-center px-3">
               <GiftIcon className="text-primary size-4" />
@@ -207,6 +222,18 @@ interface GuestLayoutProps {
 
 export default ({ children, className, bookCard = true }: GuestLayoutProps) => {
   const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
+
+  const { flash } = usePage<{ flash?: FlashMessages }>().props;
+
+  useEffect(() => {
+    if (flash?.success) toast.success(flash.success);
+    if (flash?.warning) toast.warning(flash.warning);
+    if (flash?.error) {
+      toast.error("Terjadi Kesalahan", {
+        description: flash.error,
+      });
+    }
+  }, [flash?.success, flash?.error, flash?.warning]);
 
   return (
     <>

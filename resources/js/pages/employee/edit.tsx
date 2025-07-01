@@ -69,7 +69,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
           >
             {/* name */}
             <div className="grid gap-2">
-              <Label htmlFor="name">Nama</Label>
+              <Label
+                htmlFor="name"
+                required
+              >
+                Nama
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -83,7 +88,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
 
             {/* email */}
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label
+                htmlFor="email"
+                required
+              >
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -97,7 +107,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
 
             {/* phone */}
             <div className="grid gap-2">
-              <Label htmlFor="phone">Nomor Telepon</Label>
+              <Label
+                htmlFor="phone"
+                required
+              >
+                Nomor Telepon
+              </Label>
               <Input
                 id="phone"
                 type="text"
@@ -110,7 +125,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
 
             {/* gender */}
             <div className="grid gap-2">
-              <Label htmlFor="gender">Gender</Label>
+              <Label
+                htmlFor="gender"
+                required
+              >
+                Gender
+              </Label>
               <Select
                 value={data.gender}
                 onValueChange={(value) => setData("gender", value as Enum.Gender)}
@@ -140,7 +160,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
 
             {/* department */}
             <div className="grid gap-2">
-              <Label htmlFor="department_id">Departemen</Label>
+              <Label
+                htmlFor="department_id"
+                required
+              >
+                Departemen
+              </Label>
               <Select
                 value={data.department_id}
                 onValueChange={(value) => setData("department_id", value)}
@@ -166,7 +191,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
 
             {/* hire date */}
             <div className="grid gap-2">
-              <Label htmlFor="hire_date">Tanggal Bergabung</Label>
+              <Label
+                htmlFor="hire_date"
+                required
+              >
+                Tanggal Bergabung
+              </Label>
               <DatePicker
                 value={data.hire_date as Date}
                 onChange={(date) => setData("hire_date", format(date, "yyyy-MM-dd"))}
@@ -177,7 +207,12 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
 
             {/* salary */}
             <div className="grid gap-2">
-              <Label htmlFor="salary">Gaji</Label>
+              <Label
+                htmlFor="salary"
+                required
+              >
+                Gaji
+              </Label>
               <div className="relative">
                 <Input
                   id="salary"
