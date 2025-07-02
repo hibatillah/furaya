@@ -38,12 +38,11 @@ interface ReservationCreateProps {
   roomPackages: Enum.RoomPackage[];
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
-  statusAccs: Enum.StatusAcc[];
   employee: Employee.Default;
 }
 
 export default function ReservationsCreate(props: ReservationCreateProps) {
-  const { visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, statusAccs, employee, guestTypes, nationalities, countries } = props;
+  const { visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, employee, guestTypes, nationalities, countries } = props;
 
   // declare form
   const initialStartDate = new Date();

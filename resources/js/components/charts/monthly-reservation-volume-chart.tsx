@@ -23,7 +23,25 @@ export function ChartMonthlyReservationVolume({ data, className }: { data: Recor
     return acc;
   }, {});
 
-  const [year, setYear] = React.useState<keyof typeof groupedByYear>(Object.keys(groupedByYear).at(-1) as keyof typeof groupedByYear);
+  // compute default year and month together
+  const { defaultYear } = React.useMemo(() => {
+    if (!data) return { defaultYear: "" };
+
+    // get current year
+    const now = new Date();
+    const currentYear = format(now, "yyyy");
+
+    if (groupedByYear[currentYear]) {
+      return { defaultYear: currentYear };
+    }
+
+    // fallback to the latest year
+    const years = Object.keys(groupedByYear);
+    const lastYear = years.at(-1) || "";
+    return { defaultYear: lastYear };
+  }, [groupedByYear]);
+
+  const [year, setYear] = React.useState<keyof typeof groupedByYear>(defaultYear);
 
   const chartData = React.useMemo(() => {
     const yearData = groupedByYear[year] || {};

@@ -4,24 +4,25 @@ Furaya Hotel Management System, focus on Front Desk module with Prototyping meth
 
 ## Features
 
-- User Role Management
+- User Management
   - Manager
   - Admin
   - Employee
-  - Customer
+  - Guest
 - Room Management
   - Room Status
   - Room Facilities
   - Room Type
   - Bed Type
+  - Room Images
 - Reservation Management
   - Booking
   - Check-in
   - Check-out
-- Report Management
-  - Reservation Report
-  - Payment Report
-  - Room Report
+- Guest Page
+  - Reservation
+  - Reservation History
+  - Payment
 - Dashboard
 
 ## Technologies
@@ -31,6 +32,9 @@ Furaya Hotel Management System, focus on Front Desk module with Prototyping meth
 - Tailwind CSS 4
 - Inertia.js
 - TypeScript
+- Shadcn UI
+- Midtrans
+- Recharts
 
 ## Installation
 
@@ -43,10 +47,16 @@ npm install
 
 ## Run the development server
 
-Migrate and seed the database
+Migrate database schema
 
 ```bash
-php artisan migrate --seed
+php artisan migrate
+```
+
+Seed the database (optional)
+
+```bash
+php artisan db:seed
 ```
 
 Run the development server

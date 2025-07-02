@@ -314,6 +314,8 @@ class ReservationController extends Controller
                 "reservationRoom.room.bedType",
                 "reservationGuest.guest.user",
                 "employee.user",
+                "checkIn",
+                "checkOut"
             )->findOrFail($id);
             $roomTypes = RoomType::all();
             $statusAcc = StatusAccEnum::getValues();

@@ -28,7 +28,28 @@ class RoomSeeder extends Seeder
     $bedTypes = ['Single', 'Double', 'Twin', 'Queen', 'King'];
 
     // define initial room types
-    $roomTypes = ['Junior', 'Deluxe', 'Executive', 'Business', 'Furaya Suite'];
+    $roomTypes = [
+      [
+        'name' => 'Deluxe',
+        'images' => ["room_types/deluxe.jpg"],
+      ],
+      [
+        'name' => 'Executive',
+        'images' => ["room_types/executive.jpg"],
+      ],
+      [
+        'name' => 'Business',
+        'images' => ["room_types/business.jpg"],
+      ],
+      [
+        'name' => 'Junior Suite',
+        'images' => ["room_types/executive.jpg"],
+      ],
+      [
+        'name' => 'Furaya Suite',
+        'images' => ["room_types/business.jpg"],
+      ],
+    ];
 
     // insert seed data
     foreach ($facilities as $facility) {
@@ -49,7 +70,8 @@ class RoomSeeder extends Seeder
 
     foreach ($roomTypes as $roomType) {
       RoomType::factory()->create([
-        'name' => $roomType,
+        'name' => $roomType['name'],
+        'images' => $roomType['images'],
       ]);
     }
 

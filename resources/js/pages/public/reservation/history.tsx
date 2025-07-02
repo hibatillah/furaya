@@ -14,7 +14,7 @@ export default function ReservationHistory({ reservations }: { reservations: Res
       <Head title="Riwayat Reservasi" />
 
       <div className="container mx-auto space-y-4 p-4">
-        <div className="flex items-end justify-between gap-5">
+        <div className="flex max-lg:flex-col lg:items-end justify-between gap-5">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">Riwayat Reservasi</h1>
             <p className="text-muted-foreground">Lihat riwayat reservasi Anda di sini.</p>
@@ -24,7 +24,7 @@ export default function ReservationHistory({ reservations }: { reservations: Res
             <Input
               type="search"
               placeholder="Cari reservasi"
-              className="w-80 pe-8 not-dark:bg-white"
+              className="w-full lg:w-80 pe-8 not-dark:bg-white"
             />
             <div className="pointer-events-none absolute inset-y-0 end-3 flex items-center select-none">
               <SearchIcon className="text-foreground size-4" />
@@ -32,12 +32,12 @@ export default function ReservationHistory({ reservations }: { reservations: Res
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid gap-5 lg:grid-cols-2">
           {reservations.length > 0 ? (
             reservations.map((reservation) => (
               <Card
                 key={reservation.id}
-                className="grid items-center gap-8 pe-8 lg:grid-cols-[1fr_auto]"
+                className="grid items-center gap-8 lg:grid-cols-[1fr_auto]"
               >
                 <div className="relative flex flex-col gap-5">
                   <CardHeader className="flex flex-row items-center gap-3">
@@ -76,9 +76,9 @@ export default function ReservationHistory({ reservations }: { reservations: Res
                 </div>
 
                 <ImageContainer
-                  src={reservation.reservation_room?.room_type?.images?.[0] ?? ""}
+                  src={reservation.reservation_room?.room_type?.formatted_images?.[0] ?? ""}
                   alt={reservation.reservation_room?.room_type_name ?? ""}
-                  className="size-40"
+                  className="size-60 max-lg:mx-auto max-lg:mb-2 lg:me-8 lg:size-44"
                 />
               </Card>
             ))

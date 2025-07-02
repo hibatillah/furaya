@@ -1,8 +1,10 @@
+import { DataList } from "@/components/data-list";
 import { InfoTooltip } from "@/components/info-tooltip";
 import { InputDate, type InputDate as InputDateType } from "@/components/input-date";
 import InputError from "@/components/input-error";
 import { SubmitButton } from "@/components/submit-button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,10 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AppLayout from "@/layouts/app-layout";
-import { formatCurrency } from "@/lib/utils";
-import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY, MIN_PAX } from "@/static/reservation";
-import { BreadcrumbItem } from "@/types";
-import { Head, useForm } from "@inertiajs/react";
+import { cn, formatCurrency } from "@/lib/utils";
+import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY, MIN_PAX, reservationStatusBadgeColor } from "@/static/reservation";
+import { BreadcrumbItem, SharedData } from "@/types";
+import { Head, useForm, usePage } from "@inertiajs/react";
 import { addDays, addYears, differenceInCalendarDays, format, isAfter, isSameDay } from "date-fns";
 import { UserSearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -45,6 +47,9 @@ export default function ReservationsEdit(props: {
     countries,
     roomTypes,
   } = props;
+
+  const { auth } = usePage<SharedData>().props;
+  const employeeName = auth.user.name;
 
   // define breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -96,7 +101,7 @@ export default function ReservationsEdit(props: {
     children: reservationData.children || 0,
     arrival_from: reservationData.arrival_from || "",
     guest_type: reservationData.guest_type || "",
-    employee_name: reservationData.employee_name,
+    employee_name: reservationData.employee_name || employeeName,
     employee_id: reservationData.employee_id,
     booking_type: reservationData.booking_type,
     visit_purpose: reservationData.visit_purpose,
@@ -298,7 +303,7 @@ export default function ReservationsEdit(props: {
     toast.loading("Memperbarui reservasi...", { id: "update-reservation" });
 
     put(route("reservation.update", { id: reservation.id }), {
-      onError: (errors) => {
+      onError: () => {
         toast.warning("Reservasi gagal diperbarui", {
           id: "update-reservation",
           description: "Terjadi kesalahan saat memperbarui reservasi",
@@ -324,6 +329,73 @@ export default function ReservationsEdit(props: {
     }
   }, [startDate, endDate]);
 
+  // detail reservation
+  const detailReservation = useMemo(() => {
+    return [
+      {
+        label: "Booking Number",
+        value: reservation.booking_number,
+      },
+      {
+        label: "Dibuat Oleh",
+        value: reservation.employee_name,
+      },
+      {
+        label: "Status",
+        value: (
+          <Badge
+            variant="outline"
+            className={cn("capitalize", reservationStatusBadgeColor[reservation.status])}
+          >
+            {reservation.status}
+          </Badge>
+        ),
+      },
+      {
+        label: "Status Pembayaran",
+        value: (
+          <Badge
+            variant="outline"
+            className="capitalize"
+          >
+            {reservation.transaction_status}
+          </Badge>
+        ),
+      },
+      {
+        label: "Metode Pembayaran",
+        value: (
+          <Badge
+            variant="outline"
+            className="capitalize"
+          >
+            {reservation.payment_type}
+          </Badge>
+        ),
+      },
+      {
+        label: "Bank Pembayaran",
+        value: reservation.transaction_bank ?? "-",
+      },
+      {
+        label: "Check In",
+        value: reservation.formatted_check_in_at ?? "-",
+      },
+      {
+        label: "Check In Oleh",
+        value: reservation.check_in?.check_in_by ?? "-",
+      },
+      {
+        label: "Check Out",
+        value: reservation.formatted_check_out_at ?? "-",
+      },
+      {
+        label: "Check Out Oleh",
+        value: reservation.check_out?.check_out_by ?? "-",
+      },
+    ];
+  }, [reservation]);
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Edit Reservasi" />
@@ -335,12 +407,19 @@ export default function ReservationsEdit(props: {
             <CardTitle className="text-lg">Detail Reservasi</CardTitle>
           </CardHeader>
           <CardContent>
-            <Alert className="col-span-full">
-              <AlertTitle>
-                <span className="font-bold">Booking number:</span> {reservation.booking_number}
-              </AlertTitle>
-            </Alert>
+            <DataList
+              data={detailReservation}
+              className="col-span-full [--columns:2]"
+            />
+          </CardContent>
+        </Card>
 
+        {/* booking details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Detail Booking</CardTitle>
+          </CardHeader>
+          <CardContent>
             {/* start date */}
             <div className="flex flex-col gap-2">
               <Label

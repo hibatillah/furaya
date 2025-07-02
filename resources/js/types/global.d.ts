@@ -48,6 +48,7 @@ declare module "@inertiajs/react" {
       success?: string;
       warning?: string;
       error?: string;
+      data?: Record<string, any>;
     };
   }
 }

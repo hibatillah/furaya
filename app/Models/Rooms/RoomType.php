@@ -3,14 +3,28 @@
 namespace App\Models\Rooms;
 
 use App\Models\BaseModel;
+use Illuminate\Support\Facades\Storage;
 
 class RoomType extends BaseModel
 {
+  protected $casts = [
+    "images" => "array",
+  ];
+
   protected $appends = [
     "rooms_count",
     "can_delete",
     "facilities_count",
+    "formatted_images",
   ];
+
+  /**
+   * format images path
+   */
+  public function getFormattedImagesAttribute()
+  {
+    return array_map(fn($image) => Storage::url($image), $this->images ?? []);
+  }
 
   /**
    * `rooms_count`

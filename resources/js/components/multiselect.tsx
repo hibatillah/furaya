@@ -21,6 +21,7 @@ export default function Multiselect(props: MultiselectProps) {
       defaultOptions={data}
       placeholder={_label}
       emptyIndicator={<p className="text-center text-sm">{label ?? "Data"} tidak tersedia</p>}
+      className="bg-accent"
     />
   );
 }

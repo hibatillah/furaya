@@ -38,8 +38,8 @@ function BookCard({ className }: { className?: string }) {
   const [promoCode, setPromoCode] = useState("");
 
   const [pax, setPax] = useState<Record<string, number>>({
-    adults: adults ?? 1,
-    children: children ?? 0,
+    adults: adults ? Number(adults) : 1,
+    children: children ? Number(children) : 0,
   });
 
   function handleDateReservation() {
@@ -159,9 +159,12 @@ function BookCard({ className }: { className?: string }) {
                   </Label>
                   <Input
                     type="number"
+                    min={1}
                     value={pax.adults}
-                    onIncrease={() => setPax({ ...pax, adults: pax.adults + 1 })}
-                    onDecrease={() => setPax({ ...pax, adults: pax.adults - 1 })}
+                    onIncrease={() => {
+                      setPax((prev) => ({ ...prev, adults: prev.adults + 1 }));
+                    }}
+                    onDecrease={() => setPax((prev) => ({ ...prev, adults: Math.max(1, prev.adults - 1) }))}
                   />
                 </div>
 
@@ -175,9 +178,10 @@ function BookCard({ className }: { className?: string }) {
                   </Label>
                   <Input
                     type="number"
+                    min={0}
                     value={pax.children}
                     onIncrease={() => setPax({ ...pax, children: pax.children + 1 })}
-                    onDecrease={() => setPax({ ...pax, children: pax.children - 1 })}
+                    onDecrease={() => setPax({ ...pax, children: pax.children > 0 ? pax.children - 1 : 0 })}
                   />
                 </div>
               </div>
@@ -289,7 +293,7 @@ function Header() {
   const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
 
   return (
-    <header className="bg-background/5 backdrop-blur-md dark:backdrop-blur-xl border-border sticky top-0 z-10 w-full border-b">
+    <header className="bg-background/5 border-border sticky top-0 z-10 w-full border-b backdrop-blur-md dark:backdrop-blur-xl">
       <div className="container mx-auto flex items-center justify-between gap-5 px-4 py-2">
         <Link
           href={route("home")}

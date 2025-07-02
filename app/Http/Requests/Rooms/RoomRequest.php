@@ -48,7 +48,7 @@ class RoomRequest extends FormRequest
             'facilities' => ['nullable', 'array'],
             'facilities.*' => ['nullable', 'string', Rule::exists("facilities", "id")],
             'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'image', 'max:5120'],
+            'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ];
     }
 

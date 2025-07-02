@@ -32,6 +32,7 @@ class RoomTypeFactory extends Factory
             'base_rate' => $rateType->rate,
             'rate_type_id' => $rateType->id,
             'bed_type_id' => BedType::all()->random()->id,
+            'images' => [$this->faker->imageUrl(640, 480, 'rooms')],
         ];
     }
 }

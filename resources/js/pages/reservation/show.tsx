@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
 import { bookingTypeBadgeColor, reservationStatusBadgeColor, statusAccBadgeColor, visitPurposeBadgeColor } from "@/static/reservation";
+import { smokingTypeBadgeColor } from "@/static/room";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useCallback, useState } from "react";
@@ -27,6 +28,7 @@ import ConfirmPendingReservation from "./confirm";
 
 export default function ReservationsShow(props: { reservation: Reservation.Default; status: Enum.ReservationStatus[] }) {
   const { reservation, status } = props;
+  console.log(reservation);
 
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";
@@ -181,6 +183,36 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
       ),
     },
     {
+      label: "Status Pembayaran",
+      value: reservation.transaction_status ? (
+        <Badge
+          variant="outline"
+          className="capitalize"
+        >
+          {reservation.transaction_status}
+        </Badge>
+      ) : (
+        "-"
+      ),
+    },
+    {
+      label: "Metode Pembayaran",
+      value: reservation.payment_type ? (
+        <Badge
+          variant="outline"
+          className="capitalize"
+        >
+          {reservation.payment_type}
+        </Badge>
+      ) : (
+        "-"
+      ),
+    },
+    {
+      label: "Bank Pembayaran",
+      value: reservation.transaction_bank || "-",
+    },
+    {
       label: "Check In",
       value: reservation.formatted_check_in_at ?? "-",
     },
@@ -213,7 +245,29 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Tipe Kasur",
-      value: <Badge variant="outline">{room?.bed_type}</Badge>,
+      value: room?.bed_type ? <Badge variant="outline">{room?.bed_type}</Badge> : "-",
+    },
+    {
+      label: "Smoking Type",
+      value: room?.room?.smoking_type ? (
+        <Badge className={cn("capitalize", smokingTypeBadgeColor[room?.room?.smoking_type as Enum.SmokingType])}>{room?.room?.smoking_type}</Badge>
+      ) : (
+        "-"
+      ),
+    },
+    {
+      label: "Kapasitas",
+      value: room?.room?.capacity ? `${room?.room?.capacity} orang` : "-",
+    },
+    {
+      label: "Luas Kamar",
+      value: room?.room?.size ? (
+        <span className="after:text-foreground relative after:absolute after:-end-2 after:top-0 after:text-[8px] after:content-['2']">
+          {room?.room?.size} m
+        </span>
+      ) : (
+        "-"
+      ),
     },
     {
       label: "View",

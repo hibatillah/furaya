@@ -14,6 +14,7 @@ use App\Models\Rooms\RoomFacility;
 use App\Models\Rooms\RoomType;
 use App\Models\Rooms\RateType;
 use App\Models\Reservations\Reservation;
+use App\Utils\Helper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -85,10 +86,24 @@ class RoomController extends Controller
             $validated['status'] = RoomStatusEnum::getKeyValues()[$validated["status"]];
 
             $result = DB::transaction(function () use ($validated) {
+                $roomType = RoomType::findOrFail($validated['room_type_id']);
                 $facilities = $validated['facilities'];
 
+                // store and get image paths
+                $imagePaths = Helper::storeImage(
+                    files: request()->file('images') ?? [],
+                    prefix: $validated['room_number'],
+                    folder: 'rooms'
+                );
+
                 // create room
-                $room = Room::create(Arr::except($validated, ["facilities", "images"]));
+                $room = Room::create([
+                    ...Arr::except($validated, ["facilities"]),
+                    "images" => [
+                        ...$roomType->images,
+                        ...$imagePaths,
+                    ],
+                ]);
 
                 if (count($facilities) > 0) {
                     foreach ($facilities as $facilityId) {
@@ -200,9 +215,32 @@ class RoomController extends Controller
             $validated = $request->validated();
             $validated['status'] = RoomStatusEnum::getKeyValues()[$validated["status"]];
 
-            DB::transaction(function () use ($validated, $room, $roomFacilities) {
+            DB::transaction(function () use (
+                $validated,
+                $room,
+                $roomFacilities
+            ) {
+                $roomType = RoomType::findOrFail($validated['room_type_id']);
+                $oldImages = array_filter($room->images, function ($image) {
+                    return str_starts_with($image, 'rooms/');
+                });
+
+                // update room images
+                $imagePaths = Helper::updateImage(
+                    newFiles: request()->file('images') ?? [],
+                    oldFiles: $oldImages,
+                    prefix: $validated['room_number'],
+                    folder: 'rooms'
+                );
+
                 // update room
-                $room->update(Arr::except($validated, ["facilities", "image"]));
+                $room->update([
+                    ...Arr::except($validated, ["facilities"]),
+                    "images" => [
+                        ...$roomType->images,
+                        ...$imagePaths,
+                    ],
+                ]);
 
                 // update room facility
                 $facilities = $validated['facilities'];
@@ -256,6 +294,16 @@ class RoomController extends Controller
     {
         try {
             $room = Room::findOrFail($id);
+
+            // delete room images
+            foreach ($room->images as $image) {
+                // just delete room images not room type images
+                if (str_starts_with($image, 'rooms/')) {
+                    Helper::deleteImage($image);
+                }
+            }
+
+            // delete room
             $room->delete();
 
             return redirect()->back();

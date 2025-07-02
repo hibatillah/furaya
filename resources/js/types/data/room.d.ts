@@ -22,6 +22,7 @@ declare namespace Room {
   interface Addition {
     facility?: RoomFacility.Default[];
     count_facility?: number;
+    formatted_images?: string[];
   }
 
   interface Default extends Base, Addition {}
@@ -73,6 +74,7 @@ declare namespace RoomType {
     rooms_count?: number;
     can_delete: boolean;
     facilities_count: number;
+    formatted_images?: string[];
   }
 
   interface Default extends Base, Addition {}

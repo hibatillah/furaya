@@ -58,9 +58,10 @@ export interface FlashMessages {
 }
 
 export interface MidtransResult {
+  transaction_id: string;
+  transaction_time: string;
   transaction_status: string;
-  payment_status: string;
-  order_id: string;
   payment_type: string;
   snap_token: string;
+  bank: string;
 }

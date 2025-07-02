@@ -7,16 +7,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
-import { cn, formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
-import RoomTypeCreate from "./create";
 import RoomTypeDelete from "./delete";
-import RoomTypeEdit from "./edit";
-import RoomTypeShow from "./show";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -25,20 +22,15 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomTypeIndex(props: {
-  roomTypes: RoomType.Default[];
-  facilities: Facility.Default[];
-  smokingTypes: Enum.SmokingType[];
-  rateTypes: RateType.Default[];
-  bedTypes: BedType.Default[];
-}) {
-  const { roomTypes, facilities, rateTypes, smokingTypes, bedTypes } = props;
+export default function RoomTypeIndex(props: { roomTypes: RoomType.Default[]; bedTypes: BedType.Default[] }) {
+  const { roomTypes, bedTypes } = props;
 
+  // handle dialog form
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"detail" | "delete" | "edit" | null>(null);
+  const [dialogType, setDialogType] = useState<"delete" | "edit" | null>(null);
   const [selectedRow, setSelectedRow] = useState<RoomType.Default | null>(null);
 
-  function handleDialog(type: "detail" | "delete" | "edit", row: RoomType.Default) {
+  function handleDialog(type: "delete" | "edit", row: RoomType.Default) {
     setDialogType(type);
     setSelectedRow(row);
     setDialogOpen(true);
@@ -50,6 +42,7 @@ export default function RoomTypeIndex(props: {
     setSelectedRow(null);
   }
 
+  // define columns
   const columns: ColumnDef<RoomType.Default>[] = [
     {
       accessorKey: "code",
@@ -137,8 +130,12 @@ export default function RoomTypeIndex(props: {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleDialog("detail", row.original)}>Detail</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDialog("edit", row.original)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={route("roomtype.show", { id: row.original.id })}>Detail</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={route("roomtype.edit", { id: row.original.id })}>Edit</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
@@ -176,12 +173,14 @@ export default function RoomTypeIndex(props: {
                     },
                   ]}
                 />
-                <RoomTypeCreate
-                  facilities={facilities}
-                  rateTypes={rateTypes}
-                  smokingTypes={smokingTypes}
-                  bedTypes={bedTypes}
-                />
+                <Button asChild>
+                  <Link
+                    href={route("roomtype.create")}
+                    className="ms-auto"
+                  >
+                    Tambah Tipe Kamar
+                  </Link>
+                </Button>
               </DataTableControls>
             )}
           </DataTable>
@@ -193,34 +192,14 @@ export default function RoomTypeIndex(props: {
         onOpenChange={setDialogOpen}
       >
         <DialogContent
-          className={cn({
-            "w-120": dialogType === "detail" || dialogType === "delete",
-            "!max-w-200": dialogType === "edit",
-          })}
+          className="w-120"
           onOpenAutoFocus={(e) => e.preventDefault()}
-          onFocus={(e) => e.preventDefault()}
           noClose
         >
-          {dialogType === "detail" && selectedRow && (
-            <RoomTypeShow
-              data={selectedRow}
-              onClose={handleDialogClose}
-            />
-          )}
           {dialogType === "delete" && selectedRow && (
             <RoomTypeDelete
               id={selectedRow.id}
               canDelete={selectedRow.can_delete}
-              onClose={handleDialogClose}
-            />
-          )}
-          {dialogType === "edit" && selectedRow && (
-            <RoomTypeEdit
-              data={selectedRow}
-              facilities={facilities}
-              rateTypes={rateTypes}
-              smokingTypes={smokingTypes}
-              bedTypes={bedTypes}
               onClose={handleDialogClose}
             />
           )}

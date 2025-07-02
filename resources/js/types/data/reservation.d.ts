@@ -30,10 +30,11 @@ declare namespace Reservation {
     smoking_type?: Enum.SmokingType;
     include_breakfast?: boolean;
     snap_token?: string;
-    transaction_status?: string;
-    payment_status?: string;
-    midtrans_order_id?: string;
     payment_type?: string;
+    transaction_id?: string;
+    transaction_time?: string;
+    transaction_status?: string;
+    transaction_bank?: string;
     canceled_at?: Date | string;
   }
 

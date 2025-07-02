@@ -2,33 +2,16 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { useRef } from "react";
 
-function Input({ className, type, ref, disabled, disableHandle = false, onIncrease, onDecrease, ...props }: React.ComponentProps<"input"> & {
+function Input({ className, type, disabled, disableHandle = false, onIncrease, onDecrease, ...props }: React.ComponentProps<"input"> & {
   disableHandle?: boolean;
   onIncrease?: () => void;
   onDecrease?: () => void;
 }) {
-  const baseRef = useRef<HTMLInputElement>(null);
-  const inputRef = (ref as React.RefObject<HTMLInputElement>) ?? baseRef;
-
-  const increase = () => {
-    if (inputRef?.current) {
-      inputRef.current.stepUp();
-    }
-  };
-
-  const decrease = () => {
-    if (inputRef?.current) {
-      inputRef.current.stepDown();
-    }
-  };
-
   return (
     <div className="relative">
       <input
         type={type}
-        ref={inputRef}
         data-slot="input"
         disabled={disabled}
         className={cn(
@@ -39,13 +22,12 @@ function Input({ className, type, ref, disabled, disableHandle = false, onIncrea
         )}
         {...props}
       />
-      {type === "number" && !disableHandle && !disabled && (
+      {type === "number" && (onIncrease && onDecrease) && !disabled && (
         <div className="absolute end-0 inset-y-0 pe-px pt-px pb-[0.5px] grid grid-rows-2 border-s border-input divide-y divide-input">
           <button
             type="button"
             onClick={() => {
-              increase();
-              onIncrease?.();
+              onIncrease();
             }}
             className="hover:bg-muted text-muted-foreground hover:text-foreground w-full px-2 rounded-tr-md"
           >
@@ -55,8 +37,7 @@ function Input({ className, type, ref, disabled, disableHandle = false, onIncrea
           <button
             type="button"
             onClick={() => {
-              decrease();
-              onDecrease?.();
+              onDecrease();
             }}
             className="hover:bg-muted text-muted-foreground hover:text-foreground w-full px-2 rounded-br-md"
           >

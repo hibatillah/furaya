@@ -36,11 +36,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->report(function (Throwable $e) {
-            // Skip logging for known types
-            if ($e instanceof NotFoundHttpException) {
-                return;
-            }
-
             // custom exception logging
             Log::channel("project")->error("Exception", [
                 "url"     => request()->fullUrl(),

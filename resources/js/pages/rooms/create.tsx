@@ -90,8 +90,8 @@ export default function RoomsCreate(props: {
     toast.loading("Menambahkan kamar...", { id: "create-room" });
 
     post(route("room.store"), {
+      forceFormData: true,
       onError: (errors) => {
-        console.log(errors);
         toast.warning("Kamar gagal ditambahkan", {
           id: "create-room",
           description: errors.message,
@@ -114,7 +114,12 @@ export default function RoomsCreate(props: {
           >
             {/* room number */}
             <div className="grid gap-2">
-              <Label htmlFor="room_number" required>Nomor Kamar</Label>
+              <Label
+                htmlFor="room_number"
+                required
+              >
+                Nomor Kamar
+              </Label>
               <Input
                 id="room_number"
                 type="number"
@@ -130,7 +135,12 @@ export default function RoomsCreate(props: {
 
             {/* floor number */}
             <div className="grid gap-2">
-              <Label htmlFor="floor_number" required>Nomor Lantai</Label>
+              <Label
+                htmlFor="floor_number"
+                required
+              >
+                Nomor Lantai
+              </Label>
               <Input
                 id="floor_number"
                 type="number"
@@ -146,7 +156,12 @@ export default function RoomsCreate(props: {
 
             {/* room type */}
             <div className="grid gap-2">
-              <Label htmlFor="room_type_id" required>Tipe Kamar</Label>
+              <Label
+                htmlFor="room_type_id"
+                required
+              >
+                Tipe Kamar
+              </Label>
               <Select
                 value={data.room_type_id}
                 onValueChange={(value) => {
@@ -166,6 +181,7 @@ export default function RoomsCreate(props: {
                   );
                 }}
                 disabled={roomTypes.length === 0}
+                required
               >
                 <SelectTrigger id="room_type_id">
                   <SelectValue placeholder="Pilih Tipe Kamar">
@@ -189,11 +205,17 @@ export default function RoomsCreate(props: {
 
             {/* bed type */}
             <div className="grid gap-2">
-              <Label htmlFor="bed_type_id" required>Tipe Kasur</Label>
+              <Label
+                htmlFor="bed_type_id"
+                required
+              >
+                Tipe Kasur
+              </Label>
               <Select
                 value={data.bed_type_id}
                 onValueChange={(value) => setData("bed_type_id", value)}
                 disabled={bedTypes.length === 0}
+                required
               >
                 <SelectTrigger id="bed_type_id">
                   <SelectValue placeholder="Pilih Tipe Kasur">
@@ -217,7 +239,12 @@ export default function RoomsCreate(props: {
 
             {/* rate type */}
             <div className="grid gap-2">
-              <Label htmlFor="rate_type_id" required>Tipe Tarif</Label>
+              <Label
+                htmlFor="rate_type_id"
+                required
+              >
+                Tipe Tarif
+              </Label>
               <Select
                 value={data.rate_type_id}
                 onValueChange={(value) => {
@@ -225,6 +252,7 @@ export default function RoomsCreate(props: {
                   setData("price", rateTypes.find((type) => type.id === value)?.rate || "");
                 }}
                 disabled={rateTypes.length === 0}
+                required
               >
                 <SelectTrigger id="rate_type_id">
                   <SelectValue placeholder="Pilih Tipe Tarif">
@@ -247,7 +275,12 @@ export default function RoomsCreate(props: {
 
             {/* price */}
             <div className="grid gap-2">
-              <Label htmlFor="price" required>Harga</Label>
+              <Label
+                htmlFor="price"
+                required
+              >
+                Harga
+              </Label>
               <div className="relative">
                 <Input
                   id="price"
@@ -268,10 +301,16 @@ export default function RoomsCreate(props: {
 
             {/* condition */}
             <div className="grid gap-2">
-              <Label htmlFor="condition" required>Kondisi</Label>
+              <Label
+                htmlFor="condition"
+                required
+              >
+                Kondisi
+              </Label>
               <Select
                 value={data.condition}
                 onValueChange={(value) => setData("condition", value as Enum.RoomCondition)}
+                required
               >
                 <SelectTrigger id="condition">
                   <SelectValue placeholder="Pilih Kondisi">
@@ -295,7 +334,12 @@ export default function RoomsCreate(props: {
 
             {/* capacity */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="capacity" required>Kapasitas</Label>
+              <Label
+                htmlFor="capacity"
+                required
+              >
+                Kapasitas
+              </Label>
               <div className="relative">
                 <Input
                   id="capacity"
@@ -314,10 +358,16 @@ export default function RoomsCreate(props: {
 
             {/* status */}
             <div className="grid gap-2">
-              <Label htmlFor="status" required>Status</Label>
+              <Label
+                htmlFor="status"
+                required
+              >
+                Status
+              </Label>
               <Select
                 value={data.status}
                 onValueChange={(value) => setData("status", value as Enum.RoomStatus)}
+                required
               >
                 <SelectTrigger id="status">
                   <SelectValue placeholder="Pilih Status">
@@ -341,7 +391,12 @@ export default function RoomsCreate(props: {
 
             {/* size */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="size" required>Luas Kamar</Label>
+              <Label
+                htmlFor="size"
+                required
+              >
+                Luas Kamar
+              </Label>
               <div className="relative">
                 <Input
                   id="size"
@@ -362,10 +417,16 @@ export default function RoomsCreate(props: {
 
             {/* smoking type */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="smoking_type" required>Smoking Type</Label>
+              <Label
+                htmlFor="smoking_type"
+                required
+              >
+                Smoking Type
+              </Label>
               <Select
                 value={data.smoking_type}
                 onValueChange={(value) => setData("smoking_type", value as Enum.SmokingType)}
+                required
               >
                 <SelectTrigger id="smoking_type">
                   <SelectValue placeholder="Pilih Smoking Type" />
@@ -382,7 +443,7 @@ export default function RoomsCreate(props: {
                   ))}
                 </SelectContent>
               </Select>
-              <InputError message={errors.rate_type_id} />
+              <InputError message={errors.smoking_type} />
             </div>
 
             {/* view */}
@@ -399,21 +460,8 @@ export default function RoomsCreate(props: {
               <InputError message={errors.view} />
             </div>
 
-            {/* image */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="images">Gambar</Label>
-              <Input
-                id="images"
-                type="file"
-                placeholder="Gambar"
-                accept="image/*"
-                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
-              />
-              <InputError message={errors.images} />
-            </div>
-
             {/* facilities */}
-            <div className="grid gap-2">
+            <div className="grid gap-2 xl:col-span-2">
               <Label htmlFor="facilities">Fasilitas</Label>
               <Multiselect
                 label="Fasilitas"
@@ -428,6 +476,20 @@ export default function RoomsCreate(props: {
                 }}
               />
               <InputError message={errors.facilities} />
+            </div>
+
+            {/* image */}
+            <div className="xl:row-span-6 flex flex-col gap-2 xl:col-start-3 xl:row-start-1">
+              <Label htmlFor="images">Gambar</Label>
+              <Input
+                id="images"
+                type="file"
+                placeholder="Gambar"
+                accept="image/*"
+                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
+                multiple
+              />
+              <InputError message={errors.images} />
             </div>
 
             {/* submit */}

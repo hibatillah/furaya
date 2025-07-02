@@ -13,13 +13,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware("role:admin")->group(function () {
   /** room resource routes */
+  Route::get("kamar/tambah", [RoomController::class, "create"])
+    ->name("room.create");
+
+  // override update method
+  Route::put('kamar/{id}', [RoomController::class, 'update'])->name('room.update');
+  Route::post('kamar/{id}', [RoomController::class, 'update'])->name('room.update');
+
   Route::resource("/kamar", RoomController::class)
-    ->except(["index", "crete", "show"])
+    ->except(["create", "update"])
     ->parameters(["kamar" => "id"])
     ->names([
+      "index" => "room.index",
       "store" => "room.store",
+      "show" => "room.show",
       "edit" => "room.edit",
-      "update" => "room.update",
       "destroy" => "room.destroy",
     ]);
 
@@ -30,15 +38,19 @@ Route::middleware("role:admin")->group(function () {
      * `/tipe/kamar`
      */
     Route::get("kamar/tambah", [RoomTypeController::class, "create"])->name("roomtype.create");
+
+    // override update method
+    Route::put('kamar/{id}', [RoomTypeController::class, 'update'])->name('roomtype.update');
+    Route::post('kamar/{id}', [RoomTypeController::class, 'update'])->name('roomtype.update');
+
     Route::resource("kamar", RoomTypeController::class)
-      ->except(["create"])
+      ->except(["create", "update"])
       ->parameters(["kamar" => "id"])
       ->names([
         "index" => "roomtype.index",
         "store" => "roomtype.store",
         "show" => "roomtype.show",
         "edit" => "roomtype.edit",
-        "update" => "roomtype.update",
         "destroy" => "roomtype.destroy",
       ]);
 

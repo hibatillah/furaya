@@ -192,7 +192,13 @@ class PublicReservationController extends Controller
                 "address",
             ]);
 
-            DB::transaction(function () use ($userData, $guestData, $reservation, $reservationRoom, $validated) {
+            $reservation = DB::transaction(function () use (
+                $userData,
+                $guestData,
+                $reservation,
+                $reservationRoom,
+                $validated
+            ) {
                 $user = User::updateOrCreate(
                     ['email' => $userData['email']],
                     array_merge($userData, [
@@ -243,10 +249,13 @@ class PublicReservationController extends Controller
                     "is_paid" => $validated["advance_amount"] > 0,
                     "description" => $validated["advance_remarks"] ?: "Add Booking Advance",
                 ]);
+
+                return $reservation;
             });
 
-            return redirect()->route("public.reservation")
-                ->with("success", "Reservasi berhasil ditambahkan");
+            return redirect()->back()->with("data", [
+                "reservation_id" => $reservation->id,
+            ]);
         } catch (ValidationException $e) {
             report($e);
             return back()->withErrors($e->errors())->withInput();
@@ -265,7 +274,7 @@ class PublicReservationController extends Controller
         $guest = $user->guest;
 
         $reservations = Reservation::with(
-            "reservationRoom",
+            "reservationRoom.roomType",
             "reservationGuest"
         )
             ->whereHas("reservationGuest", function ($query) use ($guest) {
@@ -285,11 +294,12 @@ class PublicReservationController extends Controller
             $reservation = Reservation::findOrFail($id);
 
             $reservation->update([
+                "transaction_id" => $request->transaction_id,
+                "transaction_time" => $request->transaction_time,
                 "transaction_status" => $request->transaction_status,
-                "payment_status" => $request->payment_status,
-                "midtrans_order_id" => $request->midtrans_order_id,
                 "payment_type" => $request->payment_type,
                 "snap_token" => $request->snap_token,
+                "transaction_bank" => $request?->bank ?? "",
             ]);
 
             return back();

@@ -4,13 +4,27 @@ namespace App\Models\Rooms;
 
 use App\Models\BaseModel;
 use App\Models\Reservations\ReservationRoom;
+use Illuminate\Support\Facades\Storage;
 
 class Room extends BaseModel
 {
+    protected $casts = [
+        "images" => "array",
+    ];
+
     protected $appends = [
         "facility",
         "count_facility",
+        "formatted_images",
     ];
+
+    /**
+     * format images path
+     */
+    public function getFormattedImagesAttribute()
+    {
+        return array_map(fn($image) => Storage::url($image), $this->images ?? []);
+    }
 
     /**
      * get room facilities

@@ -55,5 +55,5 @@ export const roomStatusBadgeColor = [
 
 export const smokingTypeBadgeColor = {
   "smoking": badgeColor[0],
-  "non-smoking": badgeColor[1],
+  "non smoking": badgeColor[1],
 }

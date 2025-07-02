@@ -28,6 +28,8 @@ export function ChartDailyReservationVolume({ data, className }: { data: Record<
   // compute default year and month together
   const { defaultYear, defaultMonth } = React.useMemo(() => {
     if (!data) return { defaultYear: "", defaultMonth: "" };
+
+    // get current year and month
     const now = new Date();
     const currentYear = format(now, "yyyy");
     const currentMonth = format(now, "MM");

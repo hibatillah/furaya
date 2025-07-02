@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,6 +24,7 @@ import { addYears, format } from "date-fns";
 import { AlertCircleIcon, BedIcon, CircleSlashIcon, InfoIcon, Maximize2Icon, UsersRoundIcon, WalletIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import PublicLogin from "../auth/login";
 
 interface PublicReservationCreateProps {
   roomType: RoomType.Default;
@@ -41,14 +43,16 @@ interface PublicReservationCreateProps {
 export default function PublicReservationsCreate(props: PublicReservationCreateProps) {
   const { roomType, genders, nationalities, smokingTypes, startDate, endDate, adults, children, lengthOfStay, user } = props;
 
+  const [loginDialog, setLoginDialog] = useState(false);
+
   // declare initial data
   const pax = adults + children;
   const BASE_BREAKFAST_RATE = 70_000;
   const formatStartDate = format(new Date(startDate), "dd MMMM yyyy", dateConfig);
   const formatEndDate = format(new Date(endDate), "dd MMMM yyyy", dateConfig);
 
+  const [selectedPayment, setSelectedPayment] = useState<string>("later");
   const [smokingTypeSelected, setSmokingTypeSelected] = useState<Enum.SmokingType>("non smoking");
-  const [selectedPayment, setSelectedPayment] = useState<Enum.Payment>("other");
   const [includeBreakfast, setIncludeBreakfast] = useState(true);
   const [selectedNationality, setSelectedNationality] = useState<string>("");
 
@@ -86,7 +90,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     booking_type: "online" as Enum.BookingType,
     visit_purpose: "other" as Enum.VisitPurpose,
     room_package: "other" as Enum.RoomPackage,
-    payment_method: selectedPayment,
+    payment_method: "other" as Enum.Payment,
     status_acc: "pending" as Enum.StatusAcc,
     discount: "",
     discount_reason: "",
@@ -104,7 +108,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     nik_passport: user?.guest?.nik_passport ?? "",
     phone: user?.guest?.phone ?? "",
     gender: user?.guest?.gender ?? ("" as Enum.Gender),
-    birthdate: user?.guest?.birthdate ?? "",
+    birthdate: "",
     profession: user?.guest?.profession ?? "",
     nationality: user?.guest?.nationality ?? "",
     address: user?.guest?.address ?? "",
@@ -120,16 +124,62 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     view: "",
   });
 
-  // handle create reservation
+  /**
+   * Handle create reservation
+   *
+   * - Create new reservation
+   * - Show payment snap window
+   * - Update reservation payment data
+   */
   function handleCreateReservation(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!user) {
+      toast.error("Login terlebih dahulu", {
+        description: "Silakan login terlebih dahulu untuk membuat reservasi kamar",
+      });
+      return;
+    }
 
     // sent data
     toast.loading("Menambahkan reservasi...", { id: "create-reservation" });
 
     post(route("public.reservation.store"), {
+      onSuccess: async (page: Record<string, any>) => {
+        const reservationId = page.props.flash?.data?.reservation_id;
+
+        if (!reservationId) {
+          toast.error("Gagal mendapatkan ID reservasi", {
+            id: "create-reservation",
+          });
+          return;
+        }
+
+        toast.success("Reservasi berhasil ditambahkan", {
+          id: "create-reservation",
+        });
+
+        try {
+          toast.info("Memproses pembayaran", { id: "process-payment" });
+
+          // get snap token using reservation id
+          const snapToken = await getSnapToken(reservationId);
+
+          if (!snapToken) {
+            throw new Error("Snap token kosong");
+          }
+
+          // show payment snap window
+          processPayment(snapToken, reservationId);
+        } catch (err: any) {
+          toast.error("Gagal memproses pembayaran", {
+            description: "Coba beberapa saat lagi",
+            id: "process-payment",
+          });
+        }
+      },
+
       onError: (errors) => {
-        console.log(errors);
         toast.warning("Reservasi gagal ditambahkan", {
           id: "create-reservation",
           description: errors.message,
@@ -138,53 +188,116 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     });
   }
 
+  /**
+   * Get snap token from `PaymentController` to show payment snap window
+   *
+   * @param reservationId - reservation id
+   * @returns snap token
+   */
+  async function getSnapToken(reservationId: string): Promise<string> {
+    try {
+      const response = await fetch("/reservasi/snap-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "",
+        },
+        body: JSON.stringify({ reservation_id: reservationId }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Gagal mendapatkan snap token");
+      }
+
+      const data = await response.json();
+      return data.snap_token;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Show payment snap window then update reservation payment data
+   *
+   * @param snapToken - snap token from `getSnapToken`
+   * @param reservationId - reservation id
+   */
   function processPayment(snapToken: string, reservationId: string) {
     if (!window.snap) {
       toast.error("Pembayaran belum dapat diproses", {
         description: "Coba beberapa saat lagi",
+        id: "process-payment",
       });
       return;
     }
 
-    toast.loading("Memproses pembayaran...", {
-      id: "process-payment",
-    });
-
     window.snap.pay(snapToken, {
       onSuccess: async (result: MidtransResult) => {
+        toast.success("Pembayaran berhasil dilakukan", {
+          id: "process-payment",
+        });
+
         try {
+          toast.loading("Memperbarui data reservasi", { id: "update-reservation" });
+
           await router.put(route("public.reservation.payment", reservationId), {
             transaction_status: result.transaction_status,
-            payment_status: result.payment_status,
-            midtrans_order_id: result.order_id,
+            transaction_id: result.transaction_id,
+            transaction_time: result.transaction_time,
             payment_type: result.payment_type,
             snap_token: snapToken,
+            transaction_bank: result.bank ?? "",
           });
 
-          toast.success("Pembayaran berhasil", {
-            id: "process-payment",
+          toast.success("Data reservasi berhasil diperbarui", {
+            id: "update-reservation",
           });
-        } catch (error) {
+        } catch (err) {
           toast.error("Data reservasi gagal diperbarui", {
-            description: "Coba refresh halaman",
-            id: "process-payment",
+            id: "update-reservation",
           });
         }
       },
+
       onPending: () => {
         toast.info("Pembayaran sedang diproses", {
           id: "process-payment",
         });
       },
-      onError: () => {
-        toast.error("Pembayaran gagal dilakukan", {
-          description: "Coba beberapa saat lagi",
+
+      onError: (err: any) => {
+        toast.error("Pembayaran gagal", {
           id: "process-payment",
+          description: err,
         });
       },
     });
   }
 
+  // handle midtrans payment snap script
+  useEffect(() => {
+    const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+
+    if (!clientKey) {
+      toast.error("Terjadi kesalahan melakukan pembayaran", {
+        description: "Silakan hubungi admin",
+      });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://app.sandbox.midtrans.com/snap/snap.js`;
+    script.setAttribute("data-client-key", clientKey);
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  // summary data list
   const summaryDataList = [
     {
       label: "Tipe Kamar",
@@ -200,7 +313,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     },
     {
       label: "Payment",
-      value: selectedPayment === "other" ? "Pay at Check-in" : <span className="capitalize">{selectedPayment}</span>,
+      value: <span className="capitalize">{selectedPayment === "now" ? "Pay Now" : "Pay at Check-in"}</span>,
     },
   ];
 
@@ -213,12 +326,15 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
         nik_passport: user.guest?.nik_passport ?? "",
         phone: user.guest?.phone ?? "",
         gender: user.guest?.gender ?? ("" as Enum.Gender),
-        birthdate: new Date(user.guest?.birthdate as string) ?? "",
         profession: user.guest?.profession ?? "",
         nationality: user.guest?.nationality ?? "",
         address: user.guest?.address ?? "",
         country: user.guest?.country ?? "",
       }));
+
+      if (user.guest?.birthdate) {
+        setData("birthdate", new Date(user.guest.birthdate as Date));
+      }
 
       setSelectedNationality(nationalities.find((nationality) => nationality.name === user.guest?.nationality)?.id ?? "");
     }
@@ -259,7 +375,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
             >
               <AlertCircleIcon />
               <AlertTitle>Login terlebih dahulu</AlertTitle>
-              <AlertDescription>Silakan login terlebih dahulu untuk membuat reservasi kamar</AlertDescription>
             </Alert>
           )}
 
@@ -291,7 +406,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
             <Card className="gap-2">
               <CardContent className="grid grid-cols-[auto_1fr] gap-5">
                 <ImageContainer
-                  src=""
+                  src={roomType.formatted_images?.[0] ?? ""}
                   className="size-40"
                 />
 
@@ -362,12 +477,16 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
             </Card>
 
             {/* customer details */}
-            <Card>
+            <Card className="overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg">Detail Tamu</CardTitle>
               </CardHeader>
               <Separator />
-              <CardContent className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <CardContent
+                className={cn("relative grid gap-5 md:grid-cols-2 xl:grid-cols-3", {
+                  "*:not-[#overlay]:pointer-events-none *:not-[#overlay]:select-none": !user,
+                })}
+              >
                 {/* fullname */}
                 <div className="flex flex-col gap-2">
                   <Label
@@ -552,6 +671,32 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                   />
                   <InputError message={errors.address} />
                 </div>
+
+                {!user && (
+                  <div
+                    id="overlay"
+                    className="bg-background/5 absolute inset-x-0 -inset-y-6 flex flex-col items-center justify-center gap-5 backdrop-blur-[2px]"
+                  >
+                    <Alert
+                      variant="destructive"
+                      className="w-1/2 shadow-md"
+                    >
+                      <AlertCircleIcon />
+                      <AlertTitle>Login terlebih dahulu</AlertTitle>
+                      <AlertDescription>
+                        <p>
+                          Silakan{" "}
+                          <PublicLogin>
+                            <DialogTrigger className="decoration-muted-foreground hover:decoration-foreground cursor-pointer underline underline-offset-4">
+                              Login
+                            </DialogTrigger>
+                          </PublicLogin>{" "}
+                          terlebih dahulu untuk membuat reservasi kamar
+                        </p>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -684,43 +829,39 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                   </Label>
                   <RadioGroup
                     value={selectedPayment}
-                    onValueChange={(value: Enum.Payment) => {
-                      setSelectedPayment(value);
-                      setData("payment_method", value);
-                    }}
+                    onValueChange={setSelectedPayment}
                     className="*:border-input *:w-full *:space-y-3 *:rounded-md *:border *:p-4"
                     required
                   >
                     <Label
-                      htmlFor="card"
+                      htmlFor="now"
                       role="button"
                       className="has-data-[state=checked]:dark:border-primary/50 has-data-[state=checked]:bg-accent has-data-[state=checked]:border-primary hover:bg-accent/50 cursor-pointer"
                     >
                       <RadioGroupItem
-                        value="debit card"
-                        id="card"
+                        value="now"
+                        id="now"
                         className="hidden"
                       />
-                      <div className="text-base font-semibold">Debit Card / Credit Card</div>
+                      <div className="text-base font-semibold">Pay Now</div>
                       <p className="text-muted-foreground leading-normal">
-                        By selecting this payment method, you don't need to prepay for your stay. Receive your booking confirmation at the email you
-                        provided during the booking process and show it at check-in.
+                        By selecting this payment method, you will be directed to make a payment. You can choose the type of payment you want based on
+                        the available options.
                       </p>
                     </Label>
                     <Label
-                      htmlFor="check-in"
+                      htmlFor="later"
                       role="button"
                       className="has-data-[state=checked]:dark:border-primary/50 has-data-[state=checked]:bg-accent has-data-[state=checked]:border-primary hover:bg-accent/50 cursor-pointer"
                     >
                       <RadioGroupItem
-                        value="other"
-                        id="check-in"
+                        value="later"
+                        id="later"
                         className="hidden"
                       />
                       <div className="text-base font-semibold">Pay at Check-in</div>
                       <p className="text-muted-foreground leading-normal">
-                        By selecting this payment method, you don't need to prepay for your stay. Receive your booking confirmation at the email you
-                        provided during the booking process and show it at check-in.
+                        By selecting this payment method, you don't need to prepay for your stay.
                       </p>
                     </Label>
                   </RadioGroup>

@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\Rooms;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RoomTypeRequest extends FormRequest
 {
@@ -36,7 +39,7 @@ class RoomTypeRequest extends FormRequest
             "facilities" => ["nullable", "array"],
             "facilities.*" => ["nullable", "string", "exists:facilities,id"],
             "images" => ["nullable", "array"],
-            "images.*" => ["nullable", "image", "max:5120"],
+            "images.*" => ["nullable", "image", "mimes:jpeg,png,jpg,webp", "max:5120"],
         ];
     }
 
@@ -67,6 +70,7 @@ class RoomTypeRequest extends FormRequest
             "facilities.*.exists" => "Fasilitas tipe kamar tidak ditemukan.",
             "images.array" => "Gambar tipe kamar harus berupa array.",
             "images.*.image" => "Gambar tipe kamar harus berupa gambar.",
+            "images.*.mimes" => "Gambar tipe kamar harus berupa gambar (jpeg, png, jpg, webp).",
             "images.*.max" => "Gambar tipe kamar maksimal 5MB.",
         ];
     }

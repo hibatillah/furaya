@@ -19,13 +19,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('dashboard')
             ->middleware('role:admin,manager,employee');
 
-        /** reservation transaction history for managers and employees */
-        Route::get("reservasi/{id}/transaksi", [
-            ReservationTransactionController::class,
-            "index"
-        ])
-            ->name("reservation.transaction")
-            ->middleware("role:manager,employee");
+        /** reservation routes for managers and employees */
+        Route::middleware("role:manager,employee")->group(function () {
+            // reservation transaction history for managers and employees
+            Route::get("reservasi/{id}/transaksi", [
+                ReservationTransactionController::class,
+                "index"
+            ])
+                ->name("reservation.transaction");
+
+            // add other reservation routes for managers and employees
+            Route::resource("reservasi", ReservationController::class)
+                ->only(["index", "show"])
+                ->parameters(["reservasi" => "id"])
+                ->names([
+                    "index" => "reservation.index",
+                    "show" => "reservation.show",
+                ]);
+        });
 
         /** custom reservation routes*/
         Route::middleware("role:employee")->group(function () {
@@ -79,15 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('reservation.guest');
         });
 
-        /** add other reservation routes for managers and employees */
-        Route::resource("reservasi", ReservationController::class)
-            ->only(["index", "show"])
-            ->parameters(["reservasi" => "id"])
-            ->names([
-                "index" => "reservation.index",
-                "show" => "reservation.show",
-            ])
-            ->middleware("role:manager,employee");
+        /** update room status for admin and employee */
+        Route::put("kamar/{id}/status", [RoomController::class, "updateStatus"])
+            ->name("room.update.status")
+            ->middleware("role:admin,employee");
 
         /** guest resource routes for managers and admins */
         Route::resource("tamu", GuestController::class)
@@ -101,26 +107,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 "update" => "guest.update",
             ])
             ->middleware("role:manager,admin");
-
-        /** room resource routes for admin and employee */
-        Route::middleware("role:admin,employee")->group(function () {
-            //  crete room page
-            Route::get("kamar/tambah", [RoomController::class, "create"])
-                ->name("room.create");
-
-            // update room status
-            Route::put("kamar/{id}/status", [RoomController::class, "updateStatus"])
-                ->name("room.update.status");
-
-            //  show room page routes
-            Route::resource("/kamar", RoomController::class)
-                ->only(["index", "show"])
-                ->parameters(["kamar" => "id"])
-                ->names([
-                    "index" => "room.index",
-                    "show" => "room.show",
-                ]);
-        });
 
         require __DIR__ . '/roles/admins.php';
         require __DIR__ . '/roles/employees.php';

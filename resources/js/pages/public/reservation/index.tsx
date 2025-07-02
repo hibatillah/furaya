@@ -48,7 +48,7 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
               >
                 <CardHeader className="p-0">
                   <ImageContainer
-                    src=""
+                    src={roomType.formatted_images?.[0] ?? ""}
                     alt={roomType.name}
                     className="h-52 w-full"
                   />
