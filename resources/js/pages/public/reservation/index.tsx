@@ -2,6 +2,7 @@ import { ImageContainer } from "@/components/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import GuestLayout from "@/layouts/guest-layout";
 import { formatCurrency } from "@/lib/utils";
 import { dateConfig } from "@/static";
@@ -9,6 +10,7 @@ import { EMAIL_CONTACT, PHONE_CONTACT } from "@/static/contact";
 import { Head, router } from "@inertiajs/react";
 import { format } from "date-fns";
 import { MailIcon, Maximize2Icon, PhoneIcon, TriangleAlertIcon, UsersRoundIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function PublicReservationIndex(props: { roomTypes: RoomType.Default[]; startDate: string; endDate: string }) {
   const { roomTypes, startDate, endDate } = props;
@@ -28,13 +30,41 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
     });
   }
 
+  // handle manual loading page
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 500);
+  }, []);
+
+  if (loading) {
+    return (
+      <GuestLayout>
+        <Head title="Kamar Tersedia" />
+        <div className="container mx-auto space-y-5 lg:px-5 pb-10">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold">Kamar Tersedia</h1>
+            <p className="text-muted-foreground max-md:text-balance">
+              List kamar yang tersedia untuk tanggal {formatStartDate} - {formatEndDate}
+            </p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+            <Skeleton className="h-80 w-full" />
+            <Skeleton className="h-80 w-full" />
+          </div>
+        </div>
+      </GuestLayout>
+    );
+  }
+
   return (
     <GuestLayout>
       <Head title="Kamar Tersedia" />
-      <div className="container mx-auto space-y-5 px-5 pb-10">
+      <div className="container mx-auto space-y-5 pb-10 lg:px-5">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Kamar Tersedia</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground max-md:text-balance">
             List kamar yang tersedia untuk tanggal {formatStartDate} - {formatEndDate}
           </p>
         </div>

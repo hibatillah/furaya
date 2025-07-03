@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Publics;
 
 use App\Enums\GenderEnum;
+use App\Enums\ReservationStatusEnum;
 use App\Enums\ReservationTransactionEnum;
 use App\Enums\SmokingTypeEnum;
 use App\Http\Controllers\Controller;
@@ -268,8 +269,12 @@ class PublicReservationController extends Controller
         }
     }
 
-    public function history()
+    public function history(Request $request)
     {
+        $sort = $request->input('sort', 'desc');
+        $status = $request->input('status', 'all');
+        $search = $request->input('search', '');
+
         $user = Auth::user();
         $guest = $user->guest;
 
@@ -280,11 +285,21 @@ class PublicReservationController extends Controller
             ->whereHas("reservationGuest", function ($query) use ($guest) {
                 $query->where("guest_id", $guest->id);
             })
-            ->latest()
+            ->when($status !== 'all', function ($query) use ($status) {
+                $query->where("status", $status);
+            })
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where("booking_number", "like", "%$search%");
+            })
+            ->orderBy("created_at", $sort)
             ->get();
+
+        $reservationStatus = ReservationStatusEnum::getValues();
 
         return Inertia::render("public/reservation/history", [
             "reservations" => $reservations,
+            "sort" => $sort,
+            "status" => $reservationStatus,
         ]);
     }
 

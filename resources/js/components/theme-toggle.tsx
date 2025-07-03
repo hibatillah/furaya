@@ -10,7 +10,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
     <Button
       variant="ghost"
       size="icon"
-      className={cn("text-muted-foreground hover:text-foreground ml-auto size-8", className)}
+      className={cn("text-muted-foreground hover:text-foreground size-8", className)}
       onClick={() => updateAppearance(appearance === "dark" ? "light" : "dark")}
       aria-label="Toggle Theme"
     >

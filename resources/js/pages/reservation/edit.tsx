@@ -10,10 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
-import { MAX_LENGTH_OF_STAY, MIN_ADVANCE_AMOUNT, MIN_LENGTH_OF_STAY, MIN_PAX, reservationStatusBadgeColor } from "@/static/reservation";
+import {
+  BASE_BREAKFAST_RATE,
+  MAX_LENGTH_OF_STAY,
+  MIN_ADVANCE_AMOUNT,
+  MIN_LENGTH_OF_STAY,
+  MIN_PAX,
+  reservationStatusBadgeColor,
+} from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, useForm, usePage } from "@inertiajs/react";
 import { addDays, addYears, differenceInCalendarDays, format, isAfter, isSameDay } from "date-fns";
@@ -85,6 +93,7 @@ export default function ReservationsEdit(props: {
   const [selectedGuestType, setSelectedGuestType] = useState<string | undefined>(initialGuestType?.id);
   const [selectedNationality, setSelectedNationality] = useState<string | undefined>(initialNationality?.id);
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>(initialCountry?.id);
+  const [includeBreakfast, setIncludeBreakfast] = useState<boolean>(reservationData.include_breakfast || true);
 
   // define form
   const { data, setData, put, processing, errors } = useForm<Reservation.Update>({
@@ -116,7 +125,7 @@ export default function ReservationsEdit(props: {
     advance_remarks: reservationData.advance_remarks || "",
     advance_amount: reservationData.advance_amount || MIN_ADVANCE_AMOUNT,
     smoking_type: reservationData.smoking_type || ("" as Enum.SmokingType),
-    include_breakfast: reservationData.include_breakfast || false,
+    include_breakfast: reservationData.include_breakfast || includeBreakfast,
 
     // guest data
     name: reservation_guest?.name || "",
@@ -272,6 +281,19 @@ export default function ReservationsEdit(props: {
   );
 
   /**
+   * Calculate breakfast rate
+   * based on room capacity, length of stay, and include breakfast
+   * @returns number - breakfast rate
+   */
+  const breakfastRate = useMemo(() => {
+    const LoS = data.length_of_stay || 1;
+    const roomRate = data.room_rate || 0;
+    const breakfastRate = data.include_breakfast ? BASE_BREAKFAST_RATE * (selectedRoomNumber?.capacity || 0) * LoS : 0;
+
+    return breakfastRate;
+  }, [selectedRoomNumber, data.length_of_stay, data.include_breakfast]);
+
+  /**
    * Calculate total price
    * based on room rate, length of stay, discount percentage
    * @returns string - price in currency format
@@ -283,17 +305,17 @@ export default function ReservationsEdit(props: {
     }
 
     // calculate total price
-    const LoS = data.length_of_stay || 0;
-    const roomRate = selectedRoomNumber?.price || 0;
+    const LoS = data.length_of_stay || 1;
+    const roomRate = data.room_rate || 0;
     const discountPercentage = data.discount || 0;
 
-    const priceBeforeDiscount = roomRate * LoS;
+    const priceBeforeDiscount = roomRate * LoS + breakfastRate;
     const discount = priceBeforeDiscount * (discountPercentage / 100);
     const priceAfterDiscount = priceBeforeDiscount - discount;
 
     setData("total_price", priceAfterDiscount);
     return formatCurrency(priceAfterDiscount);
-  }, [selectedRoomNumber, data.length_of_stay, data.discount]);
+  }, [selectedRoomNumber, data.length_of_stay, data.discount, data.include_breakfast]);
 
   // handle update reservation
   function handleUpdateReservation(e: React.FormEvent) {
@@ -964,6 +986,38 @@ export default function ReservationsEdit(props: {
                 disableHandle
               />
               <InputError message={errors.children} />
+            </div>
+
+            {/* include breakfast */}
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="include_breakfast"
+                required
+              >
+                Breakfast
+              </Label>
+              <Button
+                variant="outline"
+                asChild
+              >
+                <Label
+                  htmlFor="include_breakfast"
+                  className="bg-accent ms-auto w-full"
+                >
+                  <span>Include Breakfast</span>
+                  <span className="text-muted-foreground">{selectedRoomNumber ? `- ${selectedRoomNumber.capacity} tamu` : ""}</span>
+                  <Switch
+                    id="include_breakfast"
+                    checked={includeBreakfast}
+                    onCheckedChange={(value) => {
+                      setIncludeBreakfast(value);
+                      setData("include_breakfast", value);
+                    }}
+                    className="ms-auto"
+                  />
+                </Label>
+              </Button>
+              <InputError message={errors.include_breakfast} />
             </div>
           </CardContent>
         </Card>

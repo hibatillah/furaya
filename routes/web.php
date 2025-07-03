@@ -19,25 +19,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('dashboard')
             ->middleware('role:admin,manager,employee');
 
-        /** reservation routes for managers and employees */
-        Route::middleware("role:manager,employee")->group(function () {
-            // reservation transaction history for managers and employees
-            Route::get("reservasi/{id}/transaksi", [
-                ReservationTransactionController::class,
-                "index"
-            ])
-                ->name("reservation.transaction");
-
-            // add other reservation routes for managers and employees
-            Route::resource("reservasi", ReservationController::class)
-                ->only(["index", "show"])
-                ->parameters(["reservasi" => "id"])
-                ->names([
-                    "index" => "reservation.index",
-                    "show" => "reservation.show",
-                ]);
-        });
-
         /** custom reservation routes*/
         Route::middleware("role:employee")->group(function () {
             // update reservation status
@@ -88,6 +69,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'getGuest'
             ])
                 ->name('reservation.guest');
+        });
+
+        /** reservation routes for managers and employees */
+        Route::middleware("role:manager,employee")->group(function () {
+            // reservation transaction history for managers and employees
+            Route::get("reservasi/{id}/transaksi", [
+                ReservationTransactionController::class,
+                "index"
+            ])
+                ->name("reservation.transaction");
+
+            // add other reservation routes for managers and employees
+            Route::resource("reservasi", ReservationController::class)
+                ->only(["index", "show"])
+                ->parameters(["reservasi" => "id"])
+                ->names([
+                    "index" => "reservation.index",
+                    "show" => "reservation.show",
+                ]);
         });
 
         /** update room status for admin and employee */

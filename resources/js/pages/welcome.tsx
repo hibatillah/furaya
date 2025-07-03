@@ -9,9 +9,7 @@ export default function Welcome() {
   return (
     <GuestLayout>
       <Head title="Hotel Furaya, Pekanbaru" />
-      <div className="flex h-[70vh] items-center justify-center gap-5">
-        <h1 className="text-2xl font-bold">Selamat Datang, {username}</h1>
-      </div>
+      <div className="flex items-center justify-center gap-5 lg:h-[70vh]"></div>
     </GuestLayout>
   );
 }

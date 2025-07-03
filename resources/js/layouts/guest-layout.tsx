@@ -58,12 +58,12 @@ function BookCard({ className }: { className?: string }) {
   }
 
   return (
-    <Card className={cn("mx-auto w-fit flex-row gap-8 p-4 ps-5", className)}>
+    <Card className={cn("mx-auto w-fit p-4 ps-5 max-md:w-full lg:flex-row lg:gap-8", className)}>
       <CardHeader className="justify-center p-0">
         <CardTitle>Book Online</CardTitle>
         <CardDescription>Guaranteed Accommodation</CardDescription>
       </CardHeader>
-      <CardContent className="relative flex flex-row items-end gap-3 p-0">
+      <CardContent className="relative grid grid-cols-2 lg:flex items-end gap-x-4 gap-y-3 p-0 lg:flex-row">
         {/* date picker component */}
         <Popover>
           {/* start date */}
@@ -77,7 +77,7 @@ function BookCard({ className }: { className?: string }) {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="bg-accent w-36 justify-between gap-4"
+                className="bg-accent w-36 justify-between gap-4 max-lg:w-full"
               >
                 {date?.from ? format(date.from, "PP", dateConfig) : "Pick a date"}
                 <CalendarIcon className="text-primary" />
@@ -96,7 +96,7 @@ function BookCard({ className }: { className?: string }) {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="bg-accent w-36 justify-between gap-4"
+                className="bg-accent w-36 justify-between gap-4 max-lg:w-full"
               >
                 {date?.to ? format(date.to, "PP", dateConfig) : "Pick a date"}
                 <CalendarIcon className="text-primary" />
@@ -125,7 +125,7 @@ function BookCard({ className }: { className?: string }) {
         </Popover>
 
         {/* pax */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 max-sm:col-span-full">
           <Label
             htmlFor="pax"
             className="text-xs"
@@ -136,7 +136,7 @@ function BookCard({ className }: { className?: string }) {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="bg-accent"
+                className="bg-accent max-lg:justify-between"
               >
                 {pax.adults} Adults, {pax.children} Children
                 <UserRoundIcon className="text-primary" />
@@ -190,7 +190,7 @@ function BookCard({ className }: { className?: string }) {
         </div>
 
         {/* code */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 max-sm:col-span-full">
           <Label
             htmlFor="room_type"
             className="text-xs"
@@ -201,7 +201,7 @@ function BookCard({ className }: { className?: string }) {
             <Input
               type="text"
               placeholder="Enter your code"
-              className="w-40 pe-9"
+              className="w-full lg:w-40 pe-9"
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
             />
@@ -212,7 +212,7 @@ function BookCard({ className }: { className?: string }) {
         </div>
 
         {/* submit */}
-        <Button onClick={handleDateReservation}>Book Now</Button>
+        <Button onClick={handleDateReservation} className="max-lg:col-span-full">Book Now</Button>
       </CardContent>
     </Card>
   );
@@ -294,14 +294,14 @@ function Header() {
 
   return (
     <header className="bg-background/5 border-border sticky top-0 z-10 w-full border-b backdrop-blur-md dark:backdrop-blur-xl">
-      <div className="container mx-auto flex items-center justify-between gap-5 px-4 py-2">
+      <div className="container mx-auto flex items-center gap-0.5 px-4 py-2">
         <Link
           href={route("home")}
-          className="text-foreground/80 tracking-wide uppercase"
+          className="text-foreground/80 me-auto tracking-wide uppercase"
         >
           Hotel Furaya
         </Link>
-        <nav className="flex items-center gap-0.5">
+        <nav className="flex items-center gap-0.5 max-lg:hidden">
           {menu.map((item) => (
             <Button
               key={item}
@@ -313,9 +313,9 @@ function Header() {
               {item}
             </Button>
           ))}
-          <ThemeToggle />
-          <Profile />
         </nav>
+        <ThemeToggle />
+        <Profile />
       </div>
     </header>
   );

@@ -71,6 +71,7 @@ export default function PublicRegister({
       <DialogContent
         className="grid md:w-200 md:!max-w-none md:grid-cols-2 md:gap-x-8 md:gap-y-5"
         tabIndex={-1}
+        forceMount
         noClose
       >
         <form

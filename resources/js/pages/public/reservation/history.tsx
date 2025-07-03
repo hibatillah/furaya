@@ -1,33 +1,120 @@
 import { ImageContainer } from "@/components/image";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import GuestLayout from "@/layouts/guest-layout";
 import { cn, formatCurrency } from "@/lib/utils";
 import { reservationStatusBadgeColor } from "@/static/reservation";
-import { Head } from "@inertiajs/react";
-import { CalendarX2Icon, SearchIcon } from "lucide-react";
+import { Head, router } from "@inertiajs/react";
+import { CalendarX2Icon, MoveDownIcon, MoveUpIcon, SearchIcon } from "lucide-react";
+import { useState } from "react";
 
-export default function ReservationHistory({ reservations }: { reservations: Reservation.Default[] }) {
+export default function ReservationHistory({
+  reservations,
+  sort,
+  status,
+}: {
+  reservations: Reservation.Default[];
+  sort: "asc" | "desc";
+  status: Enum.ReservationStatus[];
+}) {
+  const [selectedStatus, setSelectedStatus] = useState<Enum.ReservationStatus>("all" as Enum.ReservationStatus);
+  const [search, setSearch] = useState<string>("");
+
+  function handleReservationFilter({ status, sort, search }: { status: Enum.ReservationStatus; sort: "asc" | "desc"; search: string }) {
+    setSelectedStatus(status);
+
+    router.get(
+      route("public.reservation.history"),
+      {
+        status,
+        sort,
+        search,
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+      },
+    );
+  }
+
   return (
     <GuestLayout bookCard={false}>
       <Head title="Riwayat Reservasi" />
 
-      <div className="container mx-auto space-y-4 p-4">
-        <div className="flex max-lg:flex-col lg:items-end justify-between gap-5">
+      <div className="container mx-auto space-y-4 lg:p-4">
+        <div className="flex justify-between gap-5 max-lg:flex-col lg:items-end">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">Riwayat Reservasi</h1>
             <p className="text-muted-foreground">Lihat riwayat reservasi Anda di sini.</p>
           </div>
 
-          <div className="relative">
-            <Input
-              type="search"
-              placeholder="Cari reservasi"
-              className="w-full lg:w-80 pe-8 not-dark:bg-white"
-            />
-            <div className="pointer-events-none absolute inset-y-0 end-3 flex items-center select-none">
-              <SearchIcon className="text-foreground size-4" />
+          <div className="grid grid-cols-2 lg:flex lg:items-center gap-3">
+            {/* status */}
+            <Select
+              value={selectedStatus}
+              onValueChange={(value) => {
+                handleReservationFilter({
+                  status: value as Enum.ReservationStatus,
+                  sort,
+                  search,
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Status Reservasi">
+                  <span className="me-1 capitalize">{selectedStatus === ("all" as Enum.ReservationStatus) ? "Semua Status" : selectedStatus}</span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Status</SelectItem>
+                {status.map((status) => (
+                  <SelectItem
+                    key={status}
+                    value={status}
+                    className="capitalize"
+                  >
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* sort */}
+            <Button
+              variant="outline"
+              className="bg-accent gap-1.5 !ps-2.5"
+              onClick={() => {
+                handleReservationFilter({
+                  status: selectedStatus,
+                  sort: sort === "asc" ? "desc" : "asc",
+                  search,
+                });
+              }}
+            >
+              {sort === "desc" ? <MoveUpIcon /> : <MoveDownIcon />}
+              {sort === "desc" ? "Terbaru" : "Terlama"}
+            </Button>
+
+            {/* input search */}
+            <div className="relative max-lg:col-span-full max-lg:row-start-1">
+              <Input
+                type="search"
+                placeholder="Cari booking number reservasi"
+                className="w-full pe-8 not-dark:bg-white lg:w-64"
+                onChange={(e) => {
+                  handleReservationFilter({
+                    status: selectedStatus,
+                    sort,
+                    search: e.target.value,
+                  });
+                }}
+              />
+              <div className="pointer-events-none absolute inset-y-0 end-3 flex items-center select-none">
+                <SearchIcon className="text-foreground size-4" />
+              </div>
             </div>
           </div>
         </div>
@@ -41,7 +128,7 @@ export default function ReservationHistory({ reservations }: { reservations: Res
               >
                 <div className="relative flex flex-col gap-5">
                   <CardHeader className="flex flex-row items-center gap-3">
-                    <CardTitle className="text-card-foreground/90 font-light">{reservation.booking_number}</CardTitle>
+                    <CardTitle className="text-card-foreground/90 font-normal max-lg:text-lg">{reservation.booking_number}</CardTitle>
                     <Badge
                       variant="outline"
                       className={cn("capitalize", reservationStatusBadgeColor[reservation.status])}
@@ -78,7 +165,7 @@ export default function ReservationHistory({ reservations }: { reservations: Res
                 <ImageContainer
                   src={reservation.reservation_room?.room_type?.formatted_images?.[0] ?? ""}
                   alt={reservation.reservation_room?.room_type_name ?? ""}
-                  className="size-60 max-lg:mx-auto max-lg:mb-2 lg:me-8 lg:size-44"
+                  className="max-lg:w-72 max-lg:h-40 max-lg:mx-auto max-lg:mb-2 lg:me-8 lg:size-44"
                 />
               </Card>
             ))

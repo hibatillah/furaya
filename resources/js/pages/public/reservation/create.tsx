@@ -159,6 +159,13 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
           id: "create-reservation",
         });
 
+        // return if use later payment
+        if (selectedPayment === "later") {
+          router.visit(route("public.reservation.history"));
+          return;
+        }
+
+        // show payment snap window
         try {
           toast.info("Memproses pembayaran", { id: "process-payment" });
 
@@ -395,19 +402,19 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
   return (
     <GuestLayout>
       <Head title="Reservasi Kamar" />
-      <div className="container mx-auto space-y-5 px-5 pb-10">
+      <div className="container mx-auto space-y-5 pb-10 lg:px-5">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Reservasi Kamar</h1>
         </div>
 
-        <div className="relative grid gap-5 lg:grid-cols-[1fr_auto]">
+        <div className="relative grid grid-cols-1 gap-5 lg:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-5">
             {/* room details */}
             <Card className="gap-2">
-              <CardContent className="grid grid-cols-[auto_1fr] gap-5">
+              <CardContent className="grid grid-cols-1 gap-5 lg:grid-cols-[auto_1fr]">
                 <ImageContainer
                   src={roomType.formatted_images?.[0] ?? ""}
-                  className="size-40"
+                  className="h-40 w-full lg:size-40"
                 />
 
                 <div className="flex flex-col gap-2">
@@ -415,7 +422,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     <div className="space-y-1">
                       <h3 className="text-lg font-semibold">{roomType.name} Room</h3>
 
-                      <div className="grid grid-flow-col grid-cols-[repeat(2,max-content)] grid-rows-3 gap-x-8 gap-y-1">
+                      <div className="grid grid-cols-1 grid-rows-3 gap-x-8 gap-y-1 lg:grid-flow-col lg:grid-cols-[repeat(2,max-content)]">
                         {/* capacity */}
                         <div className="flex items-center gap-2">
                           <UsersRoundIcon className="text-primary size-4" />
