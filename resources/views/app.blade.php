@@ -34,8 +34,7 @@
             [
                 'resources/js/app.tsx',
                 "resources/js/pages/{$page['component']}.tsx"
-            ],
-            app()->isProduction() ? env('VITE_ASSET_URL') : null
+            ]
         )
         @inertiaHead
     </head>

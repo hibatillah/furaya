@@ -35,7 +35,7 @@ Route::put("/reservasi/pembayaran/{id}", [
   "payment"
 ])->name("public.reservation.payment");
 
-Route::middleware("role:guest")->group(function () {
+Route::middleware(["auth", "role:guest"])->group(function () {
   // show reservation history
   Route::get("/reservasi/riwayat", [
     PublicReservationController::class,
