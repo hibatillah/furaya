@@ -96,6 +96,14 @@ class RoomController extends Controller
                     folder: 'rooms'
                 );
 
+                // store room layout
+                $roomLayout = request()->file('room_layout');
+                $layoutPath = Helper::storeImage(
+                    files: $roomLayout ? [$roomLayout] : [],
+                    prefix: $validated['room_number'],
+                    folder: 'rooms'
+                );
+
                 // create room
                 $room = Room::create([
                     ...Arr::except($validated, ["facilities"]),
@@ -103,6 +111,7 @@ class RoomController extends Controller
                         ...$roomType->images,
                         ...$imagePaths,
                     ],
+                    "room_layout" => $layoutPath[0] ?? null,
                 ]);
 
                 if (count($facilities) > 0) {
@@ -221,14 +230,22 @@ class RoomController extends Controller
                 $roomFacilities
             ) {
                 $roomType = RoomType::findOrFail($validated['room_type_id']);
-                $oldImages = array_filter($room->images, function ($image) {
-                    return str_starts_with($image, 'rooms/');
-                });
+
+                $images = is_array($room->images) ? $room->images : [];
+                $oldImages = array_filter($images, fn($image) => str_starts_with($image, 'rooms/'));
 
                 // update room images
                 $imagePaths = Helper::updateImage(
                     newFiles: request()->file('images') ?? [],
                     oldFiles: $oldImages,
+                    prefix: $validated['room_number'],
+                    folder: 'rooms'
+                );
+
+                // update room layout
+                $roomLayout = request()->file('room_layout');
+                $layoutPath = Helper::storeImage(
+                    files: $roomLayout ? [$roomLayout] : [],
                     prefix: $validated['room_number'],
                     folder: 'rooms'
                 );
@@ -240,10 +257,11 @@ class RoomController extends Controller
                         ...$roomType->images,
                         ...$imagePaths,
                     ],
+                    "room_layout" => $layoutPath[0] ?? null,
                 ]);
 
                 // update room facility
-                $facilities = $validated['facilities'];
+                $facilities = $validated['facilities'] ?? [];
 
                 if (count($facilities) > 0) {
                     // delete room facility if not exists in updated facilities
@@ -277,12 +295,14 @@ class RoomController extends Controller
                 ->route("room.show", ["id" => $id])
                 ->with("success", "Kamar berhasil diperbarui");
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
-                "message" => "Terjadi kesalahan menghapus kamar.",
+                "message" => "Terjadi kesalahan memperbarui kamar.",
             ]);
         }
     }
@@ -303,15 +323,22 @@ class RoomController extends Controller
                 }
             }
 
+            // delete room layout
+            if ($room->room_layout) {
+                Helper::deleteImage($room->room_layout);
+            }
+
             // delete room
             $room->delete();
 
             return redirect()->back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return redirect()->back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return redirect()->back()->withErrors([
                 "message" => "Terjadi kesalahan mengubah status kamar.",
             ]);
@@ -337,10 +364,12 @@ class RoomController extends Controller
 
             return back();
         } catch (ModelNotFoundException $e) {
+            report($e);
             return back()->withErrors([
                 "message" => "Kamar tidak ditemukan",
             ]);
         } catch (\Exception $e) {
+            report($e);
             return back()->withErrors([
                 "message" => "Terjadi kesalahan mengubah status kamar.",
             ]);

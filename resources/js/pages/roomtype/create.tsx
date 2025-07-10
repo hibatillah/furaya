@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiselect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import UploadFile from "@/components/upload-file";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,6 +40,21 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
       label: facility.name,
     }));
   }, [facilities]);
+
+  // handle file upload
+  const [fileUploadState, fileUploadActions] = useFileUpload({
+    accept: "image/*",
+    maxSize: 5 * 1024 * 1024,
+    multiple: true,
+    maxFiles: 6,
+  });
+
+  useEffect(() => {
+    setData(
+      "images",
+      fileUploadState.files.map((file) => file.file as File),
+    );
+  }, [fileUploadState.files]);
 
   // handle create room type
   function handleCreateRoomType(e: React.FormEvent) {
@@ -77,7 +94,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3"
           >
             {/* code */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label
                 htmlFor="code"
                 required
@@ -97,7 +114,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             </div>
 
             {/* name */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label
                 htmlFor="name"
                 required
@@ -117,7 +134,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             </div>
 
             {/* rate type */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label
                 htmlFor="rate_type_id"
                 required
@@ -156,7 +173,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             </div>
 
             {/* base rate */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label
                 htmlFor="base_rate"
                 required
@@ -185,7 +202,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             </div>
 
             {/* bed type */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label
                 htmlFor="bed_type_id"
                 required
@@ -271,7 +288,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             </div>
 
             {/* facilities */}
-            <div className="grid gap-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="facilities">Fasilitas</Label>
               <Multiselect
                 label="Fasilitas"
@@ -289,19 +306,16 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
             </div>
 
             {/* images */}
-            <div className="flex flex-col gap-2 xl:col-start-3 xl:row-span-3 xl:row-start-1">
+            <div className="flex flex-col gap-2 xl:col-start-3 xl:row-span-4 xl:row-start-1">
               <Label
                 htmlFor="images"
                 required
               >
                 Gambar
               </Label>
-              <Input
-                id="images"
-                type="file"
-                placeholder="Input gambar"
-                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
-                accept="image/*"
+              <UploadFile
+                options={fileUploadState}
+                actions={fileUploadActions}
                 multiple
               />
               <InputError message={errors.images} />

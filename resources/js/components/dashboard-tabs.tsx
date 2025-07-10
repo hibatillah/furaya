@@ -52,6 +52,7 @@ export default function DashboardTabs(props: { data: DashboardTabsData[]; classN
         <TabsContent
           key={index}
           value={`tab-${index + 1}`}
+          className="w-full"
         >
           {item.content}
         </TabsContent>

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 import { isAfter, set } from "date-fns";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
   });
 
   const canCheckIn = isAfter(new Date(), initialDate);
+  const isPending = reservation.status_acc === "pending";
 
   // declare form
   const [date, setDate] = useState<Date>(initialDate);
@@ -101,13 +102,18 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
     <>
       <DialogHeader>
         <DialogTitle>Check In Reservasi</DialogTitle>
-        {canCheckIn ? (
+        {canCheckIn && !isPending ? (
           <>
             <DialogDescription className="mt-2">
               <DataList data={dataList} />
             </DialogDescription>
             <Separator className="my-1" />
           </>
+        ) : isPending ? (
+          <Alert>
+            <AlertTitle>Lengkapi Data Reservasi</AlertTitle>
+            <AlertDescription>Check-in dapat dilakukan setelah data reservasi lengkap.</AlertDescription>
+          </Alert>
         ) : (
           <Alert>
             <AlertTitle>Belum Waktu Check In</AlertTitle>
@@ -121,7 +127,12 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
       >
         {/* date */}
         <div className="grid gap-2">
-          <Label htmlFor="date" required>Tanggal</Label>
+          <Label
+            htmlFor="date"
+            required
+          >
+            Tanggal
+          </Label>
           <InputDate
             mode="single"
             value={date}
@@ -131,28 +142,41 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
               before: new Date(reservation.start_date),
               after: new Date(reservation.end_date as Date),
             }}
+            disabled={isPending}
           />
           <InputError message={errors.check_in_at} />
         </div>
 
         {/* time */}
         <div className="grid gap-2">
-          <Label htmlFor="time" required>Waktu</Label>
+          <Label
+            htmlFor="time"
+            required
+          >
+            Waktu
+          </Label>
           <InputTime
             id="time"
-            className="bg-inherit"
+            className="bg-accent"
             value={time}
             onChange={(e) => setTime(e.target.value)}
+            disabled={isPending}
             required
           />
         </div>
 
         {/* room status */}
         <div className="col-span-2 grid gap-2">
-          <Label htmlFor="time" required>Status Kamar</Label>
+          <Label
+            htmlFor="time"
+            required
+          >
+            Status Kamar
+          </Label>
           <Select
             value={data.room_status}
             onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
+            disabled={isPending}
             required
           >
             <SelectTrigger id="room_status">
@@ -177,32 +201,50 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
 
         {/* notes */}
         <div className="col-span-2 grid gap-2">
-          <Label htmlFor="notes" optional>Catatan</Label>
+          <Label
+            htmlFor="notes"
+            optional
+          >
+            Catatan
+          </Label>
           <Textarea
             id="notes"
             value={data.notes}
             onChange={(e) => setData("notes", e.target.value)}
             placeholder="Tambah catatan"
             className="min-h-24"
+            disabled={isPending}
           />
           <InputError message={errors.notes} />
         </div>
 
         {/* submit button */}
         <div className="col-span-2 grid gap-3 lg:grid-cols-2">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={onClose}
-          >
-            Batal
-          </Button>
-          <Button
-            type="submit"
-            disabled={processing}
-          >
-            Submit Check In
-          </Button>
+          {!isPending ? (
+            <>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onClose}
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={processing}
+              >
+                Submit Check In
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              className="col-span-full"
+              asChild
+            >
+              <Link href={route("reservation.edit", { id: reservation.id })}>Update Reservasi</Link>
+            </Button>
+          )}
         </div>
       </form>
     </>

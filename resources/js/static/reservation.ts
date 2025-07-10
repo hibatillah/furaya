@@ -6,13 +6,7 @@ export const MIN_ADVANCE_AMOUNT = 100_000;
 export const MIN_PAX = 1;
 export const BASE_BREAKFAST_RATE = 70_000;
 
-export const bookingTypeBadgeColor = [
-  "direct",
-  "online",
-  "walk in",
-  "travel",
-  "other",
-].reduce(
+export const bookingTypeBadgeColor = ["direct", "online", "walk in", "travel", "other"].reduce(
   (acc, bookingType, index) => {
     acc[bookingType as Enum.BookingType] = badgeColor[index];
 
@@ -49,14 +43,7 @@ export const roomPackageBadgeColor = [
   {} as Record<Enum.RoomPackage, string>,
 );
 
-export const visitPurposeBadgeColor = [
-  "vacation",
-  "business",
-  "study",
-  "family",
-  "seminar",
-  "other",
-].reduce(
+export const visitPurposeBadgeColor = ["vacation", "business", "study", "family", "seminar", "other"].reduce(
   (acc, visitPurpose, index) => {
     acc[visitPurpose as Enum.VisitPurpose] = badgeColor[index];
 
@@ -93,27 +80,27 @@ export const paymentMethodBadgeColor = [
   {} as Record<Enum.Payment, string>,
 );
 
-export const reservationStatusBadgeColor = [
-  "pending",
-  "booked",
-  "checked in",
-  "checked out",
-  "no show",
-  "cancelled",
-  "overdue",
-].reduce((acc, reservationStatus, index) => {
-  acc[reservationStatus as Enum.ReservationStatus] = badgeColor[index];
+export const reservationStatusBadgeColor = ["pending", "booked", "checked in", "checked out", "no show", "cancelled", "overdue"].reduce(
+  (acc, reservationStatus, index) => {
+    acc[reservationStatus as Enum.ReservationStatus] = badgeColor[index];
 
-  // set other badge color
-  if (reservationStatus === "other") {
-    acc[reservationStatus as Enum.ReservationStatus] = badgeColor[-1];
-  }
+    // set other badge color
+    if (reservationStatus === "other") {
+      acc[reservationStatus as Enum.ReservationStatus] = badgeColor[-1];
+    }
 
-  return acc;
-}, {} as Record<Enum.ReservationStatus, string>);
+    return acc;
+  },
+  {} as Record<Enum.ReservationStatus, string>,
+);
 
 export const statusAccBadgeColor = {
   approved: "bg-green-200 border-green-400 text-green-950 dark:bg-green-950 dark:border-green-900 dark:text-green-100",
   pending: "bg-yellow-200 border-yellow-400 text-yellow-950 dark:bg-yellow-950 dark:border-yellow-900 dark:text-yellow-100",
   rejected: "bg-red-200 border-red-400 text-red-950 dark:bg-red-950 dark:border-red-900 dark:text-red-100",
 } as Record<Enum.StatusAcc, string>;
+
+export const transactionStatusBadgeColor = {
+  unpaid: badgeColor[4],
+  settlement: badgeColor[2],
+} as Record<string, string>;

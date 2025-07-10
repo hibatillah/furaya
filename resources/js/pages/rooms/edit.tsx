@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiselect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import UploadFile from "@/components/upload-file";
+import { FileMetadata, useFileUpload } from "@/hooks/use-file-upload";
 import AppLayout from "@/layouts/app-layout";
-import { formatCurrency } from "@/lib/utils";
+import { fetchImageMetadata, formatCurrency } from "@/lib/utils";
 import { roomStatusOptions } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
@@ -65,7 +67,8 @@ export default function RoomsEdit(props: {
   const { data, setData, post, processing, errors } = useForm<Room.Update>({
     ...rest,
     status: Object.entries(roomStatusOptions).find(([_, value]) => value === room.status)?.[0] as Enum.RoomStatus,
-    facilities: initialFacilities.map((item) => item.value),
+    facilities: initialFacilities.length > 0 ? initialFacilities.map((item) => item.value) : [],
+    room_layout: null,
   });
 
   // handle change room type
@@ -87,6 +90,76 @@ export default function RoomsEdit(props: {
       );
     }
   }, [selectedRoomType]);
+
+  // set initial images
+  const [initialImageMetadata, setInitialImageMetadata] = useState<FileMetadata[]>([]);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!room?.formatted_images) return;
+
+      const metadata = await fetchImageMetadata(room.formatted_images);
+      setInitialImageMetadata(metadata);
+      fileUploadActions.addFiles(metadata.map((item) => item.file as File));
+    };
+
+    loadImages();
+  }, [room?.formatted_images]);
+
+  // handle file upload
+  const [fileUploadState, fileUploadActions] = useFileUpload({
+    accept: "image/*",
+    maxSize: 5 * 1024 * 1024,
+    multiple: true,
+    maxFiles: 6,
+    initialFiles: initialImageMetadata.map((item) => ({
+      name: item.name,
+      size: item.size,
+      type: item.type,
+      url: item.url,
+      id: item.id,
+    })),
+  });
+
+  useEffect(() => {
+    setData(
+      "images",
+      fileUploadState.files.map((file) => file.file as File),
+    );
+  }, [fileUploadState.files]);
+
+  // set initial room layout
+  const [initialRoomLayoutMetadata, setInitialRoomLayoutMetadata] = useState<FileMetadata[]>([]);
+
+  useEffect(() => {
+    const loadRoomLayout = async () => {
+      if (!room?.formatted_room_layout_image) return;
+
+      const metadata = await fetchImageMetadata([room.formatted_room_layout_image]);
+      setInitialRoomLayoutMetadata(metadata);
+      layoutFileUploadActions.addFiles(metadata.map((item) => item.file as File));
+    };
+
+    loadRoomLayout();
+  }, [room?.formatted_room_layout_image]);
+
+  // handle room layout file upload
+  const [layoutFileUploadState, layoutFileUploadActions] = useFileUpload({
+    accept: "image/*",
+    maxSize: 5 * 1024 * 1024,
+    multiple: false,
+    initialFiles: initialRoomLayoutMetadata.map((item) => ({
+      name: item.name,
+      size: item.size,
+      type: item.type,
+      url: item.url,
+      id: item.id,
+    })),
+  });
+
+  useEffect(() => {
+    setData("room_layout", layoutFileUploadState.files[0]?.file as File);
+  }, [layoutFileUploadState.files]);
 
   // handle update room
   function handleUpdateRoom(e: React.FormEvent) {
@@ -475,27 +548,34 @@ export default function RoomsEdit(props: {
                 value={selectedFacilities}
                 onChange={(value) => {
                   setSelectedFacilities(value);
-                  setData(
-                    "facilities",
-                    value.map((item) => item.value),
-                  );
+                  setData("facilities", value.length > 0 ? value.map((item) => item.value) : []);
                 }}
               />
               <InputError message={errors.facilities} />
             </div>
 
-            {/* image */}
-            <div className="flex flex-col gap-2 xl:col-start-3 xl:row-span-6 xl:row-start-1">
-              <Label htmlFor="image">Gambar</Label>
-              <Input
-                id="image"
-                type="file"
-                placeholder="Gambar"
-                accept="image/*"
-                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
-                multiple
-              />
-              <InputError message={errors.images} />
+            <div className="space-y-6 xl:col-start-3 xl:row-span-7 xl:row-start-1">
+              {/* layout */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="room_layout">Denah Kamar</Label>
+                <UploadFile
+                  options={layoutFileUploadState}
+                  actions={layoutFileUploadActions}
+                />
+                <InputError message={errors.room_layout} />
+              </div>
+
+              {/* images */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="images">Gambar</Label>
+                <UploadFile
+                  options={fileUploadState}
+                  actions={fileUploadActions}
+                  multiple
+                />
+                <p className="text-muted-foreground text-sm">Gambar tipe kamar terpilih akan ditambahkan sebagai gambar kamar.</p>
+                <InputError message={errors.images} />
+              </div>
             </div>
 
             {/* submit */}

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import GuestLayout from "@/layouts/guest-layout";
 import { cn, formatCurrency } from "@/lib/utils";
-import { reservationStatusBadgeColor } from "@/static/reservation";
+import { reservationStatusBadgeColor, transactionStatusBadgeColor } from "@/static/reservation";
 import { Head, router } from "@inertiajs/react";
 import { CalendarX2Icon, MoveDownIcon, MoveUpIcon, SearchIcon } from "lucide-react";
 import { useState } from "react";
@@ -51,7 +51,7 @@ export default function ReservationHistory({
             <p className="text-muted-foreground">Lihat riwayat reservasi Anda di sini.</p>
           </div>
 
-          <div className="grid grid-cols-2 lg:flex lg:items-center gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:flex lg:items-center">
             {/* status */}
             <Select
               value={selectedStatus}
@@ -127,14 +127,33 @@ export default function ReservationHistory({
                 className="grid items-center gap-8 lg:grid-cols-[1fr_auto]"
               >
                 <div className="relative flex flex-col gap-5">
-                  <CardHeader className="flex flex-row items-center gap-3">
+                  <CardHeader className="flex flex-col gap-3">
                     <CardTitle className="text-card-foreground/90 font-normal max-lg:text-lg">{reservation.booking_number}</CardTitle>
-                    <Badge
-                      variant="outline"
-                      className={cn("capitalize", reservationStatusBadgeColor[reservation.status])}
-                    >
-                      {reservation.status}
-                    </Badge>
+
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={cn("capitalize", reservationStatusBadgeColor[reservation.status])}
+                      >
+                        {reservation.status}
+                      </Badge>
+
+                      <Badge
+                        variant="outline"
+                        className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status ?? ""])}
+                      >
+                        {reservation.transaction_status}
+                      </Badge>
+
+                      {reservation.payment_type && (
+                        <Badge
+                          variant="outline"
+                          className="capitalize"
+                        >
+                          {reservation.payment_type}
+                        </Badge>
+                      )}
+                    </div>
                   </CardHeader>
 
                   <CardContent className="grid items-end gap-2">
@@ -165,7 +184,7 @@ export default function ReservationHistory({
                 <ImageContainer
                   src={reservation.reservation_room?.room_type?.formatted_images?.[0] ?? ""}
                   alt={reservation.reservation_room?.room_type_name ?? ""}
-                  className="max-lg:w-72 max-lg:h-40 max-lg:mx-auto max-lg:mb-2 lg:me-8 lg:size-44"
+                  className="max-lg:mx-auto max-lg:mb-2 max-lg:h-40 max-lg:w-72 lg:me-8 lg:size-44"
                 />
               </Card>
             ))

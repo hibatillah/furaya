@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { bookingTypeBadgeColor, reservationStatusBadgeColor, statusAccBadgeColor } from "@/static/reservation";
+import { bookingTypeBadgeColor, reservationStatusBadgeColor, transactionStatusBadgeColor } from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -135,22 +135,23 @@ export default function ReservationsIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
-      id: "status_acc",
-      accessorKey: "status_acc",
-      header: "Status Acc",
+      id: "transaction_status",
+      accessorKey: "transaction_status",
+      header: "Payment Status",
       cell: ({ row }) => {
-        const statusAcc = row.getValue("status_acc") as Enum.StatusAcc;
+        const transactionStatus = row.getValue("transaction_status") as string;
 
-        return (
+        return !transactionStatus ? (
+          "-"
+        ) : (
           <Badge
             variant="outline"
-            className={cn("capitalize", statusAccBadgeColor[statusAcc])}
+            className={cn("capitalize", transactionStatusBadgeColor[transactionStatus])}
           >
-            {statusAcc}
+            {transactionStatus}
           </Badge>
         );
       },
-      filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
       id: "actions",
@@ -258,7 +259,7 @@ export default function ReservationsIndex(props: {
                 >
                   <Label
                     htmlFor="is_pending"
-                    className="ms-auto px-3"
+                    className="ms-auto hidden px-3" // currently not used
                   >
                     <span className="text-primary text-sm font-medium">{count_pending_reservation}</span>
                     <span>Pending Reservasi</span>
@@ -272,8 +273,13 @@ export default function ReservationsIndex(props: {
                     />
                   </Label>
                 </Button>
+
+                {/* create reservation for employee */}
                 {isEmployee && (
-                  <Button asChild>
+                  <Button
+                    className="ms-auto"
+                    asChild
+                  >
                     <Link href={route("reservation.create")}>Tambah Reservasi</Link>
                   </Button>
                 )}

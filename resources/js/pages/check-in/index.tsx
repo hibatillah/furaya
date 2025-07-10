@@ -137,6 +137,7 @@ export default function CheckInIndex(props: {
       cell: ({ row }) => {
         const isCheckIn = row.original.check_in?.check_in_at;
         const isCheckOut = row.original.check_out?.check_out_at;
+        const isPending = row.original.status_acc === "pending";
 
         return (
           <DropdownMenu>

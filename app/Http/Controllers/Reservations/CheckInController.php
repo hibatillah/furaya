@@ -77,10 +77,6 @@ class CheckInController extends Controller
                 $query->where('end_date', '<=', $end_date);
             }
 
-            if ($type === 'upcoming') {
-                $query->where('status_acc', StatusAccEnum::APPROVED);
-            }
-
             // return the reservations query
             $reservations = $query
                 ->orderBy('start_date', 'asc')

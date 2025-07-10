@@ -39,7 +39,7 @@ class RoomTypeRequest extends FormRequest
             "facilities" => ["nullable", "array"],
             "facilities.*" => ["nullable", "string", "exists:facilities,id"],
             "images" => ["nullable", "array"],
-            "images.*" => ["nullable", "image", "mimes:jpeg,png,jpg,webp", "max:5120"],
+            "images.*" => ["nullable", "max:5120"],
         ];
     }
 

@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiselect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import UploadFile from "@/components/upload-file";
+import { FileMetadata, useFileUpload } from "@/hooks/use-file-upload";
 import AppLayout from "@/layouts/app-layout";
+import { fetchImageMetadata } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export default function RoomTypeEdit(props: {
@@ -56,9 +59,46 @@ export default function RoomTypeEdit(props: {
   // define form data
   const { data, setData, post, processing, errors } = useForm<RoomType.Update>({
     ...rest,
-    facilities: facility?.map((item) => item.id),
+    facilities: facility?.map((item) => item.id) || [],
     images: [],
   });
+
+  // set initial images
+  const [initialImageMetadata, setInitialImageMetadata] = useState<FileMetadata[]>([]);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (!roomType?.formatted_images) return;
+
+      const metadata = await fetchImageMetadata(roomType.formatted_images);
+      setInitialImageMetadata(metadata);
+      fileUploadActions.addFiles(metadata.map((item) => item.file as File));
+    };
+
+    loadImages();
+  }, [roomType?.formatted_images]);
+
+  // handle file upload
+  const [fileUploadState, fileUploadActions] = useFileUpload({
+    accept: "image/*",
+    maxSize: 5 * 1024 * 1024,
+    multiple: true,
+    maxFiles: 6,
+    initialFiles: initialImageMetadata.map((item) => ({
+      name: item.name,
+      size: item.size,
+      type: item.type,
+      url: item.url,
+      id: item.id,
+    })),
+  });
+
+  useEffect(() => {
+    setData(
+      "images",
+      fileUploadState.files.map((file) => file.file as File),
+    );
+  }, [fileUploadState.files]);
 
   // handle update room type data
   function handleUpdateRoomType(e: React.FormEvent) {
@@ -300,31 +340,25 @@ export default function RoomTypeEdit(props: {
                 value={selectedFacilities}
                 onChange={(value) => {
                   setSelectedFacilities(value);
-                  setData(
-                    "facilities",
-                    value.map((item) => item.value),
-                  );
+                  setData("facilities", value.length > 0 ? value.map((item) => item.value) : []);
                 }}
               />
               <InputError message={errors.facilities} />
             </div>
 
             {/* images */}
-            <div className="flex flex-col gap-2 xl:col-start-3 xl:row-span-3 xl:row-start-1">
+            <div className="flex flex-col gap-2 xl:col-start-3 xl:row-span-4 xl:row-start-1">
               <Label
                 htmlFor="images"
                 required
               >
                 Gambar
               </Label>
-              <Input
-                id="images"
-                type="file"
-                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
-                accept="image/*"
+              <UploadFile
+                options={fileUploadState}
+                actions={fileUploadActions}
                 multiple
               />
-
               <InputError message={errors.images} />
             </div>
 

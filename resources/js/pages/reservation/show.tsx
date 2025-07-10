@@ -28,10 +28,10 @@ import ConfirmPendingReservation from "./confirm";
 
 export default function ReservationsShow(props: { reservation: Reservation.Default; status: Enum.ReservationStatus[] }) {
   const { reservation, status } = props;
-  console.log(reservation);
 
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";
+  const isManager = auth.user.role === "manager";
   const isPending = reservation.status_acc === "pending";
 
   // handle dialog form
@@ -351,46 +351,48 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Data Reservasi</h1>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <span>Lainnya</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {isEmployee && isPending && <DropdownMenuItem onClick={() => setDialogOpen(true)}>Konfirmasi</DropdownMenuItem>}
-            {isEmployee && !isPending && (
-              <DropdownMenuItem asChild>
-                <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
-              </DropdownMenuItem>
-            )}
-            {isEmployee && !isPending && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuRadioGroup
-                      value={reservation.status}
-                      onValueChange={(value) => {
-                        handleUpdateReservationStatus(value as Enum.ReservationStatus);
-                      }}
-                    >
-                      {status.map((item) => (
-                        <DropdownMenuRadioItem
-                          value={item}
-                          className="capitalize"
-                        >
-                          {item}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {isManager && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <span>Lainnya</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isEmployee && isPending && <DropdownMenuItem onClick={() => setDialogOpen(true)}>Konfirmasi</DropdownMenuItem>}
+              {isEmployee && !isPending && (
+                <DropdownMenuItem asChild>
+                  <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
+                </DropdownMenuItem>
+              )}
+              {isEmployee && !isPending && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuRadioGroup
+                        value={reservation.status}
+                        onValueChange={(value) => {
+                          handleUpdateReservationStatus(value as Enum.ReservationStatus);
+                        }}
+                      >
+                        {status.map((item) => (
+                          <DropdownMenuRadioItem
+                            value={item}
+                            className="capitalize"
+                          >
+                            {item}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">

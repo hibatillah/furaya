@@ -61,7 +61,7 @@ return new class extends Migration
             $table->string("snap_token")->nullable();
             $table->string("payment_type")->nullable();
             $table->string("transaction_id")->nullable();
-            $table->string("transaction_status")->nullable();
+            $table->string("transaction_status")->default("unpaid");
             $table->string("transaction_time")->nullable();
             $table->string("transaction_bank")->nullable();
             $table->timestamp("canceled_at")->nullable();

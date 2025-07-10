@@ -60,6 +60,7 @@ return new class extends Migration
             $table->integer("capacity");
             $table->float("size", 4, 2);
             $table->enum("smoking_type", SmokingTypeEnum::getValues());
+            $table->string("room_layout")->nullable();
             $table->json("images")->nullable();
             $table->foreignUuid("rate_type_id")
                 ->nullable()

@@ -21,6 +21,7 @@ import {
   MIN_LENGTH_OF_STAY,
   MIN_PAX,
   reservationStatusBadgeColor,
+  transactionStatusBadgeColor,
 } from "@/static/reservation";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, useForm, usePage } from "@inertiajs/react";
@@ -378,7 +379,7 @@ export default function ReservationsEdit(props: {
         value: (
           <Badge
             variant="outline"
-            className="capitalize"
+            className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status ?? ""])}
           >
             {reservation.transaction_status}
           </Badge>
@@ -386,13 +387,15 @@ export default function ReservationsEdit(props: {
       },
       {
         label: "Metode Pembayaran",
-        value: (
+        value: reservation.payment_type ? (
           <Badge
             variant="outline"
             className="capitalize"
           >
             {reservation.payment_type}
           </Badge>
+        ) : (
+          "-"
         ),
       },
       {

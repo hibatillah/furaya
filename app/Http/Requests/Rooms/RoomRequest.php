@@ -49,6 +49,7 @@ class RoomRequest extends FormRequest
             'facilities.*' => ['nullable', 'string', Rule::exists("facilities", "id")],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'room_layout' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ];
     }
 
@@ -84,6 +85,9 @@ class RoomRequest extends FormRequest
             'images.array' => 'Gambar kamar harus berupa array.',
             'images.*.image' => 'Gambar kamar harus berupa gambar.',
             'images.*.max' => 'Gambar kamar maksimal 5MB.',
+            'room_layout.image' => 'Denah kamar harus berupa gambar.',
+            'room_layout.mimes' => 'Denah kamar harus berupa gambar.',
+            'room_layout.max' => 'Denah kamar maksimal 5MB.',
         ];
     }
 }

@@ -10,6 +10,7 @@ declare namespace Room {
     smoking_type: Enum.SmokingType;
     condition: Enum.RoomCondition;
     status: Enum.RoomStatus;
+    room_layout?: string;
     images?: string[];
     room_type_id?: string;
     room_type?: RoomType.Default;
@@ -23,18 +24,22 @@ declare namespace Room {
     facility?: RoomFacility.Default[];
     count_facility?: number;
     formatted_images?: string[];
+    image_files?: FileWithPreview[];
+    formatted_room_layout_image?: string;
   }
 
   interface Default extends Base, Addition {}
 
-  type Create = Omit<Base, "id" | "room_type" | "bed_type" | "rate_type" | "images"> & {
+  type Create = Omit<Base, "id" | "room_type" | "bed_type" | "rate_type" | "images" | "room_layout"> & {
     facilities: string[];
     images?: File[] | null;
+    room_layout?: File | null;
   };
 
-  type Update = Partial<Omit<Base, "room_type" | "bed_type" | "rate_type" | "images">> & {
+  type Update = Partial<Omit<Base, "room_type" | "bed_type" | "rate_type" | "images" | "room_layout">> & {
     facilities?: string[];
     images?: File[] | null;
+    room_layout?: File | null;
   };
 }
 
@@ -72,9 +77,11 @@ declare namespace RoomType {
 
   interface Addition {
     rooms_count?: number;
+    available_rooms_count?: number;
     can_delete: boolean;
     facilities_count: number;
     formatted_images?: string[];
+    image_files?: FileMetadata[];
   }
 
   interface Default extends Base, Addition {}

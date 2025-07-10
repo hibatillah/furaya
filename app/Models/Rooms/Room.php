@@ -16,14 +16,57 @@ class Room extends BaseModel
         "facility",
         "count_facility",
         "formatted_images",
+        "formatted_room_layout_image",
+        "image_files",
     ];
+
+    /**
+     * set image File
+     */
+    public function getImageFilesAttribute()
+    {
+        $images = is_array($this->formatted_images) ? $this->formatted_images : [];
+
+        return array_map(function ($image) {
+            $filename = explode("/", $image);
+            $filename = end($filename);
+
+            $type = explode(".", $filename);
+            $type = end($type);
+
+            $date = $this->updated_at;
+            $formatted = $date->format('D M d Y H:i:s') . ' GMT+0700 (Western Indonesia Time)';
+
+            return [
+                "lastModified" => $date->timestamp,
+                "name" => $filename,
+                "size" => 3 * 1024 * 1024,
+                "type" => "image/" . $type,
+                "url" => $image,
+                "id" => $filename,
+                "webkitRelativePath" => $image,
+            ];
+        }, $images);
+    }
+
+    /**
+     * format images path
+     */
+    public function getFormattedRoomLayoutImageAttribute()
+    {
+        if (!$this->room_layout) return null;
+
+        return Storage::url($this->room_layout);
+    }
 
     /**
      * format images path
      */
     public function getFormattedImagesAttribute()
     {
-        return array_map(fn($image) => Storage::url($image), $this->images ?? []);
+        $images = is_array($this->images ?? null) ? $this->images : [];
+
+        return array_map(fn($image) => Storage::url($image), $images);
     }
 
     /**

@@ -100,12 +100,24 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Detail Kamar</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-5 lg:grid-cols-2">
+        <CardContent className="grid gap-5 lg:grid-cols-[40%_1fr]">
           <DataList
             data={dataList}
-            className="h-fit *:data-[label=Fasilitas]:col-span-full *:data-[value=Fasilitas]:col-span-full xl:[--columns:2]"
+            className="h-fit *:data-[label=Fasilitas]:col-span-full *:data-[value=Fasilitas]:col-span-full"
           />
-          <dl className="[&_dt]:text-foreground/70">
+          <dl className="[&_dt]:text-foreground/70 space-y-5">
+            <div>
+              <dt>Denah Kamar</dt>
+              <dd>
+                <ImageContainer
+                  src={room.formatted_room_layout_image}
+                  alt={`Denah Kamar ${room.room_number}`}
+                  className="h-40 w-full sm:h-60 lg:h-52"
+                  href={room.formatted_room_layout_image}
+                />
+              </dd>
+            </div>
+
             <div className="flex flex-col gap-2">
               <dt>Foto Kamar</dt>
               <dd className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">

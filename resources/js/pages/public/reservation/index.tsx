@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import GuestLayout from "@/layouts/guest-layout";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { dateConfig } from "@/static";
 import { EMAIL_CONTACT, PHONE_CONTACT } from "@/static/contact";
 import { Head, router } from "@inertiajs/react";
@@ -14,9 +14,11 @@ import { useEffect, useState } from "react";
 
 export default function PublicReservationIndex(props: { roomTypes: RoomType.Default[]; startDate: string; endDate: string }) {
   const { roomTypes, startDate, endDate } = props;
+  console.log(roomTypes);
 
   const formatStartDate = format(new Date(startDate), "dd MMMM yyyy", dateConfig);
   const formatEndDate = format(new Date(endDate), "dd MMMM yyyy", dateConfig);
+  const MIN_ROOM_ALERT = 3;
 
   function handleSelectRoom(roomTypeId: string) {
     router.visit(route("public.reservation.create"), {
@@ -41,7 +43,7 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
     return (
       <GuestLayout>
         <Head title="Kamar Tersedia" />
-        <div className="container mx-auto space-y-5 lg:px-5 pb-10">
+        <div className="container mx-auto space-y-5 pb-10 lg:px-5">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold">Kamar Tersedia</h1>
             <p className="text-muted-foreground max-md:text-balance">
@@ -94,6 +96,13 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
                       <Maximize2Icon className="text-primary size-3" />
                       {roomType.size} m <sup className="-ms-1">2</sup>
                     </div>
+                    <div
+                      className={cn("text-foreground mt-1 flex items-center gap-2 font-medium", {
+                        "text-destructive dark:text-red-700": (roomType.available_rooms_count || 0) <= MIN_ROOM_ALERT,
+                      })}
+                    >
+                      {roomType.available_rooms_count} kamar tersisa
+                    </div>
                   </div>
 
                   <div className="flex flex-col items-end gap-3">
@@ -109,6 +118,7 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
                       variant="default"
                       size="sm"
                       onClick={() => handleSelectRoom(roomType.id)}
+                      className="bg-accent border-primary/50 text-accent-foreground mt-auto border"
                     >
                       Pilih Kamar
                     </Button>

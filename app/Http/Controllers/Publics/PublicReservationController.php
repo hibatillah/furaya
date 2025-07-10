@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Publics;
 use App\Enums\GenderEnum;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\ReservationTransactionEnum;
+use App\Enums\RoomConditionEnum;
 use App\Enums\SmokingTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservations\ReservationRequest;
@@ -144,6 +145,7 @@ class PublicReservationController extends Controller
         try {
             $validated = $request->validated();
 
+            // set reservation data
             $reservation = Arr::only($validated, [
                 "start_date",
                 "end_date",
@@ -172,9 +174,8 @@ class PublicReservationController extends Controller
                 "advance_amount",
             ]);
 
+            // get reservation room data
             $reservationRoom = Arr::only($validated, [
-                "room_id",
-                "room_number",
                 "room_type_id",
                 "room_type_name",
                 "room_rate",
@@ -182,6 +183,20 @@ class PublicReservationController extends Controller
                 "view",
             ]);
 
+            /**
+             * set room
+             * get random available room id based on room type
+             */
+            $reservedRoomIds = $this->reservationService
+                ->getReservedRoomIds($reservation["start_date"], $reservation["end_date"]);
+            $rooms = $this->reservationService
+                ->getAvailableRooms($reservedRoomIds, $reservationRoom["room_type_id"]);
+
+            $room = $rooms->random();
+            $reservationRoom["room_id"] = $room->id;
+            $reservationRoom["room_number"] = $room->room_number;
+
+            // set user data
             $userData = Arr::only($validated, ["name", "email"]);
             $guestData = Arr::only($validated, [
                 "nik_passport",
@@ -203,7 +218,6 @@ class PublicReservationController extends Controller
                 $user = User::updateOrCreate(
                     ['email' => $userData['email']],
                     array_merge($userData, [
-                        "password" => Hash::make("123"),
                         "role" => "guest",
                     ])
                 );
@@ -223,10 +237,10 @@ class PublicReservationController extends Controller
                 ]);
                 $reservationGuest["country"] = $validated["country"];
 
-                $reservation = Reservation::create(array_merge(
-                    $reservation,
-                    ["booking_number" => ReservationService::generateBookingNumber()]
-                ));
+                $reservation = Reservation::create([
+                    ...$reservation,
+                    "booking_number" => ReservationService::generateBookingNumber()
+                ]);
 
                 $reservation->reservationRoom()->create($reservationRoom);
                 $reservation->reservationGuest()->create([
@@ -235,7 +249,7 @@ class PublicReservationController extends Controller
                 ]);
 
                 Room::where('id', $reservationRoom['room_id'])
-                    ->update(['condition' => 'BOOKED']);
+                    ->update(['condition' => RoomConditionEnum::BOOKED]);
 
                 $reservation->reservationTransaction()->create([
                     "amount" => $validated["total_price"],

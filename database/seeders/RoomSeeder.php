@@ -31,23 +31,23 @@ class RoomSeeder extends Seeder
     $roomTypes = [
       [
         'name' => 'Deluxe',
-        'images' => ["room_types/deluxe.jpg"],
+        'images' => ["room_types/deluxe_deluxe.jpg"],
       ],
       [
         'name' => 'Executive',
-        'images' => ["room_types/executive.jpg"],
+        'images' => ["room_types/executive_executive.jpg"],
       ],
       [
         'name' => 'Business',
-        'images' => ["room_types/business.jpg"],
+        'images' => ["room_types/business_business.jpg"],
       ],
       [
         'name' => 'Junior Suite',
-        'images' => ["room_types/executive.jpg"],
+        'images' => ["room_types/executive_executive.jpg"],
       ],
       [
         'name' => 'Furaya Suite',
-        'images' => ["room_types/business.jpg"],
+        'images' => ["room_types/business_business.jpg"],
       ],
     ];
 

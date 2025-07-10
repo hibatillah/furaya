@@ -46,9 +46,6 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
       id: "name",
       accessorKey: "name",
       header: "Nama",
-      cell: ({ row }) => {
-        return <span className="w-full text-center capitalize">{row.original.name}</span>;
-      },
     },
     {
       id: "rooms_count",
@@ -57,7 +54,7 @@ export default function BedTypeIndex(props: { bedTypes: BedType.Default[] }) {
       filterFn: "checkbox" as FilterFnOption<BedType.Default>, // add filter column
     },
     {
-      id: "actions",
+      id: "actions", 
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

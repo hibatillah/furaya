@@ -88,6 +88,7 @@ class ReservationController extends Controller
                 'children',
                 'total_price',
                 'payment_method',
+                'transaction_status',
             ]);
 
             // filter the reservations by date range

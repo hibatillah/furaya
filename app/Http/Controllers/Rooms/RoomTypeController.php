@@ -26,7 +26,8 @@ class RoomTypeController extends Controller
     {
         $bedTypes = BedType::all();
         $roomTypes = RoomType::with('facility', 'rateType', 'bedType')
-            ->latest()->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return Inertia::render('roomtype/index', [
             'roomTypes' => $roomTypes,
@@ -158,7 +159,7 @@ class RoomTypeController extends Controller
                 ]);
 
                 // update room type facility
-                $facilities = $validated['facilities'];
+                $facilities = $validated['facilities'] ?? [];
 
                 if (count($facilities) > 0) {
                     // delete room type facility if not exists in updated facilities

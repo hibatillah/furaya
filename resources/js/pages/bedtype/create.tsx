@@ -4,12 +4,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "@inertiajs/react";
-import { toast } from "sonner";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function BedTypeCreate() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data, setData, post, errors, processing } = useForm<BedType.Create>();
+  const { data, setData, post, errors, processing, reset } = useForm<BedType.Create>();
 
   // handle create bed type
   function handleCreateBedType(e: React.FormEvent) {
@@ -20,7 +20,9 @@ export default function BedTypeCreate() {
     });
 
     post(route("bedtype.store"), {
+      preserveState: false,
       onSuccess: () => {
+        reset();
         setDialogOpen(false);
         toast.success("Tipe kasur berhasil ditambahkan", {
           id: "create-bed-type",
@@ -36,7 +38,10 @@ export default function BedTypeCreate() {
   }
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Dialog
+      open={dialogOpen}
+      onOpenChange={setDialogOpen}
+    >
       <DialogTrigger asChild>
         <Button className="ms-auto w-fit">Tambah Tipe Kasur</Button>
       </DialogTrigger>
@@ -49,12 +54,17 @@ export default function BedTypeCreate() {
           className="max-w-lg space-y-6"
         >
           <div className="grid gap-2">
-            <Label htmlFor="name" required>Nama</Label>
+            <Label
+              htmlFor="name"
+              required
+            >
+              Nama
+            </Label>
             <Input
               id="name"
               type="text"
               value={data.name}
-              placeholder="Nama"
+              placeholder="Nama Tipe Kasur"
               onChange={(e) => setData("name", e.target.value)}
               required
             />

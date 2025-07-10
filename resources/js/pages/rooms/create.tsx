@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiselect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import UploadFile from "@/components/upload-file";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import AppLayout from "@/layouts/app-layout";
 import { formatCurrency } from "@/lib/utils";
 import { BreadcrumbItem } from "@/types";
@@ -24,7 +26,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function RoomsCreate(props: {
+interface RoomCreateProps {
   roomTypes: RoomType.Default[];
   bedTypes: BedType.Default[];
   rateTypes: RateType.Default[];
@@ -32,7 +34,9 @@ export default function RoomsCreate(props: {
   facilities: Facility.Default[];
   roomStatuses: Enum.RoomStatus[];
   smokingTypes: Enum.SmokingType[];
-}) {
+}
+
+export default function RoomsCreate(props: RoomCreateProps) {
   const { roomTypes, bedTypes, rateTypes, roomConditions, facilities, roomStatuses, smokingTypes } = props;
 
   // define facility options for multiselect
@@ -65,6 +69,7 @@ export default function RoomsCreate(props: {
     rate_type_id: "",
     facilities: [],
     images: [],
+    room_layout: null,
   });
 
   // handle change room type
@@ -81,6 +86,32 @@ export default function RoomsCreate(props: {
       );
     }
   }, [selectedRoomType]);
+
+  // handle file upload
+  const [fileUploadState, fileUploadActions] = useFileUpload({
+    accept: "image/*",
+    maxSize: 5 * 1024 * 1024,
+    multiple: true,
+    maxFiles: 6,
+  });
+
+  useEffect(() => {
+    setData(
+      "images",
+      fileUploadState.files.map((file) => file.file as File),
+    );
+  }, [fileUploadState.files]);
+
+  // handle room layout file upload
+  const [layoutFileUploadState, layoutFileUploadActions] = useFileUpload({
+    accept: "image/*",
+    maxSize: 5 * 1024 * 1024,
+    multiple: false,
+  });
+
+  useEffect(() => {
+    setData("room_layout", layoutFileUploadState.files[0]?.file as File);
+  }, [layoutFileUploadState.files]);
 
   // handle create room
   function handleCreateRoom(e: React.FormEvent) {
@@ -478,18 +509,28 @@ export default function RoomsCreate(props: {
               <InputError message={errors.facilities} />
             </div>
 
-            {/* image */}
-            <div className="xl:row-span-6 flex flex-col gap-2 xl:col-start-3 xl:row-start-1">
-              <Label htmlFor="images">Gambar</Label>
-              <Input
-                id="images"
-                type="file"
-                placeholder="Gambar"
-                accept="image/*"
-                onChange={(e) => setData("images", Array.from(e.target.files ?? []))}
-                multiple
-              />
-              <InputError message={errors.images} />
+            <div className="xl:col-start-3 xl:row-span-7 xl:row-start-1 space-y-6">
+              {/* layout */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="room_layout">Denah Kamar</Label>
+                <UploadFile
+                  options={layoutFileUploadState}
+                  actions={layoutFileUploadActions}
+                />
+                <InputError message={errors.room_layout} />
+              </div>
+
+              {/* images */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="images">Gambar</Label>
+                <UploadFile
+                  options={fileUploadState}
+                  actions={fileUploadActions}
+                  multiple
+                />
+                <p className="text-muted-foreground text-sm">Gambar tipe kamar terpilih akan ditambahkan sebagai gambar kamar.</p>
+                <InputError message={errors.images} />
+              </div>
             </div>
 
             {/* submit */}

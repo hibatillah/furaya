@@ -32,6 +32,7 @@ class ReservationFactory extends Factory
     {
         $now = now()->format('Ymd');
         $chances = $this->faker->numberBetween(1, 100);
+        $transactionStatus = "unpaid";
 
         // reservation details
         $startDate = Carbon::instance(
@@ -54,6 +55,10 @@ class ReservationFactory extends Factory
                 $chances <= 95 => StatusAccEnum::APPROVED,
                 default        => StatusAccEnum::REJECTED,
             };
+
+            if ($statusAcc === StatusAccEnum::APPROVED) {
+                $transactionStatus = "settlement";
+            }
         } else if ($startDate->isAfter(now()->endOfDay())) {
             $status = match (true) {
                 $chances <= 80 => ReservationStatusEnum::BOOKED,
@@ -66,6 +71,7 @@ class ReservationFactory extends Factory
                     break;
                 case ReservationStatusEnum::BOOKED:
                     $statusAcc = StatusAccEnum::APPROVED;
+                    $transactionStatus = "settlement";
                     break;
                 default:
                     $statusAcc = StatusAccEnum::REJECTED;
@@ -123,6 +129,7 @@ class ReservationFactory extends Factory
                     $this->faker->numberBetween(-1, -3)
                 )
                 : null,
+            "transaction_status" => $transactionStatus,
         ];
     }
 }

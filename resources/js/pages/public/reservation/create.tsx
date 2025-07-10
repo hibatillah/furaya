@@ -179,6 +179,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
           // show payment snap window
           processPayment(snapToken, reservationId);
         } catch (err: any) {
+          console.error(err);
           toast.error("Gagal memproses pembayaran", {
             description: "Coba beberapa saat lagi",
             id: "process-payment",

@@ -33,7 +33,7 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
       title: "Reservasi",
       icon: CalendarCheckIcon,
       content: (
-        <div className="grid w-full gap-4 lg:grid-cols-6">
+        <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-6">
           <ReservationCard
             daily={charts.daily_reservation_volume}
             monthly={charts.monthly_reservation_volume}
@@ -71,7 +71,7 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
       title: "Kamar",
       icon: HotelIcon,
       content: (
-        <div className="grid w-full gap-4 xl:grid-cols-3 2xl:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-4 xl:grid-cols-3 2xl:grid-cols-3">
           <ChartCountRoomType data={charts.room_type_count} />
           <ChartCountBedType data={charts.bed_type_count} />
           <ChartCountSmokingType data={charts.room_smoking_type_distribution} />
@@ -86,7 +86,7 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
       title: "Demografi",
       icon: EarthIcon,
       content: (
-        <div className="grid w-full gap-4 xl:grid-cols-6">
+        <div className="grid w-full grid-cols-1 gap-4 xl:grid-cols-6">
           <ChartCountGuestNationality
             data={charts.guest_nationality_distribution}
             className="xl:col-span-3"
@@ -112,10 +112,9 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
 
   // filter menu based on role
   dashboardMenu = dashboardMenu.filter((item) => {
-    if (role !== "manager") {
-      return item.title !== "Keuangan" && item.title !== "Karyawan";
-    }
-    return true;
+    // if (role !== "manager") {
+    // }
+    return item.title !== "Keuangan" && item.title !== "Karyawan";
   });
 
   return (
@@ -125,7 +124,7 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
         <DashboardTabs
           data={dashboardMenu}
           className="w-full"
-        ></DashboardTabs>
+        />
       </div>
     </AppLayout>
   );
