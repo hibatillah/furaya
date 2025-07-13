@@ -37,7 +37,9 @@ class Reservation extends BaseModel
 
             if ($this->reservationRoom?->room_id) {
                 Room::where('id', $this->reservationRoom->room_id)
-                    ->update(['condition' => RoomConditionEnum::READY]);
+                    ->update([
+                        'condition' => RoomConditionEnum::READY
+                    ]);
             }
 
             return;
@@ -49,7 +51,9 @@ class Reservation extends BaseModel
 
             if ($this->reservationRoom?->room_id) {
                 Room::where('id', $this->reservationRoom->room_id)
-                    ->update(['condition' => RoomConditionEnum::READY]);
+                    ->update([
+                        'condition' => RoomConditionEnum::READY
+                    ]);
             }
 
             // if guest is no show till check in deadline
@@ -71,11 +75,22 @@ class Reservation extends BaseModel
 
             if ($this->reservationRoom?->room_id) {
                 Room::where('id', $this->reservationRoom->room_id)
-                    ->update(['condition' => RoomConditionEnum::READY]);
+                    ->update([
+                        'condition' => RoomConditionEnum::READY
+                    ]);
             }
         }
 
         $this->save();
+    }
+
+    /**
+     * modify reservation payment type
+     */
+    public function getPaymentTypeAttribute($value)
+    {
+        if (isset($value)) return $value;
+        return $this->payment_method;
     }
 
     /**
@@ -122,7 +137,7 @@ class Reservation extends BaseModel
     {
         if ($this->checkIn?->check_in_at) {
             return Carbon::parse($this->checkIn->check_in_at)
-                ->translatedFormat('d M Y, H:i') . ' WIB';
+                ->translatedFormat('d M, H:i') . ' WIB';
         }
 
         return null;
@@ -132,7 +147,7 @@ class Reservation extends BaseModel
     {
         if ($this->checkOut?->check_out_at) {
             return Carbon::parse($this->checkOut->check_out_at)
-                ->translatedFormat('d M Y H:i') . ' WIB';
+                ->translatedFormat('d M, H:i') . ' WIB';
         }
 
         return null;

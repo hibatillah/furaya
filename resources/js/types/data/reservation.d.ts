@@ -149,7 +149,7 @@ declare namespace CheckOut {
     check_out_at: Date | string;
     employee_id: string;
     employee?: Employee.Default;
-    final_total: number | "";
+    additional_charge: number | "";
     check_out_by: string;
     notes?: string;
   }

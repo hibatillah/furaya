@@ -65,6 +65,7 @@ class CheckInController extends Controller
                     'status_acc',
                     'total_price',
                     'booking_type',
+                    'transaction_status',
                     'status',
                 ]);
 
@@ -130,7 +131,7 @@ class CheckInController extends Controller
             $validated = $request->validated();
 
             $checkin = Arr::only($validated, [
-                'checked_in_at',
+                'check_in_at',
                 'check_in_by',
                 'notes',
                 'employee_id',
@@ -140,6 +141,13 @@ class CheckInController extends Controller
                 // update reservation status
                 $reservation = Reservation::findOrFail($validated['reservation_id']);
                 $reservation->checkIn()->create($checkin);
+
+                // update reservation payment
+                if ($reservation->transaction_status !== "settlement") {
+                    $reservation->update([
+                        'transaction_status' => "settlement",
+                    ]);
+                }
 
                 // update related room status
                 $room = Room::findOrFail($reservation->reservationRoom->room_id);

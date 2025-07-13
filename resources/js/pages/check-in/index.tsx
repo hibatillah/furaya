@@ -85,26 +85,6 @@ export default function CheckInIndex(props: {
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
-      id: "room_status",
-      accessorFn: (row) => row.reservation_room?.room?.status,
-      header: "Status Kamar",
-      cell: ({ row }) => {
-        const status = row.getValue("room_status") as Enum.RoomStatus;
-
-        return !status ? (
-          "-"
-        ) : (
-          <Badge
-            variant="outline"
-            className={cn("font-medium capitalize", roomStatusBadgeColor[status])}
-          >
-            {status}
-          </Badge>
-        );
-      },
-      filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
-    },
-    {
       id: "start_date",
       accessorFn: (row) => row.formatted_start_date,
       header: "Masuk",

@@ -7,7 +7,9 @@ use App\Enums\GenderEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\ReservationTransactionEnum;
+use App\Enums\RoomConditionEnum;
 use App\Enums\RoomPackageEnum;
+use App\Enums\SmokingTypeEnum;
 use App\Enums\StatusAccEnum;
 use App\Enums\VisitPurposeEnum;
 use App\Http\Controllers\Controller;
@@ -207,7 +209,14 @@ class ReservationController extends Controller
                 "address",
             ]);
 
-            DB::transaction(function () use ($userData, $guestData, $reservation, $reservationRoom, $validated) {
+            $result = DB::transaction(function () use (
+                $userData,
+                $guestData,
+                $reservation,
+                $reservationRoom,
+                $validated
+            ) {
+                // upsert user data
                 $user = User::updateOrCreate(
                     ['email' => $userData['email']],
                     array_merge($userData, [
@@ -231,10 +240,11 @@ class ReservationController extends Controller
                 ]);
                 $reservationGuest["country"] = $validated["country"];
 
-                $reservation = Reservation::create(array_merge(
-                    $reservation,
-                    ["booking_number" => ReservationService::generateBookingNumber()]
-                ));
+                // create reservation
+                $reservation = Reservation::create([
+                    ...$reservation,
+                    "booking_number" => ReservationService::generateBookingNumber()
+                ]);
 
                 $reservation->reservationRoom()->create($reservationRoom);
                 $reservation->reservationGuest()->create([
@@ -242,31 +252,40 @@ class ReservationController extends Controller
                     "guest_id" => $guest->id,
                 ]);
 
+                // update room related condition
                 Room::where('id', $reservationRoom['room_id'])
-                    ->update(['condition' => 'BOOKED']);
+                    ->update([
+                        'condition' => RoomConditionEnum::BOOKED
+                    ]);
+
+                // create reservation transaction
+                $advanceAmount = $validated["advance_amount"];
+                $advanceRemarks = $validated["advance_remarks"];
 
                 $reservation->reservationTransaction()->create([
-                    "amount" => $validated["total_price"],
+                    "amount" => $reservation->total_price,
                     "type" => ReservationTransactionEnum::BOOKING,
-                    "is_paid" => $validated["advance_amount"] > 0,
+                    "is_paid" => $advanceAmount > 0,
                     "description" => "Create Booking",
                 ]);
 
                 $reservation->reservationTransaction()->create([
-                    "amount" => $validated["advance_amount"],
+                    "amount" => $advanceAmount,
                     "type" => ReservationTransactionEnum::DEPOSIT,
-                    "is_paid" => $validated["advance_amount"] > 0,
-                    "description" => $validated["advance_remarks"] ?: "Add Booking Advance",
+                    "is_paid" => $advanceAmount > 0,
+                    "description" => $advanceRemarks ?? "Booking Advance"
                 ]);
+
+                return $reservation;
             });
 
-            return redirect()->route("reservation.index")
+            return redirect()->route("reservation.show", $result->id)
                 ->with("success", "Reservasi berhasil ditambahkan");
         } catch (ValidationException $e) {
             report($e);
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors(["message" => "Terjadi kesalahan menambahkan reservasi."]);
         }
     }
@@ -685,6 +704,7 @@ class ReservationController extends Controller
         $roomPackages = RoomPackageEnum::getValues();
         $paymentMethods = PaymentEnum::getValues();
         $genders = GenderEnum::getValues();
+        $smokingTypes = SmokingTypeEnum::getValues();
         $statusAccs = StatusAccEnum::getValues();
 
         $employee = Employee::with("user")
@@ -700,6 +720,7 @@ class ReservationController extends Controller
             "roomPackages" => $roomPackages,
             "paymentMethods" => $paymentMethods,
             "genders" => $genders,
+            "smokingTypes" => $smokingTypes,
             "statusAccs" => $statusAccs,
             "employee" => $employee,
         ];

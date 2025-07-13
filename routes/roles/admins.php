@@ -21,10 +21,9 @@ Route::middleware("role:admin")->group(function () {
   Route::post('kamar/{id}', [RoomController::class, 'update'])->name('room.update');
 
   Route::resource("/kamar", RoomController::class)
-    ->except(["create", "update"])
+    ->except(["index", "create", "update"])
     ->parameters(["kamar" => "id"])
     ->names([
-      "index" => "room.index",
       "store" => "room.store",
       "show" => "room.show",
       "edit" => "room.edit",

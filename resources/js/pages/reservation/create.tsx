@@ -40,10 +40,11 @@ interface ReservationCreateProps {
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
   employee: Employee.Default;
+  smokingTypes: Enum.SmokingType[];
 }
 
 export default function ReservationsCreate(props: ReservationCreateProps) {
-  const { visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, employee, guestTypes, nationalities, countries } = props;
+  const { visitPurposes, bookingTypes, roomPackages, paymentMethods, genders, employee, guestTypes, nationalities, countries, smokingTypes } = props;
 
   // declare form
   const initialStartDate = new Date();
@@ -121,7 +122,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
       try {
         toast.loading("Mencari data tamu tersedia...", { id: "get-guest" });
 
-        const response = await fetch(`/admin/reservasi/tamu?nik_passport=${value}`);
+        const response = await fetch(`/admin/reservasi/tamu?phone=${encodeURIComponent(value)}`);
         const data = await response.json();
         const guest = data.guest as Guest.Default;
 
@@ -742,27 +743,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
               <InputError message={errors.room_package} />
             </div>
 
-            {/* pax */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="pax"
-                required
-              >
-                Pax
-              </Label>
-              <Input
-                type="number"
-                className="w-full"
-                min={1}
-                placeholder="Input Jumlah Pax"
-                value={data.pax}
-                disableHandle
-                required
-                readOnly
-              />
-              <InputError message={errors.pax} />
-            </div>
-
             {/* adult */}
             <div className="flex flex-col gap-2">
               <Label
@@ -812,6 +792,42 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 disableHandle
               />
               <InputError message={errors.children} />
+            </div>
+
+            {/* smoking type */}
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="smoking_type"
+                required
+              >
+                Smoking Type
+              </Label>
+              <Select
+                value={data.smoking_type}
+                onValueChange={(value) => {
+                  setData("smoking_type", value as Enum.SmokingType);
+                }}
+                disabled={!selectedRoomNumber}
+                required
+              >
+                <SelectTrigger id="smoking_type">
+                  <SelectValue placeholder="Pilih Jenis Rokok">
+                    <span className="capitalize">{data.smoking_type}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {smokingTypes.map((smokingType) => (
+                    <SelectItem
+                      key={smokingType}
+                      value={smokingType}
+                      className="capitalize"
+                    >
+                      {smokingType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.smoking_type} />
             </div>
 
             {/* include breakfast */}

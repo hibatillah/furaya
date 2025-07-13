@@ -3,12 +3,15 @@ import { InputDate } from "@/components/input-date";
 import InputError from "@/components/input-error";
 import { InputTime } from "@/components/input-time";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { cn, formatCurrency } from "@/lib/utils";
+import { transactionStatusBadgeColor } from "@/static/reservation";
 import { Link, useForm } from "@inertiajs/react";
 import { isAfter, set } from "date-fns";
 import { useEffect, useState } from "react";
@@ -28,8 +31,19 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
       value: reservation.reservation_guest?.name,
     },
     {
-      label: "No. Kamar",
-      value: reservation.reservation_room?.room_number,
+      label: "Total Harga",
+      value: formatCurrency(Number(reservation.total_price)),
+    },
+    {
+      label: "Status Pembayaran",
+      value: (
+        <Badge
+          variant="outline"
+          className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status as keyof typeof transactionStatusBadgeColor])}
+        >
+          {reservation.transaction_status}
+        </Badge>
+      ),
     },
   ];
 
@@ -89,8 +103,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
         });
         onClose();
       },
-      onError: (error) => {
-        console.warn(error);
+      onError: () => {
         toast.error("Check-in gagal ditambahkan", {
           id: `check-in-${reservation.id}`,
         });
@@ -104,9 +117,12 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
         <DialogTitle>Check In Reservasi</DialogTitle>
         {canCheckIn && !isPending ? (
           <>
-            <DialogDescription className="mt-2">
-              <DataList data={dataList} />
-            </DialogDescription>
+            <div className="mt-2 text-sm">
+              <DataList
+                data={dataList}
+                className="gap-y-1.5"
+              />
+            </div>
             <Separator className="my-1" />
           </>
         ) : isPending ? (
@@ -167,12 +183,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
 
         {/* room status */}
         <div className="col-span-2 grid gap-2">
-          <Label
-            htmlFor="time"
-            required
-          >
-            Status Kamar
-          </Label>
+          <Label htmlFor="time">Status Kamar</Label>
           <Select
             value={data.room_status}
             onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
@@ -201,17 +212,12 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
 
         {/* notes */}
         <div className="col-span-2 grid gap-2">
-          <Label
-            htmlFor="notes"
-            optional
-          >
-            Catatan
-          </Label>
+          <Label htmlFor="notes">Catatan</Label>
           <Textarea
             id="notes"
             value={data.notes}
             onChange={(e) => setData("notes", e.target.value)}
-            placeholder="Tambah catatan"
+            placeholder="Catatan check-in (opsional)"
             className="min-h-24"
             disabled={isPending}
           />

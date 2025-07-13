@@ -148,7 +148,7 @@ return new class extends Migration
                 ->nullOnDelete();
             $table->datetime('check_out_at');
             $table->string('check_out_by');
-            $table->float('final_total', 10, 2);
+            $table->float('additional_charge', 10, 2)->nullable();
             $table->string('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();

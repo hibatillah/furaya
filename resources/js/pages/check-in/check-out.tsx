@@ -4,35 +4,20 @@ import InputError from "@/components/input-error";
 import { InputTime } from "@/components/input-time";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { formatCurrency } from "@/lib/utils";
 import { useForm } from "@inertiajs/react";
 import { isAfter, set } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export default function CheckOut(props: { data: Reservation.Default; employee: Employee.Default; status: Enum.RoomStatus[]; onClose: () => void }) {
   const { data: reservation, employee, status, onClose } = props;
-
-  // define data list
-  const dataList = [
-    {
-      label: "No. Booking",
-      value: reservation.booking_number,
-    },
-    {
-      label: "Nama Tamu",
-      value: reservation.reservation_guest?.name,
-    },
-    {
-      label: "No. Kamar",
-      value: reservation.reservation_room?.room_number,
-    },
-  ];
 
   // initial data
   const initialDate = set(new Date(reservation.end_date as Date), {
@@ -46,13 +31,14 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
   // declare form
   const [date, setDate] = useState<Date>(initialDate);
   const [time, setTime] = useState<string>("12:00:00");
+  const [additionalCharge, setAdditionalCharge] = useState<number | "">(""); // handle empty input for useForm inertia
   const { data, setData, post, errors, processing } = useForm<CheckOut.Create>({
     check_out_at: initialDate,
     check_out_by: employee.user?.name || "",
     notes: "",
     employee_id: employee.id,
     reservation_id: reservation.id,
-    final_total: reservation.total_price,
+    additional_charge: "",
     room_status: "Check Out" as Enum.RoomStatus,
   });
 
@@ -91,13 +77,43 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
         });
         onClose();
       },
-      onError: (error) =>
+      onError: (error) => {
         toast.error("Check-out gagal ditambahkan", {
           id: `check-out-${reservation.id}`,
           description: error.message,
-        }),
+        });
+      },
     });
   }
+
+  // define data list
+  const finalPrice = useMemo(() => {
+    const totalPrice = Number(reservation.total_price);
+    return additionalCharge ? totalPrice + additionalCharge : totalPrice;
+  }, [reservation.total_price, additionalCharge]);
+
+  const dataList = [
+    {
+      label: "No. Booking",
+      value: reservation.booking_number,
+    },
+    {
+      label: "Nama Tamu",
+      value: reservation.reservation_guest?.name,
+    },
+    {
+      label: "Biaya Awal",
+      value: formatCurrency(Number(reservation.total_price)),
+    },
+    {
+      label: "Biaya Tambahan",
+      value: additionalCharge ? formatCurrency(Number(additionalCharge)) : "-",
+    },
+    {
+      label: "Total Harga",
+      value: formatCurrency(finalPrice),
+    },
+  ];
 
   return (
     <>
@@ -105,10 +121,18 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
         <DialogTitle>Check Out Reservasi</DialogTitle>
         {canCheckOut ? (
           <>
-            <DialogDescription className="mt-2">
-              <DataList data={dataList} />
-            </DialogDescription>
-            <Separator className="my-1" />
+            <div className="mt-2 text-sm">
+              <DataList
+                data={dataList.slice(0, -1)}
+                className="gap-y-1.5"
+              />
+              <Separator className="my-2" />
+              <DataList
+                data={dataList.slice(-1)}
+                className="gap-x-[65px]"
+              />
+              <Separator className="mt-2 mb-1" />
+            </div>
           </>
         ) : (
           <Alert>
@@ -123,7 +147,12 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
       >
         {/* date */}
         <div className="grid gap-2">
-          <Label htmlFor="date" required>Tanggal</Label>
+          <Label
+            htmlFor="date"
+            required
+          >
+            Tanggal
+          </Label>
           <InputDate
             mode="single"
             value={date}
@@ -139,41 +168,27 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
 
         {/* time */}
         <div className="grid gap-2">
-          <Label htmlFor="time" required>Waktu</Label>
+          <Label
+            htmlFor="time"
+            required
+          >
+            Waktu
+          </Label>
           <InputTime
             id="time"
-            className="bg-inherit"
+            className="bg-accent"
             value={time}
             onChange={(e) => setTime(e.target.value)}
             required
           />
         </div>
 
-        {/* final total */}
-        <div className="col-span-2 grid gap-2">
-          <Label htmlFor="final_total" required>Harga Akhir</Label>
-          <div className="relative">
-            <Input
-              id="final_total"
-              type="number"
-              value={data.final_total}
-              onChange={(e) => setData("final_total", Number(e.target.value))}
-              placeholder="Input harga akhir"
-              className="w-full ps-8"
-              disableHandle
-            />
-            <span className="text-muted-foreground absolute inset-y-0 start-0 flex items-center px-2 text-sm">Rp</span>
-          </div>
-          <InputError message={errors.final_total} />
-        </div>
-
         {/* room status */}
-        <div className="col-span-2 grid gap-2">
-          <Label htmlFor="time" required>Status Kamar</Label>
+        <div className="grid gap-2">
+          <Label htmlFor="time">Status Kamar</Label>
           <Select
             value={data.room_status}
             onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
-            required
           >
             <SelectTrigger id="room_status">
               <SelectValue placeholder="Pilih Status Kamar">
@@ -195,14 +210,40 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
           <InputError message={errors.room_status} />
         </div>
 
+        {/* additional charge */}
+        <div className="grid gap-2">
+          <Label htmlFor="additional_charge">Biaya Tambahan</Label>
+          <div className="relative">
+            <Input
+              id="additional_charge"
+              type="number"
+              value={additionalCharge}
+              onChange={(e) => {
+                setAdditionalCharge(Number(e.target.value));
+                setData("additional_charge", Number(e.target.value));
+              }}
+              placeholder="Input biaya tambahan"
+              className="w-full ps-8"
+              disableHandle
+            />
+            <span className="text-muted-foreground absolute inset-y-0 start-0 flex items-center px-2 text-sm">Rp</span>
+          </div>
+          <InputError message={errors.additional_charge} />
+        </div>
+
         {/* notes */}
         <div className="col-span-2 grid gap-2">
-          <Label htmlFor="notes" optional>Catatan</Label>
+          <Label
+            htmlFor="notes"
+            optional
+          >
+            Catatan
+          </Label>
           <Textarea
             id="notes"
             value={data.notes}
             onChange={(e) => setData("notes", e.target.value)}
-            placeholder="Tambah catatan"
+            placeholder="Catatan check-out (opsional)"
             className="min-h-24"
           />
           <InputError message={errors.notes} />

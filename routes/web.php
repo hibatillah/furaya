@@ -15,6 +15,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // grouping admin routes
     Route::prefix('admin')->group(function () {
+        // dashboard route
         Route::get('dashboard', [DashboardController::class, 'index'])
             ->name('dashboard')
             ->middleware('role:admin,manager,employee');
@@ -90,10 +91,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ]);
         });
 
-        /** update room status for admin and employee */
-        Route::put("kamar/{id}/status", [RoomController::class, "updateStatus"])
-            ->name("room.update.status")
-            ->middleware("role:admin,employee");
+        /** room routes for admin and employee */
+        Route::middleware("role:admin,employee")->group(function () {
+            /** update room status for admin and employee */
+            Route::put("kamar/{id}/status", [RoomController::class, "updateStatus"])
+                ->name("room.update.status");
+
+            /** room index route */
+            Route::get("kamar", [RoomController::class, "index"])
+                ->name("room.index");
+        });
 
         /** guest resource routes for managers and admins */
         Route::resource("tamu", GuestController::class)

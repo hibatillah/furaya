@@ -41,6 +41,7 @@ export default function ReservationsEdit(props: {
   paymentMethods: Enum.Payment[];
   genders: Enum.Gender[];
   roomTypes: RoomType.Default[];
+  smokingTypes: Enum.SmokingType[];
   statusAcc: Enum.StatusAcc[];
 }) {
   const {
@@ -55,6 +56,7 @@ export default function ReservationsEdit(props: {
     nationalities,
     countries,
     roomTypes,
+    smokingTypes,
   } = props;
 
   const { auth } = usePage<SharedData>().props;
@@ -919,27 +921,6 @@ export default function ReservationsEdit(props: {
               <InputError message={errors.room_package} />
             </div>
 
-            {/* pax */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="pax"
-                required
-              >
-                Pax
-              </Label>
-              <Input
-                type="number"
-                className="w-full"
-                min={1}
-                placeholder="Input Jumlah Pax"
-                value={data.pax}
-                disableHandle
-                required
-                readOnly
-              />
-              <InputError message={errors.pax} />
-            </div>
-
             {/* adult */}
             <div className="flex flex-col gap-2">
               <Label
@@ -989,6 +970,42 @@ export default function ReservationsEdit(props: {
                 disableHandle
               />
               <InputError message={errors.children} />
+            </div>
+
+            {/* smoking type */}
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="smoking_type"
+                required
+              >
+                Smoking Type
+              </Label>
+              <Select
+                value={data.smoking_type}
+                onValueChange={(value) => {
+                  setData("smoking_type", value as Enum.SmokingType);
+                }}
+                disabled={!selectedRoomNumber}
+                required
+              >
+                <SelectTrigger id="smoking_type">
+                  <SelectValue placeholder="Pilih Jenis Rokok">
+                    <span className="capitalize">{data.smoking_type}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {smokingTypes.map((smokingType) => (
+                    <SelectItem
+                      key={smokingType}
+                      value={smokingType}
+                      className="capitalize"
+                    >
+                      {smokingType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <InputError message={errors.smoking_type} />
             </div>
 
             {/* include breakfast */}

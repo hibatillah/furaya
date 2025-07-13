@@ -18,7 +18,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
-import { bookingTypeBadgeColor, reservationStatusBadgeColor, statusAccBadgeColor, visitPurposeBadgeColor } from "@/static/reservation";
+import { bookingTypeBadgeColor, reservationStatusBadgeColor, statusAccBadgeColor, transactionStatusBadgeColor, visitPurposeBadgeColor } from "@/static/reservation";
 import { smokingTypeBadgeColor } from "@/static/room";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
@@ -187,7 +187,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
       value: reservation.transaction_status ? (
         <Badge
           variant="outline"
-          className="capitalize"
+          className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status])}
         >
           {reservation.transaction_status}
         </Badge>

@@ -77,7 +77,7 @@ class ReservationRequest extends FormRequest
             "advance_remarks" => ["nullable", "string", "max:255"],
             "advance_amount" => ["nullable", "numeric"],
             "smoking_type" => [
-                "nullable",
+                "required",
                 Rule::in(SmokingTypeEnum::getValues())
             ],
             "include_breakfast" => ["nullable", "boolean"],
