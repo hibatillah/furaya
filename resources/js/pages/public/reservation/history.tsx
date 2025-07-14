@@ -63,7 +63,7 @@ export default function ReservationHistory({
                 });
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-card dark:bg-accent">
                 <SelectValue placeholder="Status Reservasi">
                   <span className="me-1 capitalize">{selectedStatus === ("all" as Enum.ReservationStatus) ? "Semua Status" : selectedStatus}</span>
                 </SelectValue>
@@ -85,7 +85,7 @@ export default function ReservationHistory({
             {/* sort */}
             <Button
               variant="outline"
-              className="bg-accent gap-1.5 !ps-2.5"
+              className="bg-card dark:bg-accent gap-1.5 !ps-2.5"
               onClick={() => {
                 handleReservationFilter({
                   status: selectedStatus,

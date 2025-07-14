@@ -63,7 +63,7 @@ function BookCard({ className }: { className?: string }) {
         <CardTitle>Book Online</CardTitle>
         <CardDescription>Guaranteed Accommodation</CardDescription>
       </CardHeader>
-      <CardContent className="relative grid grid-cols-2 lg:flex items-end gap-x-4 gap-y-3 p-0 lg:flex-row">
+      <CardContent className="relative grid grid-cols-2 items-end gap-x-4 gap-y-3 p-0 lg:flex lg:flex-row">
         {/* date picker component */}
         <Popover>
           {/* start date */}
@@ -201,7 +201,7 @@ function BookCard({ className }: { className?: string }) {
             <Input
               type="text"
               placeholder="Enter your code"
-              className="w-full lg:w-40 pe-9"
+              className="w-full pe-9 lg:w-40"
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
             />
@@ -212,7 +212,12 @@ function BookCard({ className }: { className?: string }) {
         </div>
 
         {/* submit */}
-        <Button onClick={handleDateReservation} className="max-lg:col-span-full">Book Now</Button>
+        <Button
+          onClick={handleDateReservation}
+          className="max-lg:col-span-full"
+        >
+          Book Now
+        </Button>
       </CardContent>
     </Card>
   );
@@ -293,7 +298,7 @@ function Header() {
   const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
 
   return (
-    <header className="bg-background/5 border-border sticky top-0 z-10 w-full border-b backdrop-blur-md dark:backdrop-blur-xl">
+    <header className="bg-background/20 dark:bg-background/60 border-border/50 sticky top-0 z-10 w-full border-b backdrop-blur-lg dark:backdrop-blur-2xl">
       <div className="container mx-auto flex items-center gap-0.5 px-4 py-2">
         <Link
           href={route("home")}

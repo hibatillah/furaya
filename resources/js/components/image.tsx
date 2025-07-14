@@ -3,16 +3,17 @@ import { EyeIcon, ImageOffIcon } from "lucide-react";
 
 interface ImageContainerProps extends React.ComponentProps<"img"> {
   href?: string;
+  imgClassName?: string;
 }
 
 export function ImageContainer(props: ImageContainerProps) {
-  const { src, alt, className, href, ...rest } = props;
+  const { src, alt, className, imgClassName, href, ...rest } = props;
 
   function Container() {
     return (
       <div
         className={cn(
-          "bg-accent group relative grid aspect-square w-20 h-20 flex-none place-items-center overflow-hidden rounded-sm border",
+          "bg-accent group relative grid aspect-square h-20 w-20 flex-none place-items-center overflow-hidden rounded-sm border",
           className,
         )}
       >
@@ -20,7 +21,7 @@ export function ImageContainer(props: ImageContainerProps) {
           <img
             src={src}
             alt={alt}
-            className="size-full object-cover brightness-90 bg-center"
+            className={cn("size-full bg-center object-cover brightness-90", imgClassName)}
             {...rest}
           />
         ) : (

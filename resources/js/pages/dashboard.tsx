@@ -56,12 +56,12 @@ export default function Dashboard({ charts }: { charts: Record<string, Record<st
             data={charts.room_type_popularity}
             className="lg:col-span-2"
           />
-          <ChartReservationStatusDistribution
-            data={charts.reservation_status_distribution}
-            className="lg:col-span-2"
-          />
           <ChartCountSmokingTypeReservation
             data={charts.smoking_type_reservation}
+            className="lg:col-span-2"
+          />
+          <ChartReservationStatusDistribution
+            data={charts.reservation_status_distribution}
             className="lg:col-span-2"
           />
         </div>

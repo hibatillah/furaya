@@ -63,7 +63,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
     check_in_at: initialDate,
     check_in_by: employee.user?.name || "",
     notes: "",
-    room_status: "Check In" as Enum.RoomStatus,
+    room_status: "Check In" as Enum.RoomStatus, // default room status after check-in
     employee_id: employee.id,
     reservation_id: reservation.id,
   });
@@ -179,35 +179,6 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
             disabled={isPending}
             required
           />
-        </div>
-
-        {/* room status */}
-        <div className="col-span-2 grid gap-2">
-          <Label htmlFor="time">Status Kamar</Label>
-          <Select
-            value={data.room_status}
-            onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
-            disabled={isPending}
-            required
-          >
-            <SelectTrigger id="room_status">
-              <SelectValue placeholder="Pilih Status Kamar">
-                <span className="capitalize">{data.room_status}</span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {status.map((status) => (
-                <SelectItem
-                  key={status}
-                  value={status}
-                  className="capitalize"
-                >
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <InputError message={errors.check_in_at} />
         </div>
 
         {/* notes */}

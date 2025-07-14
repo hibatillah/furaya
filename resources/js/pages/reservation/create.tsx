@@ -867,7 +867,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
         {/* customer details */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Detail Customer</CardTitle>
+            <CardTitle className="text-lg">Detail Tamu</CardTitle>
           </CardHeader>
           <CardContent>
             {/* phone */}

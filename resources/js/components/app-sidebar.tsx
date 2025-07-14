@@ -52,11 +52,11 @@ const managerMenuItems: Record<string, NavItem[]> = {
       href: route("employee.index"),
       icon: UsersIcon,
     },
-    {
-      title: "Admin",
-      href: route("admin.index"),
-      icon: ShieldUserIcon,
-    },
+    // {
+    //   title: "Admin",
+    //   href: route("admin.index"),
+    //   icon: ShieldUserIcon,
+    // },
     {
       title: "Departemen",
       href: route("department.index"),

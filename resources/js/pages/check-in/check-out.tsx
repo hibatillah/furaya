@@ -39,7 +39,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
     employee_id: employee.id,
     reservation_id: reservation.id,
     additional_charge: "",
-    room_status: "Check Out" as Enum.RoomStatus,
+    room_status: "Check Out" as Enum.RoomStatus, // default room status after check-out
   });
 
   // handle time change
@@ -183,35 +183,8 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
           />
         </div>
 
-        {/* room status */}
-        <div className="grid gap-2">
-          <Label htmlFor="time">Status Kamar</Label>
-          <Select
-            value={data.room_status}
-            onValueChange={(value) => setData("room_status", value as Enum.RoomStatus)}
-          >
-            <SelectTrigger id="room_status">
-              <SelectValue placeholder="Pilih Status Kamar">
-                <span className="capitalize">{data.room_status}</span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {status.map((status) => (
-                <SelectItem
-                  key={status}
-                  value={status}
-                  className="capitalize"
-                >
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <InputError message={errors.room_status} />
-        </div>
-
         {/* additional charge */}
-        <div className="grid gap-2">
+        <div className="grid col-span-2 gap-2">
           <Label htmlFor="additional_charge">Biaya Tambahan</Label>
           <div className="relative">
             <Input
@@ -222,7 +195,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
                 setAdditionalCharge(Number(e.target.value));
                 setData("additional_charge", Number(e.target.value));
               }}
-              placeholder="Input biaya tambahan"
+              placeholder="Input nominal"
               className="w-full ps-8"
               disableHandle
             />

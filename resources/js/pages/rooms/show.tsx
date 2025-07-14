@@ -112,7 +112,8 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
                 <ImageContainer
                   src={room.formatted_room_layout_image}
                   alt={`Denah Kamar ${room.room_number}`}
-                  className="h-40 w-full sm:h-60 lg:h-52"
+                  className="h-40 w-full sm:h-60"
+                  imgClassName="object-contain bg-center"
                   href={room.formatted_room_layout_image}
                 />
               </dd>

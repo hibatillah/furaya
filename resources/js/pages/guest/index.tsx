@@ -25,11 +25,6 @@ export const columns: ColumnDef<Guest.Default>[] = [
     header: "Nama",
   },
   {
-    id: "nik_passport",
-    accessorKey: "nik_passport",
-    header: "NIK/Passport",
-  },
-  {
     id: "phone",
     accessorKey: "phone",
     header: "Handphone",
@@ -38,6 +33,15 @@ export const columns: ColumnDef<Guest.Default>[] = [
     id: "email",
     accessorKey: "user.email",
     header: "Email",
+  },
+  {
+    id: "nik_passport",
+    accessorKey: "nik_passport",
+    header: "NIK/Passport",
+    cell: ({ row }) => {
+      const nikPassport = row.getValue("nik_passport") as string;
+      return nikPassport ?? "-";
+    },
   },
   {
     id: "gender",

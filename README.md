@@ -65,4 +65,12 @@ Run the development server
 composer run dev
 ```
 
+You can run client and server separately
+
+```bash
+npm run dev
+
+php artisan serve
+```
+
 [© hibatillah](https://github.com/hibatillah)
