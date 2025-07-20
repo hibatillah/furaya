@@ -142,7 +142,7 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
         className="grid max-w-lg grid-cols-2 gap-4"
       >
         {/* date */}
-        <div className="grid gap-2">
+        <div className="flex flex-col gap-2">
           <Label
             htmlFor="date"
             required
@@ -160,11 +160,10 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
             }}
             disabled={isPending}
           />
-          <InputError message={errors.check_in_at} />
         </div>
 
         {/* time */}
-        <div className="grid gap-2">
+        <div className="flex flex-col gap-2">
           <Label
             htmlFor="time"
             required
@@ -181,8 +180,11 @@ export default function CheckIn(props: { data: Reservation.Default; employee: Em
           />
         </div>
 
+        {/* check in at error message */}
+        <InputError message={errors.check_in_at} className="col-span-2" />
+
         {/* notes */}
-        <div className="col-span-2 grid gap-2">
+        <div className="col-span-2 flex flex-col gap-2">
           <Label htmlFor="notes">Catatan</Label>
           <Textarea
             id="notes"

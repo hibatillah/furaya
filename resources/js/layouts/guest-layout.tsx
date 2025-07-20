@@ -298,7 +298,7 @@ function Header() {
   const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
 
   return (
-    <header className="bg-background/20 dark:bg-background/60 border-border/50 sticky top-0 z-10 w-full border-b backdrop-blur-lg dark:backdrop-blur-2xl">
+    <header className="bg-background/90 backdrop-blur-sm border-border/50 sticky top-0 z-10 w-full border-b">
       <div className="container mx-auto flex items-center gap-0.5 px-4 py-2">
         <Link
           href={route("home")}

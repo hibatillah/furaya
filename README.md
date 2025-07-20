@@ -1,6 +1,6 @@
 # Hotel Management System
 
-Furaya Hotel Management System, focus on Front Desk module with Prototyping method.
+Furaya Hotel Management System, focus on Front Desk module which is reservation system and room management.
 
 ## Features
 
@@ -45,7 +45,7 @@ composer install
 npm install
 ```
 
-## Run the development server
+## Database migration
 
 Migrate database schema
 
@@ -59,18 +59,27 @@ Seed the database (optional)
 php artisan db:seed
 ```
 
+## Development
+
 Run the development server
 
 ```bash
 composer run dev
 ```
 
-You can run client and server separately
+Run client and server separately (recommended)
 
 ```bash
-npm run dev
-
 php artisan serve
+npm run dev
+```
+
+## Testing
+
+Run tests for main features
+
+```bash
+php artisan test --filter=Main
 ```
 
 [© hibatillah](https://github.com/hibatillah)

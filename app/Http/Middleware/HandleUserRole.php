@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class HandleUserRole
@@ -20,6 +21,15 @@ class HandleUserRole
         $authorized = in_array($userRole, $roles);
 
         if (!$authorized) {
+            Log::channel("project")->warning("Unauthorized access", [
+                "url"     => request()->fullUrl(),
+                "role"    => $userRole,
+                "roles"   => $roles,
+                "user_id" => Auth::user()?->id ?? null,
+                "env"     => config('app.env'),
+                "time"    => now()->toDateTimeString(),
+            ]);
+
             return redirect()->route('home')->with('warning', 'Anda tidak memiliki akses');
         }
 

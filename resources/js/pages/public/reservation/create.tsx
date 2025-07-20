@@ -6,7 +6,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -161,7 +161,9 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
 
         // return if use later payment
         if (selectedPayment === "later") {
-          router.visit(route("public.reservation.history"));
+          setTimeout(() => {
+            router.get(route("public.reservation.history"));
+          }, 2000);
           return;
         }
 
@@ -179,7 +181,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
           // show payment snap window
           processPayment(snapToken, reservationId);
         } catch (err: any) {
-          console.error(err);
           toast.error("Gagal memproses pembayaran", {
             description: "Coba beberapa saat lagi",
             id: "process-payment",
@@ -280,6 +281,12 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
           description: err,
         });
       },
+
+      onFinish: () => {
+        router.get(route("public.reservation.history"), {
+          preserveState: true,
+        });
+      },
     });
   }
 
@@ -316,12 +323,12 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
       ),
     },
     {
-      label: "Breakfast",
-      value: includeBreakfast ? "Include Breakfast" : "Exclude Breakfast",
+      label: "Sarapan",
+      value: includeBreakfast ? "Termasuk Sarapan" : "Tanpa Sarapan",
     },
     {
-      label: "Payment",
-      value: <span className="capitalize">{selectedPayment === "now" ? "Pay Now" : "Pay at Check-in"}</span>,
+      label: "Pembayaran",
+      value: <span className="capitalize">{selectedPayment === "now" ? "Bayar Sekarang" : "Bayar saat Check-in"}</span>,
     },
   ];
 
@@ -386,15 +393,44 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
             </Alert>
           )}
 
-          <SubmitButton
-            disabled={processing || !user}
-            loading={processing}
-            loadingText="Membuat reservasi..."
-            onClick={handleCreateReservation}
-            className="w-full disabled:cursor-not-allowed"
-          >
-            Reservasi Kamar
-          </SubmitButton>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                className="w-full"
+                disabled={processing || !user}
+              >
+                Reservasi Kamar
+              </Button>
+            </DialogTrigger>
+            <DialogContent noClose>
+              <DialogHeader>
+                <DialogTitle>
+                  <h2 className="text-lg font-semibold">Buat Reservasi Kamar</h2>
+                </DialogTitle>
+                <DialogDescription className="text-base">Yakin ingin membuat reservasi kamar?</DialogDescription>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 gap-3">
+                <DialogClose>
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                  >
+                    Batal
+                  </Button>
+                </DialogClose>
+                <SubmitButton
+                  disabled={processing || !user}
+                  loading={processing}
+                  loadingText="Membuat reservasi..."
+                  onClick={handleCreateReservation}
+                  className="disabled:cursor-not-allowed"
+                >
+                  {selectedPayment === "later" ? "Buat Reservasi" : "Bayar Reservasi"}
+                </SubmitButton>
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardFooter>
       </Card>
     );
@@ -421,13 +457,15 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                 <div className="flex flex-col gap-2">
                   <div className="grid grid-cols-[1fr_auto] gap-4">
                     <div className="space-y-1">
-                      <h3 className="text-lg font-semibold">{roomType.name} Room</h3>
+                      <h3 className="text-lg font-semibold">{roomType.name}</h3>
 
                       <div className="grid grid-cols-1 grid-rows-3 gap-x-8 gap-y-1 lg:grid-flow-col lg:grid-cols-[repeat(2,max-content)]">
                         {/* capacity */}
                         <div className="flex items-center gap-2">
                           <UsersRoundIcon className="text-primary size-4" />
-                          <span className="text-muted-foreground text-sm">up to {roomType.capacity} guests</span>
+                          <span className="text-muted-foreground text-sm">
+                            hingga {roomType.capacity} tamu
+                          </span>
                         </div>
 
                         {/* size */}
@@ -451,14 +489,14 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                             href="#"
                             className="text-muted-foreground text-sm underline-offset-2 hover:underline"
                           >
-                            Cancellation Policy
+                            Kebijakan Pembatalan
                           </Link>
                         </div>
 
                         {/* payment */}
                         <div className="flex items-center gap-2">
                           <WalletIcon className="text-primary size-4" />
-                          <div className="text-muted-foreground text-sm">Payment at Check-in</div>
+                          <div className="text-muted-foreground text-sm">Pembayaran saat Check-in</div>
                         </div>
                       </div>
                     </div>
@@ -466,7 +504,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     {/* price */}
                     <div className="flex flex-col items-end">
                       <div className="text-foreground text-xl">{formatCurrency(Number(roomType.base_rate))}</div>
-                      <p className="text-muted-foreground text-sm">price for 1 night</p>
+                      <p className="text-muted-foreground text-sm">harga untuk 1 malam</p>
                     </div>
                   </div>
 
@@ -755,7 +793,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     htmlFor="include_breakfast"
                     required
                   >
-                    Breakfast
+                    Sarapan
                   </Label>
                   <Button
                     variant="outline"
@@ -765,7 +803,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                       htmlFor="include_breakfast"
                       className="bg-accent ms-auto w-full px-3"
                     >
-                      <span>Include Breakfast</span>
+                      <span>Termasuk Sarapan</span>
                       <span className="text-muted-foreground">- Untuk {roomType.capacity} tamu</span>
                       <Switch
                         id="include_breakfast"
@@ -789,12 +827,12 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
 
                 {/* personal request */}
                 <div className="col-span-full flex flex-col gap-2">
-                  <Label htmlFor="remarks">Personal Request</Label>
+                  <Label htmlFor="remarks">Permintaan Pribadi</Label>
                   <Textarea
                     id="remarks"
                     value={data.remarks}
                     onChange={(e) => setData("remarks", e.target.value)}
-                    placeholder="If you have any special needs, please feel free to share them with use. We'll do our best to help you"
+                    placeholder="Jika ada permintaan pribadi, silakan berikan informasi kepada kami. Kami akan berusaha sebaik mungkin untuk membantu Anda"
                     className="w-full"
                   />
                   <InputError message={errors.remarks} />
@@ -810,19 +848,19 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
               <Separator />
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground text-pretty">
-                  By proceeding with the booking, you give your Consent to personal data processing and confirm that you have read the Online booking
-                  rules and the Privacy policy
+                  Dengan melanjutkan pemesanan, Anda memberikan persetujuan untuk pemrosesan data pribadi dan mengkonfirmasi bahwa Anda telah membaca aturan pemesanan
+                  online dan kebijakan privasi
                 </p>
 
                 <Alert className="border-blue-200 bg-blue-100 dark:border-blue-950 dark:bg-slate-900">
                   <InfoIcon className="!text-blue-500 dark:!text-blue-600" />
                   <AlertTitle className="tracking-wide">
-                    No need to pay for your stay right now!
+                    Tidak perlu membayar untuk penginapan Anda sekarang!
                     <Link
                       href="#"
                       className="ms-1 text-sm underline underline-offset-2"
                     >
-                      Cancellation Policy
+                      Kebijakan Pembatalan
                     </Link>
                   </AlertTitle>
                 </Alert>
@@ -833,7 +871,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     htmlFor="payment_method"
                     required
                   >
-                    Select Payment Method
+                    Pilih Metode Pembayaran
                   </Label>
                   <RadioGroup
                     value={selectedPayment}
@@ -851,10 +889,10 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                         id="now"
                         className="hidden"
                       />
-                      <div className="text-base font-semibold">Pay Now</div>
+                      <div className="text-base font-semibold">Bayar Sekarang</div>
                       <p className="text-muted-foreground leading-normal">
-                        By selecting this payment method, you will be directed to make a payment. You can choose the type of payment you want based on
-                        the available options.
+                        Dengan memilih metode pembayaran ini, Anda akan diarahkan untuk melakukan pembayaran. Anda dapat memilih jenis pembayaran yang Anda inginkan
+                        berdasarkan pilihan yang tersedia.
                       </p>
                     </Label>
                     <Label
@@ -867,9 +905,9 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                         id="later"
                         className="hidden"
                       />
-                      <div className="text-base font-semibold">Pay at Check-in</div>
+                      <div className="text-base font-semibold">Bayar saat Check-in</div>
                       <p className="text-muted-foreground leading-normal">
-                        By selecting this payment method, you don't need to prepay for your stay.
+                        Dengan memilih metode pembayaran ini, Anda tidak perlu membayar untuk penginapan Anda sekarang.
                       </p>
                     </Label>
                   </RadioGroup>

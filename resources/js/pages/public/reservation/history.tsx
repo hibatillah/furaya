@@ -128,7 +128,10 @@ export default function ReservationHistory({
               >
                 <div className="relative flex flex-col gap-5">
                   <CardHeader className="flex flex-col gap-3">
-                    <CardTitle className="text-card-foreground/90 font-normal max-lg:text-lg">{reservation.booking_number}</CardTitle>
+                    <CardTitle className="text-card-foreground/90 font-normal max-lg:text-lg">
+                      <span className="text-muted-foreground me-2 text-sm">No. Booking</span>
+                      {reservation.booking_number}
+                    </CardTitle>
 
                     <div className="flex items-center gap-2">
                       <Badge
@@ -173,7 +176,7 @@ export default function ReservationHistory({
                         {reservation.reservation_room?.bed_type ? ` - ${reservation.reservation_room?.bed_type}` : ""}
                       </div>
                       <div className="text-muted-foreground capitalize">
-                        {reservation.smoking_type} • {reservation.include_breakfast ? "Include Breakfast" : "Exclude Breakfast"}
+                        {reservation.smoking_type} • {reservation.include_breakfast ? "Termasuk Sarapan" : "Tanpa Sarapan"}
                       </div>
                     </div>
 

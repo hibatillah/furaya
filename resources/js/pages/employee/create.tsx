@@ -185,7 +185,7 @@ export default function EmployeeCreate(props: { departments: Department.Default[
               <DatePicker
                 value={data.hire_date as Date}
                 onChange={(date) => setData("hire_date", format(date, "yyyy-MM-dd"))}
-                className="w-full"
+                className="w-full bg-accent"
               />
               <InputError message={errors.hire_date} />
             </div>

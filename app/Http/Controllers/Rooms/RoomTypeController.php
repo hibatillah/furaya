@@ -60,7 +60,7 @@ class RoomTypeController extends Controller
             $validated = $request->validated();
 
             DB::transaction(function () use ($validated) {
-                $facilities = $validated['facilities'];
+                $facilities = $validated['facilities'] ?? [];
 
                 // store and get image paths
                 $imagePaths = Helper::storeImage(

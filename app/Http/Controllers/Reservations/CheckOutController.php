@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservations\CheckOutRequest;
 use App\Models\Reservations\Reservation;
 use App\Models\Rooms\Room;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +35,7 @@ class CheckOutController extends Controller
                 $reservationId = $validated['reservation_id'];
                 $additionalCharge = $validated['additional_charge'];
 
-                // update reservation status
+                // create reservation check-out
                 $reservation = Reservation::findOrFail($reservationId);
                 $reservation->checkOut()->create($checkout);
 

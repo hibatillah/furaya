@@ -8,6 +8,8 @@ use App\Http\Controllers\Rooms\RoomController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+Route::pattern('id', '[0-9a-fA-F\-]{36}');
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -98,8 +100,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name("room.update.status");
 
             /** room index route */
-            Route::get("kamar", [RoomController::class, "index"])
-                ->name("room.index");
+            Route::resource("/kamar", RoomController::class)
+                ->only(["index", "show"])
+                ->parameters(["kamar" => "id"])
+                ->names([
+                    "index" => "room.index",
+                    "show" => "room.show",
+                ]);
         });
 
         /** guest resource routes for managers and admins */

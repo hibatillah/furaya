@@ -55,7 +55,7 @@ return new class extends Migration
             $table->enum('condition', RoomConditionEnum::getValues())
                 ->default('ready');
             $table->enum('status', RoomStatusEnum::getValues())
-                ->default('ready');
+                ->default('Vacant');
             $table->float("price", 8, 2);
             $table->integer("capacity");
             $table->float("size", 4, 2);

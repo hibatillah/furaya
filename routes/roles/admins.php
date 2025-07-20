@@ -12,20 +12,22 @@ use App\Http\Controllers\Rooms\FacilityController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware("role:admin")->group(function () {
+  // override update method (UUID only)
+  Route::put('kamar/{id}', [RoomController::class, 'update'])
+    ->whereUuid('id')
+    ->name('room.update');
+
+  Route::post('kamar/{id}', [RoomController::class, 'update'])
+    ->whereUuid('id')
+    ->name('room.update');
+
   /** room resource routes */
-  Route::get("kamar/tambah", [RoomController::class, "create"])
-    ->name("room.create");
-
-  // override update method
-  Route::put('kamar/{id}', [RoomController::class, 'update'])->name('room.update');
-  Route::post('kamar/{id}', [RoomController::class, 'update'])->name('room.update');
-
   Route::resource("/kamar", RoomController::class)
-    ->except(["index", "create", "update"])
+    ->except(["update", "index", "show"])
     ->parameters(["kamar" => "id"])
     ->names([
+      "create" => "room.create",
       "store" => "room.store",
-      "show" => "room.show",
       "edit" => "room.edit",
       "destroy" => "room.destroy",
     ]);

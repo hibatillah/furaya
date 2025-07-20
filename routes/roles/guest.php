@@ -23,24 +23,24 @@ Route::get("/reservasi/tambah", [
   "create"
 ])->name("public.reservation.create");
 
-// store reservation
-Route::post("/reservasi/tambah", [
-  PublicReservationController::class,
-  "store"
-])->name("public.reservation.store");
-
-// update payment status
-Route::put("/reservasi/pembayaran/{id}", [
-  PublicReservationController::class,
-  "payment"
-])->name("public.reservation.payment");
-
 Route::middleware(["auth", "role:guest"])->group(function () {
   // show reservation history
   Route::get("/reservasi/riwayat", [
     PublicReservationController::class,
     "history"
   ])->name("public.reservation.history");
+
+  // store reservation
+  Route::post("/reservasi/tambah", [
+    PublicReservationController::class,
+    "store"
+  ])->name("public.reservation.store");
+
+  // update payment status
+  Route::put("/reservasi/pembayaran/{id}", [
+    PublicReservationController::class,
+    "payment"
+  ])->name("public.reservation.payment");
 
   // update reservation payment detail
   Route::put("/reservasi/pembayaran/{id}", [

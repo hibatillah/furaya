@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Reservations;
 
 use App\Enums\RoomStatusEnum;
+use App\Models\Reservations\Reservation;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +27,28 @@ class CheckOutRequest extends FormRequest
     {
         return [
             "reservation_id" => ["required", "string", Rule::exists("reservations", "id")],
-            "check_out_at" => ["required", "date"],
+            "check_out_at" => [
+                "required",
+                "date",
+                function ($attribute, $value, $fail) {
+                    $reservation = Reservation::with('checkIn')->find(request('reservation_id'));
+
+                    if (!$reservation) return;
+
+                    $checkOutAt = Carbon::parse($value);
+
+                    // check rules
+                    if (!$reservation->checkIn) {
+                        $fail("Check-in terlebih dahulu sebelum melakukan check-out.");
+                    }
+
+                    if (
+                        $checkOutAt->lt($reservation->start_date) || $checkOutAt->gt($reservation->end_date)
+                    ) {
+                        $fail("Check-out tidak dapat dilakukan di luar tanggal reservasi.");
+                    }
+                }
+            ],
             "check_out_by" => ["required", "string", "max:255"],
             "employee_id" => ["required", "string", Rule::exists("employees", "id")],
             "additional_charge" => ["nullable", "numeric"],

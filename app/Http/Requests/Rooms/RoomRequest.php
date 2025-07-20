@@ -36,11 +36,18 @@ class RoomRequest extends FormRequest
             ],
             'floor_number' => ['required', 'integer'],
             'view' => ['nullable', 'string', 'max:255'],
-            'condition' => ['required', Rule::in(RoomConditionEnum::getValues())],
+            'condition' => [
+                'required',
+                Rule::in(RoomConditionEnum::getValues())
+            ],
             'price' => ['required', 'numeric', 'min:1'],
             'capacity' => ['required', 'integer', 'min:1'],
             "size" => ["nullable", "numeric", "min:0"],
-            "smoking_type" => ["nullable", "string", Rule::in(SmokingTypeEnum::getValues())],
+            "smoking_type" => [
+                "nullable",
+                "string",
+                Rule::in(SmokingTypeEnum::getValues())
+            ],
             'room_type_id' => ['required', Rule::exists("room_types", "id")],
             'bed_type_id' => ['required', Rule::exists("bed_types", "id")],
             'rate_type_id' => ['required', Rule::exists("rate_types", "id")],
@@ -48,8 +55,18 @@ class RoomRequest extends FormRequest
             'facilities' => ['nullable', 'array'],
             'facilities.*' => ['nullable', 'string', Rule::exists("facilities", "id")],
             'images' => ['nullable', 'array'],
-            'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-            'room_layout' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'images.*' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:5120'
+            ],
+            'room_layout' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:5120'
+            ],
         ];
     }
 
@@ -72,11 +89,11 @@ class RoomRequest extends FormRequest
             'capacity.integer' => 'Kapasitas kamar harus berupa angka.',
             'capacity.min' => 'Kapasitas kamar minimal 1.',
             'room_type_id.required' => 'Tipe kamar wajib dipilih.',
-            'room_type_id.exist' => 'Tipe kamar yang dipilih tidak ditemukan.',
+            'room_type_id.exists' => 'Tipe kamar yang dipilih tidak ditemukan.',
             'bed_type_id.required' => 'Tipe kasur wajib dipilih.',
-            'bed_type_id.exist' => 'Tipe kasur yang dipilih tidak ditemukan.',
+            'bed_type_id.exists' => 'Tipe kasur yang dipilih tidak ditemukan.',
             'rate_type_id.required' => 'Tipe tarif wajib dipilih.',
-            'rate_type_id.exist' => 'Tipe tarif yang dipilih tidak ditemukan.',
+            'rate_type_id.exists' => 'Tipe tarif yang dipilih tidak ditemukan.',
             'status.required' => 'Status kamar wajib dipilih.',
             'status.in' => 'Status kamar yang dipilih tidak valid.',
             'facilities.array' => 'Fasilitas kamar harus berupa array.',

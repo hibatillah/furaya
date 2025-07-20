@@ -28,7 +28,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function RoomTypeCreate(props: { facilities: Facility.Default[]; rateTypes: RateType.Default[]; bedTypes: BedType.Default[] }) {
   const { facilities, rateTypes, bedTypes } = props;
 
-  const { data, setData, post, errors, processing, reset } = useForm<RoomType.Create>();
+  const { data, setData, post, errors, processing, reset } = useForm<RoomType.Create>({
+    code: "",
+    name: "",
+    capacity: "",
+    size: "",
+    base_rate: "",
+    bed_type_id: "",
+    rate_type_id: "",
+    facilities: [],
+    images: [],
+  });
 
   const [selectedFacilities, setSelectedFacilities] = useState<Option[]>([]);
   const [selectedRateType, setSelectedRateType] = useState<RateType.Default | null>(null);
@@ -307,12 +317,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
 
             {/* images */}
             <div className="flex flex-col gap-2 xl:col-start-3 xl:row-span-4 xl:row-start-1">
-              <Label
-                htmlFor="images"
-                required
-              >
-                Gambar
-              </Label>
+              <Label htmlFor="images">Gambar</Label>
               <UploadFile
                 options={fileUploadState}
                 actions={fileUploadActions}

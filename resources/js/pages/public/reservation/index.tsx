@@ -90,7 +90,7 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
                     <h3 className="text-foreground text-lg font-semibold">{roomType.name}</h3>
                     <div className="text-muted-foreground flex items-center gap-2 text-sm">
                       <UsersRoundIcon className="text-primary size-3" />
-                      up to {roomType.capacity} guests
+                      hingga {roomType.capacity} tamu
                     </div>
                     <div className="text-muted-foreground flex items-center gap-2 text-sm">
                       <Maximize2Icon className="text-primary size-3" />
@@ -108,10 +108,10 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
                   <div className="flex flex-col items-end gap-3">
                     <div className="flex flex-col items-end">
                       <div className="flex items-end gap-1">
-                        <span className="text-muted-foreground text-sm">from</span>
+                        <span className="text-muted-foreground text-sm">mulai dari</span>
                         {formatCurrency(Number(roomType.base_rate))}
                       </div>
-                      <span className="text-muted-foreground text-sm">1 night / {roomType.capacity} guests</span>
+                      <span className="text-muted-foreground text-sm">1 malam / {roomType.capacity} tamu</span>
                     </div>
 
                     <Button

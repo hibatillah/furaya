@@ -146,7 +146,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
         className="grid max-w-lg grid-cols-2 gap-4"
       >
         {/* date */}
-        <div className="grid gap-2">
+        <div className="flex flex-col gap-2">
           <Label
             htmlFor="date"
             required
@@ -163,11 +163,10 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
               after: new Date(reservation.end_date as Date),
             }}
           />
-          <InputError message={errors.check_out_at} />
         </div>
 
         {/* time */}
-        <div className="grid gap-2">
+        <div className="flex flex-col gap-2">
           <Label
             htmlFor="time"
             required
@@ -183,8 +182,11 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
           />
         </div>
 
+        {/* check out at error message */}
+        <InputError message={errors.check_out_at} className="col-span-2" />
+
         {/* additional charge */}
-        <div className="grid col-span-2 gap-2">
+        <div className="col-span-2 flex flex-col gap-2">
           <Label htmlFor="additional_charge">Biaya Tambahan</Label>
           <div className="relative">
             <Input
@@ -205,7 +207,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
         </div>
 
         {/* notes */}
-        <div className="col-span-2 grid gap-2">
+        <div className="col-span-2 flex flex-col gap-2">
           <Label
             htmlFor="notes"
             optional
