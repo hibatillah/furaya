@@ -92,7 +92,9 @@ class ReservationRequest extends FormRequest
             "nik_passport" => ["nullable", "string", "max:255"],
             "profession" => ["nullable", "string", "max:255"],
             "nationality" => ["nullable", "string", "max:255"],
+            "nationality_code" => ["nullable", "string", "max:5"],
             "country" => ["nullable", "string", "max:255"],
+            "country_code" => ["nullable", "string", "max:5"],
             "address" => ["nullable", "string", "max:255"],
 
             // room data
@@ -176,8 +178,12 @@ class ReservationRequest extends FormRequest
             "address.max" => "Alamat maksimal 255 karakter.",
             "nationality.string" => "Kebangsaan harus berupa string.",
             "nationality.max" => "Kebangsaan maksimal 255 karakter.",
+            "nationality_code.string" => "Kode kebangsaan harus berupa string.",
+            "nationality_code.max" => "Kode kebangsaan maksimal 5 karakter.",
             "country.string" => "Negara harus berupa string.",
             "country.max" => "Negara maksimal 255 karakter.",
+            "country_code.string" => "Kode negara harus berupa string.",
+            "country_code.max" => "Kode negara maksimal 5 karakter.",
             "room_id.string" => "Room ID harus berupa string.",
             "room_id.exists" => "Room ID tidak ditemukan.",
             "room_type_name.string" => "Nama tipe kamar harus berupa string.",

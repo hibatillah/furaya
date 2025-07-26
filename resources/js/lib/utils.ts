@@ -65,3 +65,14 @@ export async function fetchImageMetadata(urls: string[]) {
 
   return results;
 }
+
+/**
+ * Get country image url from flagcdn
+ *
+ * @param code - country code
+ * @returns country image url
+ */
+export function getCountryImgUrl(code: string) {
+  const url = `https://flagcdn.com/w40/${code}.webp`;
+  return url;
+}

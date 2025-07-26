@@ -69,7 +69,9 @@ declare namespace ReservationGuest {
     email?: string;
     address?: string;
     nationality?: string;
+    nationality_code?: string;
     country?: string;
+    country_code?: string;
   }
 
   interface Addition {}

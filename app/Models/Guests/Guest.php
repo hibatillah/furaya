@@ -3,7 +3,6 @@
 namespace App\Models\Guests;
 
 use App\Models\BaseModel;
-use App\Models\Reservations\Reservation;
 use App\Models\Reservations\ReservationGuest;
 use App\Models\User;
 use Carbon\Carbon;
@@ -11,6 +10,7 @@ use Carbon\Carbon;
 class Guest extends BaseModel
 {
     protected $appends = [
+        'name',
         'formatted_birthdate',
         'formatted_gender',
     ];

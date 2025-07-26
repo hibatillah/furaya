@@ -4,23 +4,40 @@ import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, getCountryImgUrl } from "@/lib/utils";
 
-interface SelectSearchProps {
+interface SelectCountryProps {
   label?: string;
   data: {
-    value: string;
-    label: string;
+    code: string;
+    name: string;
   }[];
-  value: string;
-  setValue: (value: string) => void;
+  value: string | undefined;
+  setValue: (value: { code: string; name: string }) => void;
   action?: React.ReactNode;
   className?: string;
 }
 
-export default function SelectSearch({ data, value, setValue, action, className, label }: SelectSearchProps) {
+export default function SelectCountry({ data, value, setValue, action, className, label }: SelectCountryProps) {
   const id = useId();
   const [open, setOpen] = useState<boolean>(false);
+
+  function handleSelect(value: string) {
+    const country = data.find((item) => item.name === value);
+
+    if (!country) return "Data tidak ditemukan";
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={getCountryImgUrl(country.code)}
+          alt={country.name}
+          className="h-auto w-5 border object-contain"
+        />
+        <span>{country.name}</span>
+      </div>
+    );
+  }
 
   return (
     <Popover
@@ -39,7 +56,7 @@ export default function SelectSearch({ data, value, setValue, action, className,
           )}
         >
           <span className={cn("truncate", !value && "text-muted-foreground")}>
-            {value ? data.find((item) => item.value === value)?.label : label ? `Pilih ${label}` : "Pilih data"}
+            {value ? handleSelect(value) : label ? `Pilih ${label}` : "Pilih data"}
           </span>
           <ChevronDownIcon
             size={16}
@@ -49,25 +66,30 @@ export default function SelectSearch({ data, value, setValue, action, className,
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="border-input w-full rounded-md min-w-[var(--radix-popper-anchor-width)] p-0"
+        className="border-input w-92 min-w-[var(--radix-popper-anchor-width)] p-0"
         align="start"
       >
-        <Command>
-          <CommandInput placeholder={label ? `Cari ${label}` : "Cari data"} />
-          <CommandList>
+        <Command className="rounded-lg">
+          <CommandInput placeholder="Cari negara" />
+          <CommandList className="relative">
             <CommandEmpty>{label ?? "Data"} tidak tersedia</CommandEmpty>
             <CommandGroup>
               {data.map((item) => (
                 <CommandItem
-                  key={item.value}
-                  value={item.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                  key={item.code}
+                  value={item.name}
+                  onSelect={() => {
+                    setValue({ code: item.code, name: item.name });
                     setOpen(false);
                   }}
                 >
-                  {item.label}
-                  {value === item.value && (
+                  <img
+                    src={getCountryImgUrl(item.code)}
+                    alt={item.name}
+                    className="h-4 w-4 object-contain"
+                  />
+                  <span>{item.name}</span>
+                  {value === item.name && (
                     <CheckIcon
                       size={16}
                       className="ml-auto"

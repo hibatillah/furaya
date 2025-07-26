@@ -9,7 +9,9 @@ declare namespace Guest {
     birthdate: Date | string;
     profession?: string;
     nationality?: string;
+    nationality_code?: string;
     country?: string;
+    country_code?: string;
     address?: string;
   }
 

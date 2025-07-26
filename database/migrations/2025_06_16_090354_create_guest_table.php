@@ -48,7 +48,9 @@ return new class extends Migration
             $table->enum('gender', GenderEnum::getValues())->nullable();
             $table->string("profession")->nullable();
             $table->string("nationality")->nullable();
+            $table->string("nationality_code")->nullable();
             $table->string("country")->nullable();
+            $table->string("country_code")->nullable();
             $table->string("address")->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -76,5 +77,26 @@ class Helper
       "trace" => $e->getTraceAsString(),
       "user_id" => Auth::user()->id ?? null,
     ]);
+  }
+
+  public static function getCountry()
+  {
+    $response = Http::get("https://flagcdn.com/en/codes.json");
+    $data = $response->json();
+
+    if ($response->failed()) return [];
+
+    /**
+     * Get all countries
+     * @return array of [ "code" => string, "name" => string ]
+     */
+    $countries = array_map(function ($code, $name) {
+      return (object) [
+        "code" => $code,
+        "name" => $name,
+      ];
+    }, array_keys($data), array_values($data));
+
+    return $countries;
   }
 }

@@ -2,6 +2,7 @@ import { DataList } from "@/components/data-list";
 import { InfoTooltip } from "@/components/info-tooltip";
 import { InputDate, type InputDate as InputDateType } from "@/components/input-date";
 import InputError from "@/components/input-error";
+import SelectCountry from "@/components/select-country";
 import { SubmitButton } from "@/components/submit-button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +34,10 @@ import { toast } from "sonner";
 export default function ReservationsEdit(props: {
   reservation: Reservation.Default;
   guestTypes: GuestType.Default[];
-  nationalities: Nationality.Default[];
-  countries: Country.Default[];
+  countries: {
+    code: string;
+    name: string;
+  }[];
   visitPurposes: Enum.VisitPurpose[];
   bookingTypes: Enum.BookingType[];
   roomPackages: Enum.RoomPackage[];
@@ -53,7 +56,6 @@ export default function ReservationsEdit(props: {
     reservation,
     statusAcc,
     guestTypes,
-    nationalities,
     countries,
     roomTypes,
     smokingTypes,
@@ -80,11 +82,9 @@ export default function ReservationsEdit(props: {
   const initialBirthdateYear = addYears(initialStartDate, -17); // Customer must be at least 17 years old
 
   const { start_date, end_date, reservation_guest, reservation_room, ...reservationData } = reservation;
-  const isPendingReservation = reservationData.status_acc === "pending" && !reservation_room?.room_id;
 
+  const isPendingReservation = reservationData.status_acc === "pending" && !reservation_room?.room_id;
   const initialGuestType = guestTypes.find((e) => e.name === reservation.guest_type);
-  const initialNationality = nationalities.find((e) => e.name === reservation_guest?.nationality);
-  const initialCountry = countries.find((e) => e.name === reservation_guest?.country);
 
   // handle form state
   const [startDate, setStartDate] = useState<InputDateType>(new Date(start_date) || initialStartDate);
@@ -94,8 +94,8 @@ export default function ReservationsEdit(props: {
   const [availableRooms, setAvailableRooms] = useState<Room.Default[]>([]);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<Room.Default | undefined>(reservation_room?.room);
   const [selectedGuestType, setSelectedGuestType] = useState<string | undefined>(initialGuestType?.id);
-  const [selectedNationality, setSelectedNationality] = useState<string | undefined>(initialNationality?.id);
-  const [selectedCountry, setSelectedCountry] = useState<string | undefined>(initialCountry?.id);
+  const [selectedNationality, setSelectedNationality] = useState<string | undefined>(reservation_guest?.nationality);
+  const [selectedCountry, setSelectedCountry] = useState<string | undefined>(reservation_guest?.country);
   const [includeBreakfast, setIncludeBreakfast] = useState<boolean>(reservationData.include_breakfast || true);
 
   // define form
@@ -139,8 +139,10 @@ export default function ReservationsEdit(props: {
     birthdate: reservation_guest?.guest?.gender ? new Date(reservation_guest?.guest?.birthdate as string) : "",
     profession: reservation_guest?.guest?.profession || "",
     nationality: reservation_guest?.guest?.nationality || "",
-    address: reservation_guest?.guest?.address || "",
+    nationality_code: reservation_guest?.guest?.nationality_code || "",
     country: reservation_guest?.guest?.country || "",
+    country_code: reservation_guest?.guest?.country_code || "",
+    address: reservation_guest?.guest?.address || "",
 
     // room data
     room_id: reservation_room?.room_id || "",
@@ -166,16 +168,8 @@ export default function ReservationsEdit(props: {
         const guest = data.guest as Guest.Default;
 
         if (guest) {
-          toast.success("Tamu ditemukan", {
-            id: "get-guest",
-            description: "Data tamu diterapkan ke form",
-          });
-
-          const nationality = nationalities.find((e) => e.name === guest.nationality);
-          const country = countries.find((e) => e.name === guest.country);
-
-          setSelectedNationality(nationality?.id);
-          setSelectedCountry(country?.id);
+          setSelectedNationality(guest.nationality);
+          setSelectedCountry(guest.country);
 
           // apply guest data to form
           setData((prev) => ({
@@ -187,9 +181,16 @@ export default function ReservationsEdit(props: {
             birthdate: new Date(guest.birthdate) || "",
             profession: guest.profession || "",
             nationality: guest.nationality || "",
-            address: guest.address || "",
+            nationality_code: guest.nationality_code || "",
             country: guest.country || "",
+            country_code: guest.country_code || "",
+            address: guest.address || "",
           }));
+
+          toast.success("Tamu ditemukan", {
+            id: "get-guest",
+            description: "Data tamu diterapkan ke form",
+          });
         } else {
           toast.warning("Tamu tidak ditemukan", {
             id: "get-guest",
@@ -290,7 +291,6 @@ export default function ReservationsEdit(props: {
    */
   const breakfastRate = useMemo(() => {
     const LoS = data.length_of_stay || 1;
-    const roomRate = data.room_rate || 0;
     const breakfastRate = data.include_breakfast ? BASE_BREAKFAST_RATE * (selectedRoomNumber?.capacity || 0) * LoS : 0;
 
     return breakfastRate;
@@ -1193,31 +1193,19 @@ export default function ReservationsEdit(props: {
               >
                 Kewarganegaraan
               </Label>
-              <Select
+              <SelectCountry
+                label="Kewarganegaraan"
+                data={countries}
                 value={selectedNationality}
-                onValueChange={(value) => {
-                  setSelectedNationality(value);
-                  setData("nationality", nationalities.find((nationality) => nationality.id === value)?.name || "");
+                setValue={({ code, name }) => {
+                  setSelectedNationality(name);
+                  setData((prev) => ({
+                    ...prev,
+                    nationality: name,
+                    nationality_code: code,
+                  }));
                 }}
-                required
-              >
-                <SelectTrigger id="nationality">
-                  <SelectValue placeholder="Pilih Kewarganegaraan">
-                    <span className="capitalize">{nationalities.find((nationality) => nationality.id === selectedNationality)?.name}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {nationalities.map((nationality) => (
-                    <SelectItem
-                      key={nationality.id}
-                      value={nationality.id}
-                      className="capitalize"
-                    >
-                      {nationality.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
               <InputError message={errors.nationality} />
             </div>
 
@@ -1237,32 +1225,20 @@ export default function ReservationsEdit(props: {
 
             {/* country */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="country">Negara</Label>
-              <Select
+              <Label htmlFor="country">Asal Negara</Label>
+              <SelectCountry
+                label="Asal Negara"
+                data={countries}
                 value={selectedCountry}
-                onValueChange={(value) => {
-                  setSelectedCountry(value);
-                  setData("country", countries.find((country) => country.id === value)?.name || "");
+                setValue={({ code, name }) => {
+                  setSelectedCountry(name);
+                  setData((prev) => ({
+                    ...prev,
+                    country: name,
+                    country_code: code,
+                  }));
                 }}
-                required
-              >
-                <SelectTrigger id="country">
-                  <SelectValue placeholder="Pilih Negara">
-                    <span className="capitalize">{countries.find((country) => country.id === selectedCountry)?.name}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem
-                      key={country.id}
-                      value={country.id}
-                      className="capitalize"
-                    >
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
               <InputError message={errors.country} />
             </div>
 

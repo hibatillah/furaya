@@ -84,7 +84,9 @@ return new class extends Migration
             $table->string("email")->nullable();
             $table->string("address")->nullable();
             $table->string("nationality")->nullable();
+            $table->string("nationality_code")->nullable();
             $table->string("country")->nullable();
+            $table->string("country_code")->nullable();
             $table->timestamps();
         });
 

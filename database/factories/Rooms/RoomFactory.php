@@ -27,12 +27,7 @@ class RoomFactory extends Factory
         $roomType = RoomType::all()->random();
 
         return [
-            'room_number' => function () {
-                do {
-                    $number = $this->faker->numberBetween(100, 400);
-                } while (Room::where('room_number', $number)->exists());
-                return $number;
-            },
+            'room_number' => $this->faker->unique()->numberBetween(100, 500),
             'floor_number' => $this->faker->numberBetween(1, 10),
             'view' => $this->faker->word,
             'condition' => $this->faker->randomElement(RoomConditionEnum::getValues()),

@@ -19,15 +19,28 @@ class GuestFactory extends Factory
      */
     public function definition(): array
     {
+        $countries = [
+            'Indonesia' => 'id',
+            'Malaysia' => 'my',
+            'United States' => 'us',
+            'Singapore' => 'sg',
+            'Thailand' => 'th',
+        ];
+
+        $country = $this->faker->randomElement(array_keys($countries));
+        $countryCode = $countries[$country];
+
         return [
             "user_id" => $this->faker->unique()->numberBetween(1, 20),
             "nik_passport" => $this->faker->unique()->word(10),
             "birthdate" => $this->faker->dateTimeBetween('-50 years', '-17 years'),
             "gender" => $this->faker->randomElement(GenderEnum::getValues()),
-            "phone" => $this->faker->unique()->numerify('+628#########'),
+            "phone" => $this->faker->unique()->numerify('628#########'),
             "profession" => $this->faker->jobTitle,
-            "nationality" => Nationality::all()->random()->name,
-            "country" => Country::all()->random()->name,
+            "nationality" => $country,
+            "nationality_code" => $countryCode,
+            "country" => $country,
+            "country_code" => $countryCode,
             "address" => $this->faker->address,
         ];
     }

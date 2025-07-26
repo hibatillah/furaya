@@ -2,6 +2,7 @@ import { DataList } from "@/components/data-list";
 import { ImageContainer } from "@/components/image";
 import { InputDate } from "@/components/input-date";
 import InputError from "@/components/input-error";
+import SelectCountry from "@/components/select-country";
 import { SubmitButton } from "@/components/submit-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,10 @@ import PublicLogin from "../auth/login";
 interface PublicReservationCreateProps {
   roomType: RoomType.Default;
   genders: Enum.Gender[];
-  nationalities: Nationality.Default[];
+  countries: {
+    code: string;
+    name: string;
+  }[];
   smokingTypes: Enum.SmokingType[];
   startDate: string;
   endDate: string;
@@ -41,9 +45,7 @@ interface PublicReservationCreateProps {
 }
 
 export default function PublicReservationsCreate(props: PublicReservationCreateProps) {
-  const { roomType, genders, nationalities, smokingTypes, startDate, endDate, adults, children, lengthOfStay, user } = props;
-
-  const [loginDialog, setLoginDialog] = useState(false);
+  const { roomType, genders, countries, smokingTypes, startDate, endDate, adults, children, lengthOfStay, user } = props;
 
   // declare initial data
   const pax = adults + children;
@@ -170,7 +172,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
         // show payment snap window
         try {
           toast.info("Memproses pembayaran", { id: "process-payment" });
-
           // get snap token using reservation id
           const snapToken = await getSnapToken(reservationId);
 
@@ -332,6 +333,8 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
     },
   ];
 
+  console.log(countries, user);
+
   useEffect(() => {
     if (user) {
       setData((prev: Reservation.Create) => ({
@@ -343,15 +346,17 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
         gender: user.guest?.gender ?? ("" as Enum.Gender),
         profession: user.guest?.profession ?? "",
         nationality: user.guest?.nationality ?? "",
+        nationality_code: user.guest?.nationality_code ?? " ",
         address: user.guest?.address ?? "",
         country: user.guest?.country ?? "",
+        country_code: user.guest?.country_code ?? "",
       }));
 
       if (user.guest?.birthdate) {
         setData("birthdate", new Date(user.guest.birthdate as Date));
       }
 
-      setSelectedNationality(nationalities.find((nationality) => nationality.name === user.guest?.nationality)?.id ?? "");
+      setSelectedNationality(user.guest?.nationality ?? "");
     }
   }, [user]);
 
@@ -463,9 +468,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                         {/* capacity */}
                         <div className="flex items-center gap-2">
                           <UsersRoundIcon className="text-primary size-4" />
-                          <span className="text-muted-foreground text-sm">
-                            hingga {roomType.capacity} tamu
-                          </span>
+                          <span className="text-muted-foreground text-sm">hingga {roomType.capacity} tamu</span>
                         </div>
 
                         {/* size */}
@@ -671,31 +674,19 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                   >
                     Kewarganegaraan
                   </Label>
-                  <Select
+                  <SelectCountry
+                    label="Kewarganegaraan"
+                    data={countries}
                     value={selectedNationality}
-                    onValueChange={(value) => {
-                      setSelectedNationality(value);
-                      setData("nationality", nationalities.find((nationality) => nationality.id === value)?.name || "");
+                    setValue={({ code, name }) => {
+                      setSelectedNationality(name);
+                      setData((prev) => ({
+                        ...prev,
+                        nationality: name,
+                        nationality_code: code,
+                      }));
                     }}
-                    required
-                  >
-                    <SelectTrigger id="nationality">
-                      <SelectValue placeholder="Pilih Kewarganegaraan">
-                        <span className="capitalize">{data.nationality}</span>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {nationalities.map((nationality) => (
-                        <SelectItem
-                          key={nationality.id}
-                          value={nationality.id}
-                          className="capitalize"
-                        >
-                          {nationality.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   <InputError message={errors.nationality} />
                 </div>
 
@@ -848,8 +839,8 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
               <Separator />
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground text-pretty">
-                  Dengan melanjutkan pemesanan, Anda memberikan persetujuan untuk pemrosesan data pribadi dan mengkonfirmasi bahwa Anda telah membaca aturan pemesanan
-                  online dan kebijakan privasi
+                  Dengan melanjutkan pemesanan, Anda memberikan persetujuan untuk pemrosesan data pribadi dan mengkonfirmasi bahwa Anda telah membaca
+                  aturan pemesanan online dan kebijakan privasi
                 </p>
 
                 <Alert className="border-blue-200 bg-blue-100 dark:border-blue-950 dark:bg-slate-900">
@@ -891,8 +882,8 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                       />
                       <div className="text-base font-semibold">Bayar Sekarang</div>
                       <p className="text-muted-foreground leading-normal">
-                        Dengan memilih metode pembayaran ini, Anda akan diarahkan untuk melakukan pembayaran. Anda dapat memilih jenis pembayaran yang Anda inginkan
-                        berdasarkan pilihan yang tersedia.
+                        Dengan memilih metode pembayaran ini, Anda akan diarahkan untuk melakukan pembayaran. Anda dapat memilih jenis pembayaran yang
+                        Anda inginkan berdasarkan pilihan yang tersedia.
                       </p>
                     </Label>
                     <Label

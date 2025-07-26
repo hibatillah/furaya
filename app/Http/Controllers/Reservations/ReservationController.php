@@ -24,12 +24,14 @@ use App\Models\Reservations\GuestType;
 use App\Models\Rooms\Room;
 use App\Models\User;
 use App\Services\ReservationService;
+use App\Utils\Helper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -135,7 +137,7 @@ class ReservationController extends Controller
                 'statusAcc' => $statusAcc,
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 'message' => "Terjadi kesalahan menampilkan data reservasi.",
             ]);
@@ -206,6 +208,9 @@ class ReservationController extends Controller
                 "birthdate",
                 "profession",
                 "nationality",
+                "nationality_code",
+                "country",
+                "country_code",
                 "address",
             ]);
 
@@ -237,8 +242,10 @@ class ReservationController extends Controller
                     "email",
                     "address",
                     "nationality",
+                    "nationality_code",
+                    "country",
+                    "country_code",
                 ]);
-                $reservationGuest["country"] = $validated["country"];
 
                 // create reservation
                 $reservation = Reservation::create([
@@ -316,7 +323,7 @@ class ReservationController extends Controller
             report($e);
             return redirect()->route("reservation.index")->with("error", "Reservasi tidak ditemukan");
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return redirect()->route("reservation.index")
                 ->with("error", "Terjadi kesalahan menampilkan data reservasi.");
         }
@@ -352,7 +359,7 @@ class ReservationController extends Controller
                 "message" => "Reservasi tidak ditemukan.",
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 "message" => "Terjadi kesalahan menampilkan data reservasi.",
             ]);
@@ -422,6 +429,9 @@ class ReservationController extends Controller
                 "birthdate",
                 "profession",
                 "nationality",
+                "nationality_code",
+                "country",
+                "country_code",
                 "address",
             ]);
 
@@ -457,8 +467,10 @@ class ReservationController extends Controller
                     "email",
                     "address",
                     "nationality",
+                    "nationality_code",
+                    "country",
+                    "country_code",
                 ]);
-                $reservationGuest["country"] = $validated["country"];
 
                 // update reservation
                 $existingReservation->update($reservation);
@@ -521,7 +533,7 @@ class ReservationController extends Controller
                 "message" => "Reservasi tidak ditemukan.",
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 "message" => "Terjadi kesalahan memperbarui reservasi.",
             ]);
@@ -547,7 +559,7 @@ class ReservationController extends Controller
                 "message" => "Reservasi tidak ditemukan",
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 "message" => "Terjadi kesalahan menolak reservasi",
             ]);
@@ -585,7 +597,7 @@ class ReservationController extends Controller
                 404
             );
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return response()->json(
                 [
                     'message' => 'Terjadi kesalahan mendapatkan data tamu',
@@ -633,7 +645,7 @@ class ReservationController extends Controller
                 404
             );
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return response()->json(
                 [
                     'message' => 'Terjadi kesalahan mendapatkan data kamar',
@@ -680,7 +692,7 @@ class ReservationController extends Controller
                 404
             );
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return response()->json(
                 [
                     'message' => 'Terjadi kesalahan mendapatkan data tipe kamar',
@@ -695,10 +707,8 @@ class ReservationController extends Controller
      */
     private function getDataForm()
     {
+        $countries = Helper::getCountry();
         $guestTypes = GuestType::all();
-        $nationalities = Nationality::all();
-        $countries = Country::all();
-
         $visitPurposes = VisitPurposeEnum::getValues();
         $bookingTypes = BookingTypeEnum::getValues();
         $roomPackages = RoomPackageEnum::getValues();
@@ -713,7 +723,6 @@ class ReservationController extends Controller
 
         return [
             "guestTypes" => $guestTypes,
-            "nationalities" => $nationalities,
             "countries" => $countries,
             "visitPurposes" => $visitPurposes,
             "bookingTypes" => $bookingTypes,
@@ -747,7 +756,7 @@ class ReservationController extends Controller
                 "message" => 'Reservasi tidak ditemukan',
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 "message" => "Terjadi kesalahan mengubah status reservasi.",
             ]);

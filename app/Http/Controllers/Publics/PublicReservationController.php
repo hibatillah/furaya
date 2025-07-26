@@ -9,14 +9,13 @@ use App\Enums\RoomConditionEnum;
 use App\Enums\SmokingTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservations\ReservationRequest;
-use App\Models\Guests\Country;
-use App\Models\Guests\Guest;
 use App\Models\Guests\Nationality;
 use App\Models\Reservations\Reservation;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
 use App\Models\User;
 use App\Services\ReservationService;
+use App\Utils\Helper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -107,17 +106,15 @@ class PublicReservationController extends Controller
             // get static data
             $genders = GenderEnum::getValues();
             $smokingTypes = SmokingTypeEnum::getValues();
-            $nationalities = Nationality::all();
-            $countries = Country::all();
+            $countries = Helper::getCountry();
 
             // get user data
             $user = Auth::user();
-            $guest = $user?->guest;
+            $user = User::with("guest")->findOrFail($user->id);
 
             return Inertia::render("public/reservation/create", [
                 "roomType" => $roomType,
                 "genders" => $genders,
-                "nationalities" => $nationalities,
                 "countries" => $countries,
                 "smokingTypes" => $smokingTypes,
                 "startDate" => $startDate,
@@ -132,7 +129,7 @@ class PublicReservationController extends Controller
             report($e);
             return back()->with("warning", "Data kamar tidak ditemukan.");
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->with("error", "Terjadi kesalahan menampilkan data reservasi kamar.");
         }
     }
@@ -205,6 +202,9 @@ class PublicReservationController extends Controller
                 "birthdate",
                 "profession",
                 "nationality",
+                "nationality_code",
+                "country",
+                "country_code",
                 "address",
             ]);
 
@@ -234,8 +234,10 @@ class PublicReservationController extends Controller
                     "email",
                     "address",
                     "nationality",
+                    "nationality_code",
+                    "country",
+                    "country_code",
                 ]);
-                $reservationGuest["country"] = $validated["country"];
 
                 $reservation = Reservation::create([
                     ...$reservation,
@@ -278,7 +280,7 @@ class PublicReservationController extends Controller
             report($e);
             return back()->withErrors(["message" => $e->getMessage()]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors(["message" => "Terjadi kesalahan menambahkan reservasi."]);
         }
     }
@@ -338,7 +340,7 @@ class PublicReservationController extends Controller
                 "message" => "Reservasi tidak ditemukan."
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 "message" => "Terjadi kesalahan memproses pembayaran."
             ]);

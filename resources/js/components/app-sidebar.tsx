@@ -52,11 +52,6 @@ const managerMenuItems: Record<string, NavItem[]> = {
       href: route("employee.index"),
       icon: UsersIcon,
     },
-    // {
-    //   title: "Admin",
-    //   href: route("admin.index"),
-    //   icon: ShieldUserIcon,
-    // },
     {
       title: "Departemen",
       href: route("department.index"),
@@ -100,7 +95,7 @@ const adminMenuItems: Record<string, NavItem[]> = {
       icon: ArchiveIcon,
     },
   ],
-  Tamu: [
+  Reservasi: [
     {
       title: "Tamu",
       href: route("guest.index"),
@@ -110,21 +105,6 @@ const adminMenuItems: Record<string, NavItem[]> = {
       title: "Tipe Tamu",
       href: route("guest.type.index"),
       icon: SquareUserIcon,
-    },
-    {
-      title: "Geografi",
-      href: route("geography.index"),
-      icon: MapIcon,
-    },
-    {
-      title: "Negara",
-      href: route("country.index"),
-      icon: FlagIcon,
-    },
-    {
-      title: "Kewarganegaraan",
-      href: route("nationality.index"),
-      icon: FlagIcon,
     },
   ],
 };

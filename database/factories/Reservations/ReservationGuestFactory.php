@@ -20,6 +20,17 @@ class ReservationGuestFactory extends Factory
     {
         $guest = Guest::all()->random();
 
+        $countries = [
+            'Indonesia' => 'id',
+            'Malaysia' => 'my',
+            'United States' => 'us',
+            'Singapore' => 'sg',
+            'Thailand' => 'th',
+        ];
+
+        $country = $this->faker->randomElement(array_keys($countries));
+        $countryCode = $countries[$country];
+
         return [
             "reservation_id" => Reservation::all()->random()->id,
             "guest_id" => $guest->id,
@@ -28,8 +39,10 @@ class ReservationGuestFactory extends Factory
             "phone" => $guest->phone,
             "email" => $guest->email,
             "address" => $guest->address,
-            "nationality" => $guest->nationality,
-            "country" => $guest->country,
+            "nationality" => $country,
+            "nationality_code" => $countryCode,
+            "country" => $country,
+            "country_code" => $countryCode,
         ];
     }
 }

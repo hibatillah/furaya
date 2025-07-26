@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/app-layout";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, getCountryImgUrl } from "@/lib/utils";
 import {
   bookingTypeBadgeColor,
   reservationStatusBadgeColor,
@@ -37,7 +37,6 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
 
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";
-  const isManager = auth.user.role === "manager";
   const isPending = reservation.status_acc === "pending";
 
   // handle dialog form
@@ -308,11 +307,33 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Kewarganegaraan",
-      value: guest?.nationality,
+      value: (
+        <div className="flex items-center gap-2">
+          {guest?.nationality_code && (
+            <img
+              src={getCountryImgUrl(guest?.nationality_code)}
+              alt={guest?.nationality}
+              className="h-4 w-4 object-contain"
+            />
+          )}
+          <span>{guest?.nationality}</span>
+        </div>
+      ),
     },
     {
-      label: "Negara",
-      value: guest?.country,
+      label: "Asal Negara",
+      value: (
+        <div className="flex items-center gap-2">
+          {guest?.country_code && (
+            <img
+              src={getCountryImgUrl(guest?.country_code)}
+              alt={guest?.country}
+              className="h-4 w-4 object-contain"
+            />
+          )}
+          <span>{guest?.country}</span>
+        </div>
+      ),
     },
     {
       label: "Alamat",

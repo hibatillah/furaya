@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"
@@ -43,7 +45,7 @@ function CommandDialog({
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent className="overflow-hidden p-0 sm:max-w-lg [&>button:last-child]:hidden">
-        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2">
+        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground max-h-[100svh] **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2">
           {children}
         </Command>
       </DialogContent>
@@ -57,18 +59,20 @@ function CommandInput({
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
     <div
-      className="border-input flex items-center border-b px-5"
+      className="flex items-center p-2"
       cmdk-input-wrapper=""
     >
-      <SearchIcon size={20} className="text-muted-foreground/80 me-3" />
-      <CommandPrimitive.Input
-        data-slot="command-input-wrapper"
-        className={cn(
-          "placeholder:text-muted-foreground/70 flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-          className
-        )}
-        {...props}
-      />
+      <div className="relative w-full">
+        <SearchIcon className="text-muted-foreground/80 absolute top-1/2 -translate-y-1/2 start-2 size-4" />
+        <CommandPrimitive.Input
+          data-slot="command-input-wrapper"
+          className={cn(
+            "placeholder:text-muted-foreground/70 flex h-8 w-full rounded-sm pe-2 ps-8 bg-accent text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
+          {...props}
+        />
+      </div>
     </div>
   )
 }
@@ -80,7 +84,10 @@ function CommandList({
   return (
     <CommandPrimitive.List
       data-slot="command-list"
-      className={cn("max-h-80 overflow-x-hidden overflow-y-auto", className)}
+      className={cn(
+        "max-h-80 flex-1 overflow-x-hidden overflow-y-auto",
+        className
+      )}
       {...props}
     />
   )

@@ -39,9 +39,12 @@ class GuestRequest extends FormRequest
             "birthdate" => ["nullable", "date"],
             "profession" => ["nullable", "string", "max:255"],
             "nationality" => ["nullable", "string", "max:255"],
+            "nationality_code" => ["nullable", "string", "max:5"],
+            "country" => ["nullable", "string", "max:255"],
+            "country_code" => ["nullable", "string", "max:5"],
             "address" => ["nullable", "string", "max:255"],
 
-            // additional
+            // user data
             "name" => ["nullable", "string", "max:255"],
             "email" => ["nullable", "email", "max:255", Rule::exists("users", "email")],
         ];
@@ -63,10 +66,16 @@ class GuestRequest extends FormRequest
             "profession.max" => "Profesi maksimal 255 karakter.",
             "nationality.string" => "Kewarganegaraan harus berupa string.",
             "nationality.max" => "Kewarganegaraan maksimal 255 karakter.",
+            "nationality_code.string" => "Kode kebangsaan harus berupa string.",
+            "nationality_code.max" => "Kode kebangsaan maksimal 5 karakter.",
+            "country.string" => "Negara harus berupa string.",
+            "country.max" => "Negara maksimal 255 karakter.",
+            "country_code.string" => "Kode negara harus berupa string.",
+            "country_code.max" => "Kode negara maksimal 5 karakter.",
             "address.string" => "Alamat harus berupa string.",
             "address.max" => "Alamat maksimal 255 karakter.",
 
-            // additional
+            // user data
             "name.string" => "Nama pengguna harus berupa string.",
             "name.max" => "Nama pengguna maksimal 255 karakter.",
             "email.email" => "Email pengguna harus berupa email.",
