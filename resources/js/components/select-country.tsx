@@ -16,9 +16,10 @@ interface SelectCountryProps {
   setValue: (value: { code: string; name: string }) => void;
   action?: React.ReactNode;
   className?: string;
+  noLabel?: boolean;
 }
 
-export default function SelectCountry({ data, value, setValue, action, className, label }: SelectCountryProps) {
+export default function SelectCountry({ data, value, setValue, action, className, label, noLabel }: SelectCountryProps) {
   const id = useId();
   const [open, setOpen] = useState<boolean>(false);
 
@@ -51,11 +52,11 @@ export default function SelectCountry({ data, value, setValue, action, className
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "bg-accent border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
+            "bg-accent border-input w-full justify-end px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
             className,
           )}
         >
-          <span className={cn("truncate", !value && "text-muted-foreground")}>
+          <span className={cn("me-auto truncate", !value && "text-muted-foreground")}>
             {value ? handleSelect(value) : label ? `Pilih ${label}` : "Pilih data"}
           </span>
           <ChevronDownIcon

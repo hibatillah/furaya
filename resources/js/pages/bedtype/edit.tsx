@@ -52,7 +52,6 @@ export default function BedTypeEdit(props: { data: BedType.Default; onClose: () 
             value={data.name}
             onChange={(e) => setData("name", e.target.value)}
             required
-            placeholder="Nama"
           />
           <InputError message={errors.name} />
         </div>

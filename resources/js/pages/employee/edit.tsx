@@ -81,7 +81,6 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
                 required
-                placeholder="Nama"
               />
               <InputError message={errors.name} />
             </div>
@@ -100,7 +99,6 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                 value={data.email}
                 onChange={(e) => setData("email", e.target.value)}
                 required
-                placeholder="Email"
               />
               <InputError message={errors.email} />
             </div>
@@ -118,7 +116,6 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                 type="text"
                 value={data.phone}
                 onChange={(e) => setData("phone", e.target.value)}
-                placeholder="Nomor Telepon"
               />
               <InputError message={errors.phone} />
             </div>
@@ -136,7 +133,7 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                 onValueChange={(value) => setData("gender", value as Enum.Gender)}
               >
                 <SelectTrigger id="room_type_id">
-                  <SelectValue placeholder="Pilih Tipe Kamar">
+                  <SelectValue>
                     <span className="capitalize">{data.gender === "male" ? "Pria" : "Wanita"}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -171,7 +168,7 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                 onValueChange={(value) => setData("department_id", value)}
               >
                 <SelectTrigger id="department_id">
-                  <SelectValue placeholder="Pilih Departemen">
+                  <SelectValue>
                     <span>{departments.find((department) => department.id === data.department_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -200,7 +197,7 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
               <DatePicker
                 value={data.hire_date as Date}
                 onChange={(date) => setData("hire_date", format(date, "yyyy-MM-dd"))}
-                className="w-full bg-accent"
+                className="bg-accent w-full"
               />
               <InputError message={errors.hire_date} />
             </div>
@@ -219,7 +216,6 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                   type="number"
                   value={data.salary}
                   onChange={(e) => setData("salary", Number(e.target.value))}
-                  placeholder="Gaji"
                   className="ps-9"
                   disableHandle
                   autoComplete="off"
@@ -238,7 +234,6 @@ export default function EmployeeEdit(props: { employee: Employee.Default; depart
                 type="text"
                 value={data.address}
                 onChange={(e) => setData("address", e.target.value)}
-                placeholder="Alamat"
               />
               <InputError message={errors.address} />
             </div>

@@ -549,7 +549,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     value={data.name}
                     onChange={(e) => setData("name", e.target.value)}
                     className="w-full"
-                    placeholder="Input Nama Lengkap"
                     autoComplete="off"
                     required
                   />
@@ -569,7 +568,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     value={data.phone}
                     onChange={(e) => setData("phone", e.target.value)}
                     className="w-full"
-                    placeholder="Input No. HP"
                     autoComplete="off"
                     required
                   />
@@ -589,7 +587,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     value={data.email}
                     onChange={(e) => setData("email", e.target.value)}
                     className="w-full"
-                    placeholder="Input Email"
                     autoComplete="off"
                     required
                   />
@@ -629,7 +626,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     required
                   >
                     <SelectTrigger id="gender">
-                      <SelectValue placeholder="Pilih Jenis Kelamin">
+                      <SelectValue>
                         <span className="capitalize">{data.gender === "male" ? "Pria" : "Wanita"}</span>
                       </SelectValue>
                     </SelectTrigger>
@@ -660,7 +657,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     type="text"
                     value={data.nik_passport}
                     onChange={(e) => setData("nik_passport", e.target.value)}
-                    placeholder="Input NIK/Passport"
                     className="w-full"
                   />
                   <InputError message={errors.nik_passport} />
@@ -703,7 +699,6 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     value={data.address}
                     onChange={(e) => setData("address", e.target.value)}
                     className="w-full"
-                    placeholder="Input Alamat"
                     autoComplete="off"
                   />
                   <InputError message={errors.address} />
@@ -794,7 +789,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                       htmlFor="include_breakfast"
                       className="bg-accent ms-auto w-full px-3"
                     >
-                      <span>Termasuk Sarapan</span>
+                      <span className="text-foreground">Termasuk Sarapan</span>
                       <span className="text-muted-foreground">- Untuk {roomType.capacity} tamu</span>
                       <Switch
                         id="include_breakfast"

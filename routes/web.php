@@ -133,6 +133,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('not-found');
 });
 
+// design system route
+Route::get('design-system', function () {
+    return Inertia::render('design-system');
+})->name('design-system');
+
 require __DIR__ . '/roles/guest.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

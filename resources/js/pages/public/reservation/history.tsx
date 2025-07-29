@@ -143,7 +143,10 @@ export default function ReservationHistory({
 
                       <Badge
                         variant="outline"
-                        className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status ?? ""])}
+                        className={cn(
+                          "capitalize",
+                          transactionStatusBadgeColor[reservation.transaction_status as keyof typeof transactionStatusBadgeColor],
+                        )}
                       >
                         {reservation.transaction_status}
                       </Badge>

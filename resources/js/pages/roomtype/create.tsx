@@ -115,7 +115,6 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                 id="code"
                 type="text"
                 value={data.code}
-                placeholder="Kode"
                 onChange={(e) => setData("code", e.target.value)}
                 autoComplete="off"
                 required
@@ -135,7 +134,6 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                 id="name"
                 type="text"
                 value={data.name}
-                placeholder="Nama"
                 onChange={(e) => setData("name", e.target.value)}
                 autoComplete="off"
                 required
@@ -163,7 +161,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                 required
               >
                 <SelectTrigger id="rate_type_id">
-                  <SelectValue placeholder="Pilih Tipe Tarif">
+                  <SelectValue>
                     <span className="capitalize">{selectedRateType?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -196,8 +194,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                   type="number"
                   min={0}
                   step="any"
-                  value={data.base_rate}
-                  placeholder="Tarif Dasar"
+                  value={data.base_rate}  
                   onChange={(e) => setData("base_rate", parseFloat(e.target.value))}
                   className="ps-9"
                   autoComplete="off"
@@ -226,7 +223,7 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                 required
               >
                 <SelectTrigger id="bed_type_id">
-                  <SelectValue placeholder="Pilih Tipe Kasur">
+                  <SelectValue>
                     <span className="capitalize">{bedTypes.find((type) => type.id === data.bed_type_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -258,7 +255,6 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                   id="capacity"
                   type="number"
                   value={data.capacity}
-                  placeholder="Kapasitas"
                   onChange={(e) => setData("capacity", parseInt(e.target.value))}
                   autoComplete="off"
                   disableHandle
@@ -284,7 +280,6 @@ export default function RoomTypeCreate(props: { facilities: Facility.Default[]; 
                   id="size"
                   type="number"
                   value={data.size}
-                  placeholder="Input luas kamar"
                   onChange={(e) => setData("size", parseInt(e.target.value))}
                   autoComplete="off"
                   disableHandle

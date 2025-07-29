@@ -52,12 +52,12 @@ export default function CheckInCreate(props: { reservationId: string; onClose: (
           <Input
             id="date"
             type="text"
-            value={data.checked_in_at.toLocaleString()}
-            onChange={(e) => setData("checked_in_at", new Date(e.target.value))}
+            value={data.check_in_at.toLocaleString()}
+            onChange={(e) => setData("check_in_at", new Date(e.target.value))}
             placeholder="Tanggal check-in"
             required
           />
-          <InputError message={errors.checked_in_at} />
+          <InputError message={errors.check_in_at} />
         </div>
 
         {/* time */}
@@ -66,12 +66,12 @@ export default function CheckInCreate(props: { reservationId: string; onClose: (
           <Input
             id="time"
             type="text"
-            value={data.checked_in_at.toLocaleString()}
-            onChange={(e) => setData("checked_in_at", new Date(e.target.value))}
+            value={data.check_in_at.toLocaleString()}
+            onChange={(e) => setData("check_in_at", new Date(e.target.value))}
             placeholder="Tanggal check-in"
             required
           />
-          <InputError message={errors.checked_in_at} />
+          <InputError message={errors.check_in_at} />
         </div>
 
         {/* notes */}

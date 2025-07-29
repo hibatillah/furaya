@@ -68,7 +68,6 @@ export default function RateTypeCreate() {
               id="code"
               type="text"
               value={data.code}
-              placeholder="Kode"
               onChange={(e) => setData("code", e.target.value)}
               autoComplete="off"
               required
@@ -83,7 +82,6 @@ export default function RateTypeCreate() {
               id="name"
               type="text"
               value={data.name}
-              placeholder="Nama"
               onChange={(e) => setData("name", e.target.value)}
               autoComplete="off"
               required
@@ -99,7 +97,6 @@ export default function RateTypeCreate() {
                 id="rate"
                 type="number"
                 value={data.rate}
-                placeholder="Tarif"
                 onChange={(e) => setData("rate", Number(e.target.value))}
                 className="w-full ps-9"
                 autoComplete="off"

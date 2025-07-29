@@ -1,9 +1,13 @@
 import { badgeColor } from ".";
 
-export const RoleBadgeColor = ["manager", "admin", "employee", "guest"].reduce(
-  (acc, role, index) => {
-    acc[role as Enum.Role] = badgeColor[index];
-    return acc;
-  },
-  {} as Record<Enum.Role, string>,
-);
+export const roleBadgeColor = {
+  "manager": badgeColor.purple,
+  "admin": badgeColor.blue,
+  "employee": badgeColor.green,
+  "guest": badgeColor.rose,
+} satisfies Record<Enum.Role, string>
+
+export const genderBadgeColor = {
+  "male": badgeColor.blue,
+  "female": badgeColor.rose,
+} satisfies Record<Enum.Gender, string>

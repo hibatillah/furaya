@@ -45,7 +45,7 @@ export default function DepartmentCreate() {
       <DialogTrigger asChild>
         <Button className="ms-auto w-fit">Tambah Departemen</Button>
       </DialogTrigger>
-      <DialogContent className="w-100">
+      <DialogContent className="w-120">
         <DialogHeader>
           <DialogTitle>Tambah Departemen</DialogTitle>
         </DialogHeader>
@@ -59,8 +59,8 @@ export default function DepartmentCreate() {
               id="name"
               type="text"
               value={data.name}
-              placeholder="Nama"
               onChange={(e) => setData("name", e.target.value)}
+              autoComplete="off"
               required
             />
             <InputError message={errors.name} />

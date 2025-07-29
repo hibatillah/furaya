@@ -15,7 +15,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency, getCountryImgUrl } from "@/lib/utils";
 import {
@@ -119,16 +118,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Tipe Tamu",
-      value: reservation.guest_type ? (
-        <Badge
-          variant="outline"
-          className="capitalize"
-        >
-          {reservation.guest_type}
-        </Badge>
-      ) : (
-        "-"
-      ),
+      value: reservation.guest_type ?? "-",
     },
     {
       label: "Status Acc",
@@ -192,7 +182,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
       value: reservation.transaction_status ? (
         <Badge
           variant="outline"
-          className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status])}
+          className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status as keyof typeof transactionStatusBadgeColor])}
         >
           {reservation.transaction_status}
         </Badge>
@@ -202,16 +192,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Metode Pembayaran",
-      value: reservation.payment_type ? (
-        <Badge
-          variant="outline"
-          className="capitalize"
-        >
-          {reservation.payment_type}
-        </Badge>
-      ) : (
-        "-"
-      ),
+      value: reservation.payment_type ?? "-",
     },
     {
       label: "Bank Pembayaran",
@@ -246,11 +227,11 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Tipe Kamar",
-      value: room?.room_type_name ? <Badge variant="outline">{room?.room_type_name}</Badge> : "-",
+      value: room?.room_type_name ?? "-",
     },
     {
       label: "Tipe Kasur",
-      value: room?.bed_type ? <Badge variant="outline">{room?.bed_type}</Badge> : "-",
+      value: room?.bed_type ?? "-",
     },
     {
       label: "Smoking Type",
@@ -299,7 +280,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Jenis Kelamin",
-      value: guest?.guest?.formatted_gender ? <Badge variant="outline">{guest?.guest?.formatted_gender}</Badge> : "-",
+      value: guest?.guest?.formatted_gender ?? "-",
     },
     {
       label: "Tanggal Lahir",
@@ -442,18 +423,8 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
           </CardHeader>
           <CardContent>
             <DataList
-              data={reservationDetails.slice(0, 9)}
+              data={reservationDetails}
               className="lg:[--columns:2] *:data-[value=Remarks]:lg:col-span-3"
-            />
-            <Separator className="my-5" />
-            <DataList
-              data={reservationDetails.slice(9, 13)}
-              className="lg:[--columns:2]"
-            />
-            <Separator className="my-5" />
-            <DataList
-              data={reservationDetails.slice(13)}
-              className="lg:[--columns:2]"
             />
           </CardContent>
         </Card>

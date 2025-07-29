@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { RoleBadgeColor } from "@/static/user";
+import { roleBadgeColor } from "@/static/user";
 import { BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -43,7 +43,7 @@ export default function AdminIndex({ admins }: { admins: User.Default[] }) {
         return (
           <Badge
             variant="outline"
-            className={cn("font-medium capitalize", RoleBadgeColor[role])}
+            className={cn("font-medium capitalize", roleBadgeColor[role])}
           >
             {role}
           </Badge>

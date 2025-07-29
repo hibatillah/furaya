@@ -51,7 +51,6 @@ export default function GuestTypeEdit(props: { data: GuestType.Default; onClose:
             id="code"
             type="text"
             value={data.code}
-            placeholder="Kode"
             onChange={(e) => setData("code", e.target.value)}
             required
           />
@@ -65,7 +64,6 @@ export default function GuestTypeEdit(props: { data: GuestType.Default; onClose:
             id="name"
             type="text"
             value={data.name}
-            placeholder="Nama"
             onChange={(e) => setData("name", e.target.value)}
             required
           />

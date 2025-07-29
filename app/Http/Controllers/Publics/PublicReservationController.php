@@ -110,7 +110,10 @@ class PublicReservationController extends Controller
 
             // get user data
             $user = Auth::user();
-            $user = User::with("guest")->findOrFail($user->id);
+
+            if ($user) {
+                $user = User::with("guest")->findOrFail($user->id);
+            }
 
             return Inertia::render("public/reservation/create", [
                 "roomType" => $roomType,
@@ -123,7 +126,7 @@ class PublicReservationController extends Controller
                 "children" => $children,
                 "promoCode" => $promoCode,
                 "lengthOfStay" => $lengthOfStay,
-                "user" => $user,
+                "user" => $user ?? null,
             ]);
         } catch (ModelNotFoundException $e) {
             report($e);

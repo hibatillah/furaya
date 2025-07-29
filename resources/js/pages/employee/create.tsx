@@ -63,13 +63,17 @@ export default function EmployeeCreate(props: { departments: Department.Default[
           >
             {/* name */}
             <div className="grid gap-2">
-              <Label htmlFor="name" required>Nama</Label>
+              <Label
+                htmlFor="name"
+                required
+              >
+                Nama
+              </Label>
               <Input
                 id="name"
                 type="text"
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
-                placeholder="Nama"
                 autoComplete="off"
                 required
               />
@@ -78,13 +82,17 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
             {/* email */}
             <div className="grid gap-2">
-              <Label htmlFor="email" required>Email</Label>
+              <Label
+                htmlFor="email"
+                required
+              >
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={data.email}
                 onChange={(e) => setData("email", e.target.value)}
-                placeholder="Email"
                 autoComplete="off"
                 required
               />
@@ -93,13 +101,17 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
             {/* phone */}
             <div className="grid gap-2">
-              <Label htmlFor="phone" required>Nomor Telepon</Label>
+              <Label
+                htmlFor="phone"
+                required
+              >
+                Nomor Telepon
+              </Label>
               <Input
                 id="phone"
                 type="text"
                 value={data.phone}
                 onChange={(e) => setData("phone", e.target.value)}
-                placeholder="Nomor Telepon"
                 autoComplete="off"
                 required
               />
@@ -108,13 +120,17 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
             {/* password */}
             <div className="grid gap-2">
-              <Label htmlFor="password" required>Password</Label>
+              <Label
+                htmlFor="password"
+                required
+              >
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={data.password}
                 onChange={(e) => setData("password", e.target.value)}
-                placeholder="Password"
                 autoComplete="off"
                 required
               />
@@ -123,14 +139,19 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
             {/* gender */}
             <div className="grid gap-2">
-              <Label htmlFor="gender" required>Gender</Label>
+              <Label
+                htmlFor="gender"
+                required
+              >
+                Gender
+              </Label>
               <Select
                 value={data.gender}
                 onValueChange={(value) => setData("gender", value as Enum.Gender)}
                 required
               >
                 <SelectTrigger id="gender">
-                  <SelectValue placeholder="Pilih Gender">
+                  <SelectValue>
                     <span className="capitalize">{data.gender === "male" ? "Pria" : "Wanita"}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -154,14 +175,19 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
             {/* department */}
             <div className="grid gap-2">
-              <Label htmlFor="department_id" required>Departemen</Label>
+              <Label
+                htmlFor="department_id"
+                required
+              >
+                Departemen
+              </Label>
               <Select
                 value={data.department_id}
                 onValueChange={(value) => setData("department_id", value)}
                 required
               >
                 <SelectTrigger id="department_id">
-                  <SelectValue placeholder="Pilih Departemen">
+                  <SelectValue>
                     <span>{departments.find((department) => department.id === data.department_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -181,25 +207,34 @@ export default function EmployeeCreate(props: { departments: Department.Default[
 
             {/* hire date */}
             <div className="grid gap-2">
-              <Label htmlFor="hire_date" required>Tanggal Bergabung</Label>
+              <Label
+                htmlFor="hire_date"
+                required
+              >
+                Tanggal Bergabung
+              </Label>
               <DatePicker
                 value={data.hire_date as Date}
                 onChange={(date) => setData("hire_date", format(date, "yyyy-MM-dd"))}
-                className="w-full bg-accent"
+                className="bg-accent w-full"
               />
               <InputError message={errors.hire_date} />
             </div>
 
             {/* salary */}
             <div className="grid gap-2">
-              <Label htmlFor="salary" required>Gaji</Label>
+              <Label
+                htmlFor="salary"
+                required
+              >
+                Gaji
+              </Label>
               <div className="relative">
                 <Input
                   id="salary"
                   type="number"
                   value={data.salary}
                   onChange={(e) => setData("salary", Number(e.target.value))}
-                  placeholder="Gaji"
                   className="ps-9"
                   disableHandle
                   autoComplete="off"
@@ -218,7 +253,6 @@ export default function EmployeeCreate(props: { departments: Department.Default[
                 type="text"
                 value={data.address}
                 onChange={(e) => setData("address", e.target.value)}
-                placeholder="Alamat"
                 autoComplete="off"
               />
               <InputError message={errors.address} />

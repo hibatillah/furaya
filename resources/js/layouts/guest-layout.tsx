@@ -60,8 +60,8 @@ function BookCard({ className }: { className?: string }) {
   return (
     <Card className={cn("mx-auto w-fit p-4 ps-5 max-md:w-full lg:flex-row lg:gap-8", className)}>
       <CardHeader className="justify-center p-0">
-        <CardTitle>Book Online</CardTitle>
-        <CardDescription>Guaranteed Accommodation</CardDescription>
+        <CardTitle>Booking Online</CardTitle>
+        <CardDescription>Akomodasi bergaransi</CardDescription>
       </CardHeader>
       <CardContent className="relative grid grid-cols-2 items-end gap-x-4 gap-y-3 p-0 lg:flex lg:flex-row">
         {/* date picker component */}
@@ -200,7 +200,6 @@ function BookCard({ className }: { className?: string }) {
           <div className="relative">
             <Input
               type="text"
-              placeholder="Enter your code"
               className="w-full pe-9 lg:w-40"
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
@@ -216,7 +215,7 @@ function BookCard({ className }: { className?: string }) {
           onClick={handleDateReservation}
           className="max-lg:col-span-full"
         >
-          Book Now
+          Cek Kamar
         </Button>
       </CardContent>
     </Card>

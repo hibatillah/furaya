@@ -42,7 +42,7 @@
   --sidebar-accent-foreground: oklch(0.2103 0.0059 285.8852);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
   --sidebar-ring: oklch(0.6231 0.188 259.8145);
-  --font-sans: Geist, sans-serif;
+  --font-sans: Inter, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Geist Mono, monospace;
   --shadow-color: oklch(0 0 0);
@@ -97,7 +97,7 @@
   --sidebar-border: oklch(0.2739 0.0055 286.0326);
   --sidebar-ring: oklch(0.6231 0.188 259.8145);
   --radius: 0.5rem;
-  --font-sans: Geist, sans-serif;
+  --font-sans: Inter, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Geist Mono, monospace;
   --shadow-color: oklch(0 0 0);

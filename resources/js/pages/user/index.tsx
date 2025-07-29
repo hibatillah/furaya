@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
-import { RoleBadgeColor } from "@/static/user";
+import { roleBadgeColor } from "@/static/user";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -60,7 +60,7 @@ export default function UserIndex(props: { users: User.Default[]; roles: Enum.Ro
         return (
           <Badge
             variant="outline"
-            className={cn("font-medium capitalize", RoleBadgeColor[role])}
+            className={cn("font-medium capitalize", roleBadgeColor[role])}
           >
             {role}
           </Badge>

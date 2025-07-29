@@ -29,6 +29,7 @@ export default function GuestShow(props: { guest: Guest.Default; reservations: R
     { label: "Gender", value: guest.formatted_gender },
     { label: "Tanggal Lahir", value: guest.formatted_birthdate },
     { label: "Profesi", value: guest.profession },
+    { label: "Alamat", value: guest.address },
     {
       label: "Kewarganegaraan",
       value: (
@@ -59,7 +60,6 @@ export default function GuestShow(props: { guest: Guest.Default; reservations: R
         </div>
       ),
     },
-    { label: "Alamat", value: guest.address },
   ];
 
   return (

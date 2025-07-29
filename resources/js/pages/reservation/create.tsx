@@ -432,7 +432,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.arrival_from}
                 onChange={(e) => setData("arrival_from", e.target.value)}
                 className="w-full"
-                placeholder="Input Asal Kedatangan"
                 required
               />
               <InputError message={errors.arrival_from} />
@@ -452,7 +451,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="purpose">
-                  <SelectValue placeholder="Pilih Tujuan Kedatangan">
+                  <SelectValue>
                     <span className="capitalize">{data.visit_purpose}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -485,7 +484,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="booking_type">
-                  <SelectValue placeholder="Pilih Tipe Reservasi">
+                  <SelectValue>
                     <span className="capitalize">{data.booking_type}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -521,7 +520,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="guest_type">
-                  <SelectValue placeholder="Pilih Tipe Tamu">
+                  <SelectValue>
                     <span className="capitalize">{data.guest_type}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -553,7 +552,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.remarks}
                 onChange={(e) => setData("remarks", e.target.value)}
                 className="w-full"
-                placeholder="Input Remarks"
                 autoComplete="off"
               />
               <InputError message={errors.remarks} />
@@ -592,7 +590,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="room_type">
-                  <SelectValue placeholder="Pilih Tipe Kamar">
+                  <SelectValue>
                     <span className="capitalize">{availableRoomTypes.find((type) => type.id === selectedRoomType)?.name || ""}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -645,7 +643,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="room_number">
-                  <SelectValue placeholder="Pilih Nomor Kamar">
+                  <SelectValue>
                     <span>{selectedRoomNumber?.room_number}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -688,7 +686,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                   className="w-full ps-9"
                   step={25000}
                   min={100000}
-                  placeholder="Input Harga Kamar"
                   disabled={!selectedRoomNumber}
                   value={selectedRoomNumber?.price || ""}
                   onChange={(e) => {
@@ -727,7 +724,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="room_package">
-                  <SelectValue placeholder="Pilih Paket Kamar">
+                  <SelectValue>
                     <span className="capitalize">{data.room_package}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -758,7 +755,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 type="number"
                 className="w-full"
                 min={1}
-                placeholder="Input Jumlah Dewasa"
                 disabled={!selectedRoomNumber}
                 value={data.adults}
                 onChange={(e) => {
@@ -784,7 +780,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 type="number"
                 className="w-full"
                 min={0}
-                placeholder="Input Jumlah Anak"
                 disabled={!selectedRoomNumber}
                 value={data.children}
                 onChange={(e) => {
@@ -814,7 +809,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="smoking_type">
-                  <SelectValue placeholder="Pilih Jenis Rokok">
+                  <SelectValue>
                     <span className="capitalize">{data.smoking_type}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -886,7 +881,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                   type="tel"
                   value={data.phone}
                   onChange={(e) => setData("phone", e.target.value)}
-                  placeholder="Input No. HP"
                   className="w-full"
                   inputMode="tel"
                 />
@@ -923,7 +917,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
                 className="w-full"
-                placeholder="Input Nama Lengkap"
                 autoComplete="off"
                 required
               />
@@ -943,7 +936,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.email}
                 onChange={(e) => setData("email", e.target.value)}
                 className="w-full"
-                placeholder="Input Email"
                 inputMode="email"
                 autoComplete="off"
                 required
@@ -958,7 +950,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.nik_passport}
                 onChange={(e) => setData("nik_passport", e.target.value)}
                 className="w-full"
-                placeholder="Input NIK/Passport"
                 autoComplete="off"
                 required
               />
@@ -998,7 +989,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="gender">
-                  <SelectValue placeholder="Pilih Jenis Kelamin">
+                  <SelectValue>
                     <span className="capitalize">{data.gender === "male" ? "Pria" : "Wanita"}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -1037,6 +1028,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                     nationality_code: code,
                   }));
                 }}
+                noLabel
               />
               <InputError message={errors.nationality} />
             </div>
@@ -1049,7 +1041,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.profession}
                 onChange={(e) => setData("profession", e.target.value)}
                 className="w-full"
-                placeholder="Input Profesi"
                 autoComplete="off"
               />
               <InputError message={errors.profession} />
@@ -1070,6 +1061,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                     country_code: code,
                   }));
                 }}
+                noLabel
               />
               <InputError message={errors.country} />
             </div>
@@ -1082,7 +1074,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.address}
                 onChange={(e) => setData("address", e.target.value)}
                 className="w-full"
-                placeholder="Input Alamat"
                 autoComplete="off"
               />
               <InputError message={errors.address} />
@@ -1111,7 +1102,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                   step={5}
                   min={0}
                   max={100}
-                  placeholder="Input Discount (%)"
                   value={data.discount}
                   onChange={(e) => setData("discount", Number(e.target.value))}
                   disableHandle
@@ -1136,7 +1126,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.discount_reason}
                 onChange={(e) => setData("discount_reason", e.target.value)}
                 className="w-full"
-                placeholder="Input Discount Reason"
               />
               <InputError message={errors.discount_reason} />
             </div>
@@ -1155,7 +1144,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                   className="w-full ps-9"
                   step={25000}
                   min={MIN_ADVANCE_AMOUNT}
-                  placeholder="Input Advance Amount"
                   value={data.advance_amount}
                   onChange={(e) => setData("advance_amount", Number(e.target.value))}
                   disableHandle
@@ -1181,7 +1169,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 value={data.advance_remarks}
                 onChange={(e) => setData("advance_remarks", e.target.value)}
                 className="w-full"
-                placeholder="Input Advance Remarks"
               />
               <InputError message={errors.advance_remarks} />
             </div>
@@ -1201,7 +1188,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                   step={5}
                   min={0}
                   max={100}
-                  placeholder="Input Commission (%)"
                   value={data.commission_percentage}
                   onChange={(e) => setData("commission_percentage", Number(e.target.value))}
                   disableHandle
@@ -1226,7 +1212,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 className="w-full"
                 step={25000}
                 min={0}
-                placeholder="Input Commission Amount"
                 value={data.commission_amount}
                 onChange={(e) => setData("commission_amount", Number(e.target.value))}
                 disableHandle
@@ -1248,7 +1233,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
                 required
               >
                 <SelectTrigger id="payment_method">
-                  <SelectValue placeholder="Pilih Metode Pembayaran">
+                  <SelectValue>
                     <span className="capitalize">{data.payment_method}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -1278,7 +1263,6 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
               <Input
                 type="text"
                 className="w-full"
-                placeholder="Input Total Harga"
                 value={totalPrice}
                 readOnly
                 required

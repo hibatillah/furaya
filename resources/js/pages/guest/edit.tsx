@@ -1,4 +1,5 @@
 import InputError from "@/components/input-error";
+import SelectCountry from "@/components/select-country";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -9,11 +10,13 @@ import AppLayout from "@/layouts/app-layout";
 import { BreadcrumbItem } from "@/types";
 import { Head, useForm } from "@inertiajs/react";
 import { format } from "date-fns";
+import { useState } from "react";
 import { toast } from "sonner";
 
-export default function GuestEdit(props: { guest: Guest.Default }) {
-  const { guest } = props;
+export default function GuestEdit(props: { guest: Guest.Default; countries: { code: string; name: string }[] }) {
+  const { guest, countries } = props;
   const { user, formatted_birthdate, formatted_gender, ...dataGuest } = guest;
+  console.log(dataGuest);
 
   // define page breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -28,6 +31,8 @@ export default function GuestEdit(props: { guest: Guest.Default }) {
   ];
 
   // define form state
+  const [selectedCountry, setSelectedCountry] = useState<string | undefined>(dataGuest.country);
+  const [selectedNationality, setSelectedNationality] = useState<string | undefined>(dataGuest.nationality);
   const { data, setData, put, processing, errors } = useForm<Guest.Update>({
     ...dataGuest,
     name: user?.name,
@@ -66,29 +71,54 @@ export default function GuestEdit(props: { guest: Guest.Default }) {
             onSubmit={handleSubmit}
           >
             <div className="grid gap-2">
-              <Label htmlFor="name">Nama</Label>
+              <Label
+                htmlFor="name"
+                required
+              >
+                Nama
+              </Label>
               <Input
                 id="name"
                 type="text"
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
-                placeholder="Nama"
                 required
               />
               <InputError message={errors.name} />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label
+                htmlFor="email"
+                required
+              >
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={data.email}
                 onChange={(e) => setData("email", e.target.value)}
-                placeholder="Email"
                 required
               />
               <InputError message={errors.email} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label
+                htmlFor="phone"
+                required
+              >
+                No. HP
+              </Label>
+              <Input
+                id="phone"
+                type="text"
+                value={data.phone}
+                onChange={(e) => setData("phone", e.target.value)}
+                required
+              />
+              <InputError message={errors.phone} />
             </div>
 
             <div className="grid gap-2">
@@ -98,33 +128,24 @@ export default function GuestEdit(props: { guest: Guest.Default }) {
                 type="text"
                 value={data.nik_passport}
                 onChange={(e) => setData("nik_passport", e.target.value)}
-                placeholder="NIK/Passport"
                 required
               />
               <InputError message={errors.nik_passport} />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="phone">No. HP</Label>
-              <Input
-                id="phone"
-                type="text"
-                value={data.phone}
-                onChange={(e) => setData("phone", e.target.value)}
-                placeholder="No. HP"
+              <Label
+                htmlFor="gender"
                 required
-              />
-              <InputError message={errors.phone} />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="gender">Gender</Label>
+              >
+                Gender
+              </Label>
               <Select
                 value={data.gender}
                 onValueChange={(value) => setData("gender", value as Enum.Gender)}
               >
                 <SelectTrigger id="room_type_id">
-                  <SelectValue placeholder="Pilih Tipe Kamar">
+                  <SelectValue>
                     <span className="capitalize">{data.gender === "male" ? "Pria" : "Wanita"}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -147,11 +168,16 @@ export default function GuestEdit(props: { guest: Guest.Default }) {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="birthdate">Tanggal Lahir</Label>
+              <Label
+                htmlFor="birthdate"
+                required
+              >
+                Tanggal Lahir
+              </Label>
               <DatePicker
                 value={data.birthdate as Date}
                 onChange={(date) => setData("birthdate", format(date, "yyyy-MM-dd"))}
-                className="w-full"
+                className="bg-accent w-full"
               />
               <InputError message={errors.birthdate} />
             </div>
@@ -163,23 +189,9 @@ export default function GuestEdit(props: { guest: Guest.Default }) {
                 type="text"
                 value={data.profession}
                 onChange={(e) => setData("profession", e.target.value)}
-                placeholder="Profesi"
                 required
               />
               <InputError message={errors.profession} />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="nationality">Kewarganegaraan</Label>
-              <Input
-                id="nationality"
-                type="text"
-                value={data.nationality}
-                onChange={(e) => setData("nationality", e.target.value)}
-                placeholder="Kewarganegaraan"
-                required
-              />
-              <InputError message={errors.nationality} />
             </div>
 
             <div className="grid gap-2">
@@ -189,9 +201,46 @@ export default function GuestEdit(props: { guest: Guest.Default }) {
                 type="text"
                 value={data.address}
                 onChange={(e) => setData("address", e.target.value)}
-                placeholder="Alamat"
               />
               <InputError message={errors.address} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="nationality">Kewarganegaraan</Label>
+              <SelectCountry
+                label="Kewarganegaraan"
+                data={countries}
+                value={selectedNationality}
+                setValue={({ code, name }) => {
+                  setSelectedNationality(name);
+                  setData((prev) => ({
+                    ...prev,
+                    nationality: name,
+                    nationality_code: code,
+                  }));
+                }}
+                noLabel
+              />
+              <InputError message={errors.nationality} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="nationality">Asal Negara</Label>
+              <SelectCountry
+                label="Asal Negara"
+                data={countries}
+                value={selectedCountry}
+                setValue={({ code, name }) => {
+                  setSelectedCountry(name);
+                  setData((prev) => ({
+                    ...prev,
+                    country: name,
+                    country_code: code,
+                  }));
+                }}
+                noLabel
+              />
+              <InputError message={errors.country} />
             </div>
 
             <div className="col-span-2 flex justify-end gap-2">

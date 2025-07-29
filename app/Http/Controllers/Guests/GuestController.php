@@ -7,6 +7,7 @@ use App\Http\Requests\Guests\GuestRequest;
 use Inertia\Inertia;
 use App\Models\Guests\Guest;
 use App\Models\Reservations\ReservationGuest;
+use App\Utils\Helper;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Arr;
@@ -78,9 +79,11 @@ class GuestController extends Controller
     {
         try {
             $guest = Guest::with('user')->findOrFail($id);
+            $countries = Helper::getCountry();
 
             return Inertia::render('guest/edit', [
                 'guest' => $guest,
+                'countries' => $countries,
             ]);
         } catch (ModelNotFoundException $e) {
             report($e);

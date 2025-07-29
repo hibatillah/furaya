@@ -91,16 +91,12 @@ export default function ReservationsIndex(props: {
       id: "room_type_name",
       accessorFn: (row) => row.reservation_room?.room_type_name,
       header: "Tipe Kamar",
-      cell: ({ row }) => {
-        const roomType = row.getValue("room_type_name") as string;
-        return <Badge variant="outline">{roomType}</Badge>;
-      },
       filterFn: "checkbox" as FilterFnOption<Reservation.Default>,
     },
     {
       id: "room_number",
       accessorFn: (row) => row.reservation_room?.room_number,
-      header: "No. Kamar",
+      header: "Kamar",
       cell: ({ row }) => {
         const roomNumber = row.getValue("room_number") as string;
         return roomNumber ?? "-";
@@ -146,7 +142,7 @@ export default function ReservationsIndex(props: {
         ) : (
           <Badge
             variant="outline"
-            className={cn("capitalize", transactionStatusBadgeColor[transactionStatus])}
+            className={cn("capitalize", transactionStatusBadgeColor[transactionStatus as keyof typeof transactionStatusBadgeColor])}
           >
             {transactionStatus}
           </Badge>

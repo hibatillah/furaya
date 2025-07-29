@@ -125,12 +125,12 @@ class Reservation extends BaseModel
 
     public function getFormattedStartDateAttribute()
     {
-        return Carbon::parse($this->start_date)->translatedFormat('j F Y');
+        return Carbon::parse($this->start_date)->translatedFormat('d M Y');
     }
 
     public function getFormattedEndDateAttribute()
     {
-        return Carbon::parse($this->end_date)->translatedFormat('j F Y');
+        return Carbon::parse($this->end_date)->translatedFormat('d M Y');
     }
 
     public function getFormattedCheckInAtAttribute()

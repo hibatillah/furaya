@@ -150,7 +150,6 @@ export default function RoomTypeEdit(props: {
                 id="code"
                 type="text"
                 value={data.code}
-                placeholder="Kode"
                 onChange={(e) => setData("code", e.target.value)}
                 autoComplete="off"
                 required
@@ -170,7 +169,6 @@ export default function RoomTypeEdit(props: {
                 id="name"
                 type="text"
                 value={data.name}
-                placeholder="Nama"
                 onChange={(e) => setData("name", e.target.value)}
                 autoComplete="off"
                 required
@@ -197,7 +195,7 @@ export default function RoomTypeEdit(props: {
                 }}
               >
                 <SelectTrigger id="rate_type_id">
-                  <SelectValue placeholder="Pilih Tipe Tarif">
+                  <SelectValue>
                     <span className="capitalize">{selectedRateType?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -231,7 +229,6 @@ export default function RoomTypeEdit(props: {
                   min={0}
                   step="any"
                   value={data.base_rate}
-                  placeholder="Tarif Dasar"
                   onChange={(e) => setData("base_rate", parseFloat(e.target.value))}
                   className="ps-9"
                   autoComplete="off"
@@ -259,7 +256,7 @@ export default function RoomTypeEdit(props: {
                 disabled={bedTypes.length === 0}
               >
                 <SelectTrigger id="bed_type_id">
-                  <SelectValue placeholder="Pilih Tipe Kasur">
+                  <SelectValue>
                     <span className="capitalize">{bedTypes.find((type) => type.id === data.bed_type_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -291,7 +288,6 @@ export default function RoomTypeEdit(props: {
                   id="capacity"
                   type="number"
                   value={data.capacity}
-                  placeholder="Kapasitas"
                   onChange={(e) => setData("capacity", parseInt(e.target.value))}
                   autoComplete="off"
                   disableHandle
@@ -318,7 +314,6 @@ export default function RoomTypeEdit(props: {
                   type="number"
                   step="any"
                   value={data.size}
-                  placeholder="Input luas kamar"
                   onChange={(e) => setData("size", parseInt(e.target.value))}
                   autoComplete="off"
                   disableHandle

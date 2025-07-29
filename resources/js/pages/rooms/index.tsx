@@ -107,12 +107,12 @@ export default function RoomsIndex(props: {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.getValue("status") as Enum.RoomStatus;
+        const status = row.getValue("status") as Enum.RoomStatusValue;
 
         return (
           <Badge
             variant="outline"
-            className={cn("font-medium capitalize", roomStatusBadgeColor[status])}
+            className={cn("capitalize", roomStatusBadgeColor[status])}
           >
             {status}
           </Badge>
@@ -124,34 +124,12 @@ export default function RoomsIndex(props: {
       id: "room_type",
       accessorFn: (row) => row.room_type?.name,
       header: "Tipe Kamar",
-      cell: ({ row }) => {
-        const roomType = row.getValue("room_type") as string;
-        return (
-          <Badge
-            variant="secondary"
-            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 font-medium"
-          >
-            {roomType}
-          </Badge>
-        );
-      },
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
     {
       id: "bed_type",
       accessorFn: (row) => row.bed_type?.name,
       header: "Tipe Kasur",
-      cell: ({ row }) => {
-        const bedType = row.getValue("bed_type") as string;
-        return (
-          <Badge
-            variant="secondary"
-            className="border-secondary-foreground/20 dark:border-secondary-foreground/10 font-medium"
-          >
-            {bedType}
-          </Badge>
-        );
-      },
       filterFn: "checkbox" as FilterFnOption<Room.Default>,
     },
     {
@@ -164,7 +142,7 @@ export default function RoomsIndex(props: {
         return (
           <Badge
             variant="outline"
-            className={cn("font-medium capitalize", roomConditionBadgeColor[condition])}
+            className={cn("capitalize", roomConditionBadgeColor[condition])}
           >
             {condition}
           </Badge>

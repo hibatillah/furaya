@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
+import { genderBadgeColor } from "@/static/user";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -23,6 +24,10 @@ export const columns: ColumnDef<Guest.Default>[] = [
     id: "name",
     accessorKey: "user.name",
     header: "Nama",
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string;
+      return <div className="max-w-64 truncate">{name}</div>;
+    },
   },
   {
     id: "phone",
@@ -33,14 +38,9 @@ export const columns: ColumnDef<Guest.Default>[] = [
     id: "email",
     accessorKey: "user.email",
     header: "Email",
-  },
-  {
-    id: "nik_passport",
-    accessorKey: "nik_passport",
-    header: "NIK/Passport",
     cell: ({ row }) => {
-      const nikPassport = row.getValue("nik_passport") as string;
-      return nikPassport ?? "-";
+      const email = row.getValue("email") as string;
+      return <div className="max-w-60 truncate">{email}</div>;
     },
   },
   {
@@ -48,13 +48,15 @@ export const columns: ColumnDef<Guest.Default>[] = [
     accessorKey: "formatted_gender",
     header: "Gender",
     cell: ({ row }) => {
-      const gender = row.getValue("gender") as string;
+      const gender = row.original.gender as Enum.Gender;
+      const formattedGender = row.getValue("gender") as string;
+
       return (
         <Badge
-          variant="secondary"
-          className="border-secondary-foreground/20 dark:border-secondary-foreground/10 rounded-full"
+          variant="outline"
+          className={genderBadgeColor[gender]}
         >
-          {gender}
+          {formattedGender}
         </Badge>
       );
     },
@@ -66,7 +68,7 @@ export const columns: ColumnDef<Guest.Default>[] = [
     header: "Alamat",
     cell: ({ row }) => {
       const address = row.getValue("address") as string;
-      return <div className="line-clamp-1 truncate">{address ?? "-"}</div>;
+      return <div className="max-w-[500px] truncate">{address ?? "-"}</div>;
     },
   },
   {

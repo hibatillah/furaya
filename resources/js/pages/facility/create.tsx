@@ -56,7 +56,6 @@ export default function FacilityCreate() {
               id="name"
               type="text"
               value={data.name}
-              placeholder="Nama"
               onChange={(e) => setData("name", e.target.value)}
               required
             />
@@ -68,7 +67,6 @@ export default function FacilityCreate() {
             <Textarea
               id="description"
               value={data.description}
-              placeholder="Deskripsi"
               onChange={(e) => setData("description", e.target.value)}
             />
             <InputError message={errors.description} />

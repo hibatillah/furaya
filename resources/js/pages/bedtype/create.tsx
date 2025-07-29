@@ -64,7 +64,6 @@ export default function BedTypeCreate() {
               id="name"
               type="text"
               value={data.name}
-              placeholder="Nama Tipe Kasur"
               onChange={(e) => setData("name", e.target.value)}
               required
             />

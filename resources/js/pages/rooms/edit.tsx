@@ -206,7 +206,6 @@ export default function RoomsEdit(props: {
                 min={1}
                 value={data.room_number}
                 onChange={(e) => setData("room_number", parseInt(e.target.value))}
-                placeholder="Nomor Kamar"
                 disableHandle
                 required
               />
@@ -229,7 +228,6 @@ export default function RoomsEdit(props: {
                 onChange={(e) => setData("floor_number", parseInt(e.target.value))}
                 disableHandle
                 required
-                placeholder="Nomor Lantai"
               />
               <InputError message={errors.floor_number} />
             </div>
@@ -264,7 +262,7 @@ export default function RoomsEdit(props: {
                 required
               >
                 <SelectTrigger id="room_type_id">
-                  <SelectValue placeholder="Pilih Tipe Kamar">
+                  <SelectValue>
                     <span className="capitalize">{roomTypes.find((type) => type.id === data.room_type_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -298,7 +296,7 @@ export default function RoomsEdit(props: {
                 required
               >
                 <SelectTrigger id="bed_type_id">
-                  <SelectValue placeholder="Pilih Tipe Kasur">
+                  <SelectValue>
                     <span className="capitalize">{bedTypes.find((type) => type.id === data.bed_type_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -335,7 +333,7 @@ export default function RoomsEdit(props: {
                 required
               >
                 <SelectTrigger id="rate_type_id">
-                  <SelectValue placeholder="Pilih Tipe Tarif">
+                  <SelectValue>
                     <span className="capitalize">{rateTypes.find((type) => type.id === data.rate_type_id)?.name}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -370,7 +368,6 @@ export default function RoomsEdit(props: {
                   value={data.price}
                   onChange={(e) => setData("price", parseInt(e.target.value))}
                   className="ps-8"
-                  placeholder="Harga"
                   disableHandle
                   required
                 />
@@ -393,7 +390,7 @@ export default function RoomsEdit(props: {
                 required
               >
                 <SelectTrigger id="condition">
-                  <SelectValue placeholder="Pilih Kondisi">
+                  <SelectValue>
                     <span className="capitalize">{data.condition}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -429,7 +426,6 @@ export default function RoomsEdit(props: {
                   onChange={(e) => setData("capacity", parseInt(e.target.value))}
                   disableHandle
                   required
-                  placeholder="Kapasitas"
                 />
                 <span className="text-muted-foreground absolute inset-y-0 end-3 flex items-center text-sm">Orang</span>
               </div>
@@ -450,7 +446,7 @@ export default function RoomsEdit(props: {
                 required
               >
                 <SelectTrigger id="status">
-                  <SelectValue placeholder="Pilih Status">
+                  <SelectValue>
                     <span className="uppercase">{data.status}</span>
                   </SelectValue>
                 </SelectTrigger>
@@ -481,7 +477,6 @@ export default function RoomsEdit(props: {
                   id="size"
                   type="number"
                   value={data.size}
-                  placeholder="Input luas kamar"
                   onChange={(e) => setData("size", parseInt(e.target.value))}
                   autoComplete="off"
                   disableHandle
@@ -508,7 +503,7 @@ export default function RoomsEdit(props: {
                 required
               >
                 <SelectTrigger id="smoking_type">
-                  <SelectValue placeholder="Pilih Smoking Type" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {smokingTypes.map((type) => (
@@ -532,7 +527,6 @@ export default function RoomsEdit(props: {
                 id="view"
                 type="text"
                 value={data.view}
-                placeholder="View"
                 onChange={(e) => setData("view", e.target.value)}
                 disableHandle
               />
@@ -573,7 +567,7 @@ export default function RoomsEdit(props: {
                   actions={fileUploadActions}
                   multiple
                 />
-                <p className="text-muted-foreground text-sm">Gambar tipe kamar terpilih akan ditambahkan sebagai gambar kamar.</p>
+                <p className="text-muted-foreground text-sm">Gambar terpilih akan ditambahkan sebagai gambar kamar.</p>
                 <InputError message={errors.images} />
               </div>
             </div>

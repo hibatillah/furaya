@@ -11,10 +11,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position="top-right"
       icons={{
-        success: <CircleCheckIcon className="size-4 text-teal-600" />,
-        info: <InfoIcon className="size-4 text-blue-600" />,
-        warning: <TriangleAlertIcon className="size-4 text-yellow-600" />,
-        error: <OctagonAlertIcon className="size-4 text-red-600" />,
+        success: <CircleCheckIcon className="size-4 text-emerald-500" />,
+        info: <InfoIcon className="size-4 text-blue-500" />,
+        warning: <TriangleAlertIcon className="size-4 text-yellow-500" />,
+        error: <OctagonAlertIcon className="size-4 text-red-500" />,
         loading: (
           <LoaderIcon className="text-muted-foreground duration-1500 size-4 animate-spin" />
         ),
@@ -26,6 +26,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-border": "var(--border)",
         } as React.CSSProperties
       }
+      richColors
       {...props}
     />
   )

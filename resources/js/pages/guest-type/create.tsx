@@ -64,12 +64,16 @@ export default function GuestTypeCreate() {
         >
           {/* code */}
           <div className="grid gap-2">
-            <Label htmlFor="code" required>Kode</Label>
+            <Label
+              htmlFor="code"
+              required
+            >
+              Kode
+            </Label>
             <Input
               id="code"
               type="text"
               value={data.code}
-              placeholder="Kode"
               onChange={(e) => setData("code", e.target.value)}
               autoComplete="off"
               required
@@ -79,12 +83,16 @@ export default function GuestTypeCreate() {
 
           {/* name */}
           <div className="grid gap-2">
-            <Label htmlFor="name" required>Nama</Label>
+            <Label
+              htmlFor="name"
+              required
+            >
+              Nama
+            </Label>
             <Input
               id="name"
               type="text"
               value={data.name}
-              placeholder="Nama"
               onChange={(e) => setData("name", e.target.value)}
               autoComplete="off"
               required

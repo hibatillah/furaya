@@ -45,14 +45,18 @@ export default function DepartmentEdit(props: { data: Department.Default; onClos
         className="max-w-lg space-y-6"
       >
         <div className="grid gap-2">
-          <Label htmlFor="name" required>Nama</Label>
+          <Label
+            htmlFor="name"
+            required
+          >
+            Nama
+          </Label>
           <Input
             id="name"
             type="text"
             value={data.name}
             onChange={(e) => setData("name", e.target.value)}
             required
-            placeholder="Nama"
           />
           <InputError message={errors.name} />
         </div>

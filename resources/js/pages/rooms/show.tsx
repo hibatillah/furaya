@@ -69,7 +69,14 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
     },
     {
       label: "Status Kamar",
-      value: <Badge className={roomStatusBadgeColor[room.status]}>{room.status}</Badge>,
+      value: (
+        <Badge
+          variant="outline"
+          className={cn("capitalize", roomStatusBadgeColor[room.status as keyof typeof roomStatusBadgeColor])}
+        >
+          {room.status}
+        </Badge>
+      ),
     },
     {
       label: "Kondisi",
