@@ -137,6 +137,7 @@ class Reservation extends BaseModel
     {
         if ($this->checkIn?->check_in_at) {
             return Carbon::parse($this->checkIn->check_in_at)
+                ->setTimezone('Asia/Jakarta')
                 ->translatedFormat('d M, H:i') . ' WIB';
         }
 
@@ -147,6 +148,7 @@ class Reservation extends BaseModel
     {
         if ($this->checkOut?->check_out_at) {
             return Carbon::parse($this->checkOut->check_out_at)
+                ->setTimezone('Asia/Jakarta')
                 ->translatedFormat('d M, H:i') . ' WIB';
         }
 

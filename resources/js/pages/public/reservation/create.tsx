@@ -551,6 +551,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     className="w-full"
                     autoComplete="off"
                     required
+                    disabled={!user}
                   />
                   <InputError message={errors.name} />
                 </div>
@@ -570,6 +571,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     className="w-full"
                     autoComplete="off"
                     required
+                    disabled={!user}
                   />
                   <InputError message={errors.phone} />
                 </div>
@@ -589,6 +591,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     className="w-full"
                     autoComplete="off"
                     required
+                    disabled={!user}
                   />
                   <InputError message={errors.email} />
                 </div>
@@ -608,6 +611,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     onChange={(date) => setData("birthdate", date as Date)}
                     disabledDate={{ after: new Date() }}
                     defaultMonth={initialBirthdateYear}
+                    disabled={!user}
                   />
                   <InputError message={errors.birthdate} />
                 </div>
@@ -624,6 +628,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     value={data.gender}
                     onValueChange={(value) => setData("gender", value as Enum.Gender)}
                     required
+                    disabled={!user}
                   >
                     <SelectTrigger id="gender">
                       <SelectValue>
@@ -658,6 +663,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     value={data.nik_passport}
                     onChange={(e) => setData("nik_passport", e.target.value)}
                     className="w-full"
+                    disabled={!user}
                   />
                   <InputError message={errors.nik_passport} />
                 </div>
@@ -682,6 +688,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                         nationality_code: code,
                       }));
                     }}
+                    disabled={!user}
                   />
                   <InputError message={errors.nationality} />
                 </div>
@@ -700,6 +707,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                     onChange={(e) => setData("address", e.target.value)}
                     className="w-full"
                     autoComplete="off"
+                    disabled={!user}
                   />
                   <InputError message={errors.address} />
                 </div>
@@ -755,6 +763,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
                       setData("smoking_type", value as Enum.SmokingType);
                     }}
                     required
+                    disabled={!user}
                   >
                     <SelectTrigger id="smoking_type">
                       <SelectValue placeholder="Pilih Jenis Rokok" />

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reservations;
 use App\Enums\ReservationTransactionEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservations\CheckOutRequest;
+use App\Models\Reservations\CheckOut;
 use App\Models\Reservations\Reservation;
 use App\Models\Rooms\Room;
 use Carbon\Carbon;
@@ -24,12 +25,15 @@ class CheckOutController extends Controller
             $validated = $request->validated();
 
             $checkout = Arr::only($validated, [
-                'check_out_at',
                 'check_out_by',
                 'additional_charge',
                 'notes',
                 'employee_id',
             ]);
+
+            // set timezone
+            $checkout['check_out_at'] = Carbon::parse($validated['check_out_at'])
+                ->setTimezone('Asia/Jakarta');
 
             DB::transaction(function () use ($validated, $checkout) {
                 $reservationId = $validated['reservation_id'];
@@ -73,6 +77,39 @@ class CheckOutController extends Controller
             report($e);
             return back()->withErrors([
                 'message' => "Terjadi kesalahan menambahkan data check-out.",
+            ]);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(CheckOutRequest $request, string $id)
+    {
+        try {
+            $validated = $request->validated();
+
+            // set check-out timezone
+            $validated['check_out_at'] = Carbon::parse($validated['check_out_at'])
+                ->setTimezone('Asia/Jakarta');
+
+            // update check-out data
+            $existCheckOut = CheckOut::findOrFail($id);
+            $existCheckOut->update($validated);
+
+            return back();
+        } catch (ValidationException $e) {
+            report($e);
+            return back()->withErrors($e->errors())->withInput();
+        } catch (ModelNotFoundException $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Data check-in tidak ditemukan",
+            ]);
+        } catch (\Exception $e) {
+            report($e->getMessage());
+            return back()->withErrors([
+                'message' => "Terjadi kesalahan mengubah data check-in.",
             ]);
         }
     }

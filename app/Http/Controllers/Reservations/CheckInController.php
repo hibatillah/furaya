@@ -7,13 +7,14 @@ use App\Enums\BookingTypeEnum;
 use App\Enums\PaymentEnum;
 use App\Enums\RoomStatusEnum;
 use App\Enums\ReservationStatusEnum;
-use App\Enums\StatusAccEnum;
 use App\Http\Requests\Reservations\CheckInRequest;
 use App\Models\Managements\Employee;
+use App\Models\Reservations\CheckIn;
 use App\Models\Reservations\Reservation;
 use App\Models\Rooms\Room;
 use App\Models\Rooms\RoomType;
 use App\Services\ReservationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -115,7 +116,7 @@ class CheckInController extends Controller
                 'message' => "Data reservasi tidak ditemukan",
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 'message' => "Terjadi kesalahan menampilkan data check-in.",
             ]);
@@ -131,18 +132,21 @@ class CheckInController extends Controller
             $validated = $request->validated();
 
             $checkin = Arr::only($validated, [
-                'check_in_at',
                 'check_in_by',
                 'notes',
                 'employee_id',
             ]);
+
+            // set timezone
+            $checkin['check_in_at'] = Carbon::parse($validated['check_in_at'])
+                ->setTimezone('Asia/Jakarta');
 
             DB::transaction(function () use ($validated, $checkin) {
                 // update reservation status
                 $reservation = Reservation::findOrFail($validated['reservation_id']);
                 $reservation->checkIn()->create($checkin);
 
-                // update reservation payment
+                // transaction status set to `settlement` on check-in
                 if ($reservation->transaction_status !== "settlement") {
                     $reservation->update([
                         'transaction_status' => "settlement",
@@ -166,9 +170,42 @@ class CheckInController extends Controller
                 'message' => "Data reservasi tidak ditemukan",
             ]);
         } catch (\Exception $e) {
-            report($e);
+            report($e->getMessage());
             return back()->withErrors([
                 'message' => "Terjadi kesalahan menambahkan data check-in.",
+            ]);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(CheckInRequest $request, string $id)
+    {
+        try {
+            $validated = $request->validated();
+
+            // set check-in timezone
+            $validated['check_in_at'] = Carbon::parse($validated['check_in_at'])
+                ->setTimezone('Asia/Jakarta');
+
+            // update check-in data
+            $existCheckIn = CheckIn::findOrFail($id);
+            $existCheckIn->update($validated);
+
+            return back();
+        } catch (ValidationException $e) {
+            report($e);
+            return back()->withErrors($e->errors())->withInput();
+        } catch (ModelNotFoundException $e) {
+            report($e);
+            return back()->withErrors([
+                'message' => "Data check-in tidak ditemukan",
+            ]);
+        } catch (\Exception $e) {
+            report($e->getMessage());
+            return back()->withErrors([
+                'message' => "Terjadi kesalahan mengubah data check-in.",
             ]);
         }
     }

@@ -26,7 +26,11 @@ class CheckInRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "reservation_id" => ["required", "string", Rule::exists("reservations", "id")],
+            "reservation_id" => [
+                "required",
+                "string",
+                Rule::exists("reservations", "id")
+            ],
             "check_in_at" => [
                 "required",
                 "date",
@@ -36,19 +40,26 @@ class CheckInRequest extends FormRequest
                     if (!$reservation) return;
 
                     $checkInAt = Carbon::parse($value);
+                    $startDateTime = Carbon::parse($reservation->start_date)->setTime(13, 0, 0);
+                    $endDateTime = Carbon::parse($reservation->end_date)->setTime(12, 0, 0);
 
                     // check rules
                     if (
-                        $checkInAt->lt($reservation->start_date) || $checkInAt->gt($reservation->end_date)
+                        $checkInAt->lt($startDateTime) ||
+                        $checkInAt->gt($endDateTime)
                     ) {
-                        $fail("Check-in tidak dapat dilakukan di luar tanggal reservasi.");
+                        $fail("Check-in tidak dapat dilakukan di luar tanggal dan waktu reservasi.");
                     }
                 }
             ],
             "check_in_by" => ["required", "string", "max:255"],
-            "employee_id" => ["required", "string", Rule::exists("employees", "id")],
+            "employee_id" => [
+                "required",
+                "string",
+                Rule::exists("employees", "id")
+            ],
             "notes" => ["nullable", "string", "max:255"],
-            "room_status" => ["required", "string", Rule::in(RoomStatusEnum::getValues())],
+            "room_status" => ["nullable", "string", Rule::in(RoomStatusEnum::getValues())],
         ];
     }
 
@@ -66,9 +77,11 @@ class CheckInRequest extends FormRequest
             "employee_id.required" => "Employee ID wajib diisi.",
             "employee_id.string" => "Employee ID harus berupa string.",
             "employee_id.exists" => "Employee ID tidak ditemukan.",
-            "room_status.required" => "Status kamar wajib diisi.",
+            "notes.string" => "Catatan harus berupa string.",
+            "notes.max" => "Catatan maksimal 255 karakter.",
             "room_status.string" => "Status kamar harus berupa string.",
             "room_status.in" => "Status kamar tidak valid.",
+            "room_status.nullable" => "Status kamar opsional.",
         ];
     }
 }

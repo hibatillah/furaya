@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
 class HandleUserRole
@@ -30,7 +31,9 @@ class HandleUserRole
                 "time"    => now()->toDateTimeString(),
             ]);
 
-            return redirect()->route('home')->with('warning', 'Anda tidak memiliki akses');
+            return Inertia::render('not-found')
+                ->toResponse($request)
+                ->setStatusCode(404);
         }
 
         return $next($request);

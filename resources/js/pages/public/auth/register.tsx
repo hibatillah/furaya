@@ -84,7 +84,7 @@ export default function PublicRegister({
 
           <div className="grid gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Nama Lengkap</Label>
               <Input
                 id="name"
                 type="text"
@@ -95,7 +95,6 @@ export default function PublicRegister({
                 value={data.name}
                 onChange={(e) => setData("name", e.target.value)}
                 disabled={processing}
-                placeholder="Full name"
               />
               <InputError
                 message={errors.name}
@@ -104,7 +103,7 @@ export default function PublicRegister({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone number</Label>
+              <Label htmlFor="phone">No. HP</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -114,14 +113,13 @@ export default function PublicRegister({
                 value={data.phone}
                 onChange={(e) => setData("phone", e.target.value)}
                 disabled={processing}
-                placeholder="Input your phone number"
                 inputMode="tel"
               />
               <InputError message={errors.phone} />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -131,7 +129,6 @@ export default function PublicRegister({
                 value={data.email}
                 onChange={(e) => setData("email", e.target.value)}
                 disabled={processing}
-                placeholder="email@example.com"
               />
               <InputError message={errors.email} />
             </div>
@@ -146,14 +143,13 @@ export default function PublicRegister({
                 value={data.password}
                 onChange={(e) => setData("password", e.target.value)}
                 disabled={processing}
-                placeholder="Password"
                 autoComplete="off"
               />
               <InputError message={errors.password} />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="password_confirmation">Confirm password</Label>
+              <Label htmlFor="password_confirmation">Konfirmasi password</Label>
               <Input
                 id="password_confirmation"
                 type="password"
@@ -162,7 +158,6 @@ export default function PublicRegister({
                 value={data.password_confirmation}
                 onChange={(e) => setData("password_confirmation", e.target.value)}
                 disabled={processing}
-                placeholder="Confirm password"
                 autoComplete="off"
               />
               <InputError message={errors.password_confirmation} />
@@ -170,12 +165,12 @@ export default function PublicRegister({
 
             <Button
               type="submit"
-              className="mt-2 w-full"
+              className="w-full"
               tabIndex={5}
               disabled={processing}
             >
               {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-              Create account
+              Daftar Akun
             </Button>
           </div>
 

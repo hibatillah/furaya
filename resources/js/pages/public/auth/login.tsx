@@ -6,7 +6,7 @@ import InputError from "@/components/input-error";
 import TextLink from "@/components/text-link";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -78,25 +78,26 @@ export default function PublicLogin({ status, canResetPassword = true, children,
         noClose
       >
         <form
-          className="flex flex-col gap-6 py-2"
+          className="flex flex-col gap-8 py-2"
           onSubmit={submit}
         >
           <DialogHeader className="col-span-full">
             <DialogTitle className="text-xl">Log in</DialogTitle>
+            <DialogDescription>Login menggunakan email atau nomor HP terdaftar.</DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6">
+          <div className="mt-4 grid gap-6">
             <Tabs
               defaultValue="email"
               className="w-full"
             >
               <TabsList className="mb-5 w-full *:w-full">
                 <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="phone">Phone</TabsTrigger>
+                <TabsTrigger value="phone">No. HP</TabsTrigger>
               </TabsList>
               <TabsContent value="email">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email address</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -106,14 +107,13 @@ export default function PublicLogin({ status, canResetPassword = true, children,
                     autoComplete="email"
                     value={data.email}
                     onChange={(e) => setData("email", e.target.value)}
-                    placeholder="email@example.com"
                   />
                   <InputError message={errors.email} />
                 </div>
               </TabsContent>
               <TabsContent value="phone">
                 <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone number</Label>
+                  <Label htmlFor="phone">No. HP</Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -123,7 +123,6 @@ export default function PublicLogin({ status, canResetPassword = true, children,
                     autoComplete="phone"
                     value={data.phone}
                     onChange={(e) => setData("phone", e.target.value)}
-                    placeholder="Input your phone number"
                   />
                   <InputError message={errors.phone} />
                 </div>
@@ -139,7 +138,7 @@ export default function PublicLogin({ status, canResetPassword = true, children,
                     className="ml-auto text-sm"
                     tabIndex={5}
                   >
-                    Forgot password?
+                    Lupa password?
                   </TextLink>
                 )}
               </div>
@@ -151,34 +150,35 @@ export default function PublicLogin({ status, canResetPassword = true, children,
                 autoComplete="current-password"
                 value={data.password}
                 onChange={(e) => setData("password", e.target.value)}
-                placeholder="Password"
               />
               <InputError message={errors.password} />
             </div>
 
-            <Label
-              htmlFor="remember"
-              className="flex w-fit items-center space-x-3"
-            >
-              <Checkbox
-                id="remember"
-                name="remember"
-                checked={data.remember}
-                onClick={() => setData("remember", !data.remember)}
-                tabIndex={3}
-              />
-              Remember me
-            </Label>
+            <div className="grid gap-3">
+              <Label
+                htmlFor="remember"
+                className="flex w-fit items-center space-x-3"
+              >
+                <Checkbox
+                  id="remember"
+                  name="remember"
+                  checked={data.remember}
+                  onClick={() => setData("remember", !data.remember)}
+                  tabIndex={3}
+                />
+                Ingat saya
+              </Label>
 
-            <Button
-              type="submit"
-              className="mt-4 w-full"
-              tabIndex={4}
-              disabled={processing}
-            >
-              {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-              Log in
-            </Button>
+              <Button
+                type="submit"
+                className="w-full"
+                tabIndex={4}
+                disabled={processing}
+              >
+                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                Masuk
+              </Button>
+            </div>
           </div>
         </form>
 

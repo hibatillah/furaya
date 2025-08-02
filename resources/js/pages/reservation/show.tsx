@@ -17,16 +17,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency, getCountryImgUrl } from "@/lib/utils";
-import {
-  bookingTypeBadgeColor,
-  reservationStatusBadgeColor,
-  statusAccBadgeColor,
-  transactionStatusBadgeColor,
-  visitPurposeBadgeColor,
-} from "@/static/reservation";
+import { reservationStatusBadgeColor, statusAccBadgeColor, transactionStatusBadgeColor } from "@/static/reservation";
 import { smokingTypeBadgeColor } from "@/static/room";
 import { BreadcrumbItem, SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
+import { EllipsisIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import ConfirmPendingReservation from "./confirm";
@@ -36,7 +31,6 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
 
   const { auth } = usePage<SharedData>().props;
   const isEmployee = auth.user.role === "employee";
-  const isPending = reservation.status_acc === "pending";
 
   // handle dialog form
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -96,25 +90,11 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
     },
     {
       label: "Tipe Reservasi",
-      value: (
-        <Badge
-          variant="outline"
-          className={cn("capitalize", bookingTypeBadgeColor[reservation.booking_type])}
-        >
-          {reservation.booking_type}
-        </Badge>
-      ),
+      value: reservation.booking_type,
     },
     {
       label: "Tujuan Kedatangan",
-      value: (
-        <Badge
-          variant="outline"
-          className={cn("capitalize", visitPurposeBadgeColor[reservation.visit_purpose])}
-        >
-          {reservation.visit_purpose}
-        </Badge>
-      ),
+      value: reservation.visit_purpose,
     },
     {
       label: "Tipe Tamu",
@@ -359,48 +339,42 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Data Reservasi</h1>
 
-        {/* inactive dropdown menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="hidden"
+              size="sm"
+              className={!isEmployee ? "hidden" : undefined}
             >
-              <span>Lainnya</span>
+              <EllipsisIcon className="h-4 w-4" />
+              <span className="sr-only">Lainnya</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {isEmployee && isPending && <DropdownMenuItem onClick={() => setDialogOpen(true)}>Konfirmasi</DropdownMenuItem>}
-            {isEmployee && !isPending && (
-              <DropdownMenuItem asChild>
-                <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
-              </DropdownMenuItem>
-            )}
-            {isEmployee && !isPending && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuRadioGroup
-                      value={reservation.status}
-                      onValueChange={(value) => {
-                        handleUpdateReservationStatus(value as Enum.ReservationStatus);
-                      }}
+            <DropdownMenuItem asChild>
+              <Link href={route("reservation.edit", { id: reservation.id })}>Edit</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuRadioGroup
+                  value={reservation.status}
+                  onValueChange={(value) => {
+                    handleUpdateReservationStatus(value as Enum.ReservationStatus);
+                  }}
+                >
+                  {status.map((item) => (
+                    <DropdownMenuRadioItem
+                      value={item}
+                      className="capitalize"
                     >
-                      {status.map((item) => (
-                        <DropdownMenuRadioItem
-                          value={item}
-                          className="capitalize"
-                        >
-                          {item}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              </>
-            )}
+                      {item}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -424,7 +398,7 @@ export default function ReservationsShow(props: { reservation: Reservation.Defau
           <CardContent>
             <DataList
               data={reservationDetails}
-              className="lg:[--columns:2] *:data-[value=Remarks]:lg:col-span-3"
+              className="lg:[--columns:2]"
             />
           </CardContent>
         </Card>

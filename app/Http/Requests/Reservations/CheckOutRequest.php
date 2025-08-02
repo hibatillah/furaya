@@ -26,7 +26,11 @@ class CheckOutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "reservation_id" => ["required", "string", Rule::exists("reservations", "id")],
+            "reservation_id" => [
+                "required",
+                "string",
+                Rule::exists("reservations", "id")
+            ],
             "check_out_at" => [
                 "required",
                 "date",
@@ -36,6 +40,7 @@ class CheckOutRequest extends FormRequest
                     if (!$reservation) return;
 
                     $checkOutAt = Carbon::parse($value);
+                    $endDateTime = Carbon::parse($reservation->end_date)->setTime(12, 0, 0);
 
                     // check rules
                     if (!$reservation->checkIn) {
@@ -43,17 +48,25 @@ class CheckOutRequest extends FormRequest
                     }
 
                     if (
-                        $checkOutAt->lt($reservation->start_date) || $checkOutAt->gt($reservation->end_date)
+                        $checkOutAt->lt($reservation->start_date) || $checkOutAt->gt($endDateTime)
                     ) {
-                        $fail("Check-out tidak dapat dilakukan di luar tanggal reservasi.");
+                        $fail("Check-out tidak dapat dilakukan di luar tanggal dan waktu reservasi.");
                     }
                 }
             ],
             "check_out_by" => ["required", "string", "max:255"],
-            "employee_id" => ["required", "string", Rule::exists("employees", "id")],
-            "additional_charge" => ["nullable", "numeric"],
+            "employee_id" => [
+                "required",
+                "string",
+                Rule::exists("employees", "id")
+            ],
+            "additional_charge" => ["nullable", "numeric", "min:0"],
             "notes" => ["nullable", "string", "max:255"],
-            "room_status" => ["required", "string", Rule::in(RoomStatusEnum::getValues())],
+            "room_status" => [
+                "nullable",
+                "string",
+                Rule::in(RoomStatusEnum::getValues())
+            ],
         ];
     }
 
@@ -72,9 +85,10 @@ class CheckOutRequest extends FormRequest
             "employee_id.string" => "Employee ID harus berupa string.",
             "employee_id.exists" => "Employee ID tidak ditemukan.",
             "additional_charge.numeric" => "Additional charge harus berupa angka.",
+            "additional_charge.min" => "Additional charge minimal 0.",
             "notes.string" => "Catatan harus berupa string.",
             "notes.max" => "Catatan maksimal 255 karakter.",
-            "room_status.required" => "Status kamar wajib diisi.",
+            "room_status.nullable" => "Status kamar opsional.",
             "room_status.string" => "Status kamar harus berupa string.",
             "room_status.in" => "Status kamar tidak valid.",
         ];

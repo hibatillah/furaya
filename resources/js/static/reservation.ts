@@ -28,7 +28,7 @@ export const roomPackageBadgeColor = {
 export const visitPurposeBadgeColor = {
   vacation: badgeColor.green,
   business: badgeColor.cyan,
-  study: badgeColor.indigo,
+  study: badgeColor.purple,
   family: badgeColor.amber,
   seminar: badgeColor.red,
   other: badgeColor.stone,

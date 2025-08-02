@@ -151,7 +151,7 @@ class ReservationController extends Controller
     {
         $dataForm = $this->getDataForm();
 
-        return Inertia::render("reservation/create", $dataForm);
+        return Inertia::render("reservation/create-step", $dataForm);
     }
 
     /**

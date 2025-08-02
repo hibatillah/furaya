@@ -6,13 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { cn, formatCurrency } from "@/lib/utils";
 import { roomConditionBadgeColor, roomStatusBadgeColor, smokingTypeBadgeColor } from "@/static/room";
-import { BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import { BreadcrumbItem, SharedData } from "@/types";
+import { Head, usePage } from "@inertiajs/react";
 import { ImageOffIcon } from "lucide-react";
 import { useMemo } from "react";
 
 export default function RoomShow(props: { room: Room.Default; reservations: Reservation.Default[] }) {
   const { room } = props;
+
+  const { auth } = usePage<SharedData>().props;
+  const isAdmin = auth.user.role === "admin";
 
   // define page breadcrumbs
   const breadcrumbs: BreadcrumbItem[] = [
@@ -84,11 +87,11 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
     },
     {
       label: "Tipe Kamar",
-      value: <Badge variant="outline">{room.room_type?.name}</Badge>,
+      value: room.room_type?.name,
     },
     {
       label: "Tipe Kasur",
-      value: <Badge variant="outline">{room.bed_type?.name}</Badge>,
+      value: room.bed_type?.name,
     },
     {
       label: "Smoking Type",
@@ -116,13 +119,31 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
             <div>
               <dt>Denah Kamar</dt>
               <dd>
-                <ImageContainer
-                  src={room.formatted_room_layout_image ?? ""}
-                  alt={`Denah Kamar ${room.room_number}`}
-                  className="h-40 w-full sm:h-60"
-                  imgClassName="object-contain bg-center"
-                  href={room.formatted_room_layout_image}
-                />
+                {room.formatted_room_layout_image ? (
+                  <ImageContainer
+                    src={room.formatted_room_layout_image}
+                    alt={`Denah Kamar ${room.room_number}`}
+                    className="h-40 w-full sm:h-60"
+                    imgClassName="object-contain bg-center"
+                    href={room.formatted_room_layout_image}
+                  />
+                ) : (
+                  <div className="col-span-full flex h-60 flex-col items-center justify-center gap-3 rounded-md border">
+                    <ImageOffIcon className="text-primary size-8 stroke-[1.5]" />
+                    <div
+                      className="text-center"
+                      text-sm
+                    >
+                      <p className="text-muted-foreground">Kamar ini belum memiliki denah kamar.</p>
+                      <TextLink
+                        href={route("room.edit", { id: room.id })}
+                        className={cn(!isAdmin && "hidden")}
+                      >
+                        Tambahkan Denah Kamar
+                      </TextLink>
+                    </div>
+                  </div>
+                )}
               </dd>
             </div>
 
@@ -146,8 +167,13 @@ export default function RoomShow(props: { room: Room.Default; reservations: Rese
                       className="text-center"
                       text-sm
                     >
-                      <p className="text-muted-foreground">Kamar {room.room_number} belum memiliki gambar.</p>
-                      <TextLink href={route("room.edit", { id: room.id })}>Tambahkan Gambar</TextLink>
+                      <p className="text-muted-foreground">Kamar ini belum memiliki gambar.</p>
+                      <TextLink
+                        href={route("room.edit", { id: room.id })}
+                        className={cn(!isAdmin && "hidden")}
+                      >
+                        Tambahkan Gambar
+                      </TextLink>
                     </div>
                   </div>
                 )}

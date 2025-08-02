@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -51,14 +53,18 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->header('X-Inertia')) {
                 $status = 500; // Default status for generic errors
 
-                // Determine the correct HTTP status code if it's an HTTP exception
-                if ($e instanceof HttpException) {
+                // Prioritize known HTTP exceptions
+                if ($e instanceof NotFoundHttpException) {
+                    $status = 404;
+                } elseif ($e instanceof AccessDeniedHttpException) {
+                    $status = 403;
+                } elseif ($e instanceof HttpException) {
                     $status = $e->getStatusCode();
                 }
 
                 // Render your Inertia 404/Error component
                 // (e.g., resources/js/Pages/Errors/404.jsx)
-                if ($status === 404) {
+                if (in_array($status, [403, 404])) {
                     return Inertia::render('not-found')
                         ->toResponse($request)
                         ->setStatusCode($status);

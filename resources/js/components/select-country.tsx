@@ -17,9 +17,10 @@ interface SelectCountryProps {
   action?: React.ReactNode;
   className?: string;
   noLabel?: boolean;
+  disabled?: boolean;
 }
 
-export default function SelectCountry({ data, value, setValue, action, className, label, noLabel }: SelectCountryProps) {
+export default function SelectCountry({ data, value, setValue, action, className, label, noLabel, disabled }: SelectCountryProps) {
   const id = useId();
   const [open, setOpen] = useState<boolean>(false);
 
@@ -55,6 +56,7 @@ export default function SelectCountry({ data, value, setValue, action, className
             "bg-accent border-input w-full justify-end px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
             className,
           )}
+          disabled={disabled}
         >
           <span className={cn("me-auto truncate", !value && "text-muted-foreground")}>
             {value ? handleSelect(value) : label ? `Pilih ${label}` : "Pilih data"}

@@ -76,3 +76,11 @@ export function getCountryImgUrl(code: string) {
   const url = `https://flagcdn.com/w40/${code}.webp`;
   return url;
 }
+
+export function getTimeFormat(datetime: Date) {
+  const hours = String(datetime.getHours()).padStart(2, "0");
+  const minutes = String(datetime.getMinutes()).padStart(2, "0");
+  const seconds = String(datetime.getSeconds()).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
+}

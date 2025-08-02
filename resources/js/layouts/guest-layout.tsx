@@ -138,7 +138,7 @@ function BookCard({ className }: { className?: string }) {
                 variant="outline"
                 className="bg-accent max-lg:justify-between"
               >
-                {pax.adults} Adults, {pax.children} Children
+                {pax.adults} Dewasa, {pax.children} Anak
                 <UserRoundIcon className="text-primary" />
               </Button>
             </PopoverTrigger>
@@ -155,7 +155,7 @@ function BookCard({ className }: { className?: string }) {
                     htmlFor="pax"
                     className="text-xs"
                   >
-                    Adults
+                    Dewasa
                   </Label>
                   <Input
                     type="number"
@@ -174,7 +174,7 @@ function BookCard({ className }: { className?: string }) {
                     htmlFor="pax"
                     className="text-xs"
                   >
-                    Children
+                    Anak
                   </Label>
                   <Input
                     type="number"
@@ -297,13 +297,18 @@ function Header() {
   const menu = ["About Us", "Rooms", "Banquet & Events", "Facilities", "Offers", "Contact", "Map"];
 
   return (
-    <header className="bg-background/90 backdrop-blur-sm border-border/50 sticky top-0 z-10 w-full border-b">
+    <header className="bg-background/90 border-border/50 sticky top-0 z-10 w-full border-b backdrop-blur-sm">
       <div className="container mx-auto flex items-center gap-0.5 px-4 py-2">
         <Link
           href={route("home")}
-          className="text-foreground/80 me-auto tracking-wide uppercase"
+          className="text-foreground me-auto flex items-center gap-2"
         >
-          Hotel Furaya
+          <img
+            src="/favicon.svg"
+            alt="Furaya Hotel"
+            className="size-8 object-contain text-current"
+          />
+          <span className="truncate leading-none font-semibold tracking-wide uppercase">Furaya Hotel</span>
         </Link>
         <nav className="flex items-center gap-0.5 max-lg:hidden">
           {menu.map((item) => (

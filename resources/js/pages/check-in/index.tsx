@@ -5,11 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import AppLayout from "@/layouts/app-layout";
 import { cn } from "@/lib/utils";
 import { reservationStatusBadgeColor } from "@/static/reservation";
-import { roomStatusBadgeColor } from "@/static/room";
 import { BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ColumnDef, FilterFnOption } from "@tanstack/react-table";
@@ -17,6 +23,8 @@ import { EllipsisVerticalIcon } from "lucide-react";
 import { useState } from "react";
 import CheckIn from "./check-in";
 import CheckOut from "./check-out";
+import EditCheckIn from "./edit-check-in";
+import EditCheckOut from "./edit-check-out";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -24,6 +32,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: route("checkin.index"),
   },
 ];
+
+type DialogType = "check-in" | "check-out" | "edit-check-in" | "edit-check-out" | null;
 
 export default function CheckInIndex(props: {
   reservations: Reservation.Default[];
@@ -39,10 +49,10 @@ export default function CheckInIndex(props: {
 
   // handle dialog
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"check-in" | "check-out" | null>(null);
+  const [dialogType, setDialogType] = useState<DialogType>(null);
   const [selectedRow, setSelectedRow] = useState<Reservation.Default | null>(null);
 
-  function handleDialog(type: "check-in" | "check-out", row: Reservation.Default) {
+  function handleDialog(type: DialogType, row: Reservation.Default) {
     setDialogType(type);
     setSelectedRow(row);
     setDialogOpen(true);
@@ -87,7 +97,7 @@ export default function CheckInIndex(props: {
     {
       id: "start_date",
       accessorFn: (row) => row.formatted_start_date,
-      header: "Masuk",
+      header: "Mulai",
     },
     {
       id: "check_in_date",
@@ -101,7 +111,7 @@ export default function CheckInIndex(props: {
     {
       id: "end_date",
       accessorFn: (row) => row.formatted_end_date,
-      header: "Keluar",
+      header: "Selesai",
     },
     {
       id: "check_out_date",
@@ -117,7 +127,6 @@ export default function CheckInIndex(props: {
       cell: ({ row }) => {
         const isCheckIn = row.original.check_in?.check_in_at;
         const isCheckOut = row.original.check_out?.check_out_at;
-        const isPending = row.original.status_acc === "pending";
 
         return (
           <DropdownMenu>
@@ -132,25 +141,45 @@ export default function CheckInIndex(props: {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {(!isCheckIn || !isCheckOut) && (
+              <DropdownMenuLabel className={cn("text-foreground/80 hidden pt-0.5 pb-px text-xs", isCheckIn && isCheckOut && "hidden")}>
+                Aksi
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => handleDialog("check-in", row.original)}
+                className={cn(isCheckIn && "hidden")}
+                disabled={!!isCheckIn}
+              >
+                Check In
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDialog("check-out", row.original)}
+                className={cn(isCheckOut && "hidden")}
+                disabled={!isCheckIn || !!isCheckOut}
+              >
+                Check Out
+              </DropdownMenuItem>
+
+              {(isCheckIn || isCheckOut) && (
                 <>
+                  <DropdownMenuSeparator className={cn(isCheckIn && isCheckOut && "hidden")} />
+                  <DropdownMenuLabel className="text-foreground/80 pt-0.5 pb-px text-xs">Edit</DropdownMenuLabel>
                   <DropdownMenuItem
-                    onClick={() => handleDialog("check-in", row.original)}
-                    disabled={!!isCheckIn}
+                    onClick={() => handleDialog("edit-check-in", row.original)}
+                    className={cn(!isCheckIn && "hidden")}
                   >
                     Check In
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => handleDialog("check-out", row.original)}
-                    disabled={!!isCheckOut}
+                    onClick={() => handleDialog("edit-check-out", row.original)}
+                    className={cn(!isCheckOut && "hidden")}
                   >
                     Check Out
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={route("reservation.show", { id: row.original.id })}>Detail</Link>
+                <Link href={route("reservation.show", { id: row.original.id })}>Detail Reservasi</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -230,6 +259,18 @@ export default function CheckInIndex(props: {
               data={selectedRow}
               employee={employee}
               status={roomStatus}
+              onClose={handleDialogClose}
+            />
+          )}
+          {dialogType === "edit-check-in" && selectedRow && (
+            <EditCheckIn
+              data={selectedRow}
+              onClose={handleDialogClose}
+            />
+          )}
+          {dialogType === "edit-check-out" && selectedRow && (
+            <EditCheckOut
+              data={selectedRow}
               onClose={handleDialogClose}
             />
           )}

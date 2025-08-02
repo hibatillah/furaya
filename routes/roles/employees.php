@@ -18,13 +18,20 @@ Route::middleware("role:employee")->group(function () {
 
   /** check in routes */
   Route::resource("check-in", CheckInController::class)
-    ->only(["index", "store"])
+    ->only(["index", "store", "update"])
     ->parameters(["check-in" => "id"])
     ->names([
       "index" => "checkin.index",
       "store" => "checkin.store",
+      "update" => "checkin.update",
     ]);
 
   /** check out routes */
-  Route::post("check-out", [CheckOutController::class, "store"])->name("checkout.store");
+  Route::resource("check-out", CheckOutController::class)
+    ->only(["store", "update"])
+    ->parameters(["check-out" => "id"])
+    ->names([
+      "store" => "checkout.store",
+      "update" => "checkout.update",
+    ]);
 });

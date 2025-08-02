@@ -31,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-interface ReservationCreateProps {
+export interface ReservationCreateProps {
   guestTypes: GuestType.Default[];
   visitPurposes: Enum.VisitPurpose[];
   bookingTypes: Enum.BookingType[];
@@ -315,6 +315,7 @@ export default function ReservationsCreate(props: ReservationCreateProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Tambah Reservasi" />
+
       <h1 className="text-2xl font-bold">Tambah Reservasi</h1>
       <form className="flex flex-col gap-6 *:data-[slot=card]:gap-4 **:data-[slot=card-content]:grid **:data-[slot=card-content]:gap-5 **:data-[slot=card-content]:lg:grid-cols-2 **:data-[slot=card-content]:xl:grid-cols-4">
         {/* reservation details */}

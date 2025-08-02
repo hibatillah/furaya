@@ -1,13 +1,16 @@
-import { HotelIcon } from "lucide-react";
-
 export default function AppLogo() {
   return (
     <>
-      <div className="bg-sidebar-accent text-sidebar-foreground flex aspect-square size-8 items-center justify-center rounded-md">
-        <HotelIcon className="size-5 text-current" />
+      <div className="flex aspect-square size-8 items-center justify-center">
+        <img
+          src="/favicon.svg"
+          alt="Furaya Hotel"
+          className="size-8 object-contain text-current"
+        />
       </div>
-      <div className="ml-1 grid flex-1 text-left text-sm">
-        <span className="mb-0.5 truncate leading-none font-semibold">Hotel Furaya</span>
+      <div className="ml-1 flex-1 text-left">
+        <span className="truncate leading-none font-semibold uppercase tracking-wide">Furaya Hotel</span>
+        <p className="text-foreground/80 text-sm font-light truncate leading-none">Pekanbaru, Indonesia</p>
       </div>
     </>
   );

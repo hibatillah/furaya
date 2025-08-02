@@ -65,7 +65,7 @@ export default function DesignSystem() {
       <Card className="gap-4">
         <CardHeader>
           <CardTitle className="text-lg font-bold">Toasts</CardTitle>
-          <CardDescription>Click button to see the toast variants.</CardDescription>
+          <CardDescription>Click button to see toast variants.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
           <Button

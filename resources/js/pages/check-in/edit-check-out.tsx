@@ -2,48 +2,38 @@ import { DataList } from "@/components/data-list";
 import { InputDate } from "@/components/input-date";
 import InputError from "@/components/input-error";
 import { InputTime } from "@/components/input-time";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getTimeFormat } from "@/lib/utils";
 import { dateConfig } from "@/static";
 import { useForm } from "@inertiajs/react";
-import { isAfter, set } from "date-fns";
+import { set } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export default function CheckOut(props: { data: Reservation.Default; employee: Employee.Default; status: Enum.RoomStatus[]; onClose: () => void }) {
-  const { data: reservation, employee, status, onClose } = props;
-
-  // initial data
-  const initialDate = set(
-    new Date(reservation.end_date as Date),
-    {
-      hours: 10,
-      minutes: 0,
-    },
-    dateConfig,
-  );
-
-  const canCheckIn = isAfter(new Date(), initialDate);
-  const canCheckOut = canCheckIn && reservation.check_in?.check_in_at;
+export default function EditCheckOut(props: { data: Reservation.Default; onClose: () => void }) {
+  const { data: reservation, onClose } = props;
 
   // declare form
-  const [date, setDate] = useState<Date>(initialDate);
-  const [time, setTime] = useState<string>("10:00:00");
-  const [additionalCharge, setAdditionalCharge] = useState<number | "">(""); // handle empty input for useForm inertia
-  const { data, setData, post, errors, processing } = useForm<CheckOut.Create>({
-    check_out_at: initialDate,
-    check_out_by: employee.user?.name || "",
-    notes: "",
-    employee_id: employee.id,
+  const checkOutDatetime = new Date(reservation.check_out?.check_out_at as Date);
+  const checkOutTime = getTimeFormat(checkOutDatetime);
+
+  const [date, setDate] = useState<Date>(checkOutDatetime);
+  const [time, setTime] = useState<string>(checkOutTime);
+  const [additionalCharge, setAdditionalCharge] = useState<number | "">(""); // handle empty input for useForm inertia\
+
+  const { data, setData, put, errors, processing } = useForm<CheckOut.Update>({
+    id: reservation.check_out?.id,
+    check_out_at: reservation.check_out?.check_out_at,
+    check_out_by: reservation.check_out?.check_out_by,
+    notes: reservation.check_out?.notes,
+    employee_id: reservation.check_out?.employee_id,
     reservation_id: reservation.id,
-    additional_charge: "",
-    room_status: "Check Out" as Enum.RoomStatus, // default room status after check-out
+    additional_charge: reservation.check_out?.additional_charge,
   });
 
   // handle time change
@@ -63,30 +53,23 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
   }, [date, time]);
 
   // Handle check out
-  function handleCheckOut(e: React.FormEvent) {
+  function handleUpdateCheckOut(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!canCheckOut) {
-      toast.warning("Tidak dapat melakukan Check-out", {
-        description: "Lakukan Check-in terlebih dahulu.",
-      });
-      return;
-    }
-
     // sent data
-    toast.loading("Menambahkan data check-out...", {
+    toast.loading("Mengubah data check-out...", {
       id: `check-out-${reservation.id}`,
     });
 
-    post(route("checkout.store", { reservationId: reservation.id }), {
+    put(route("checkout.update", { id: data.id }), {
       onSuccess: () => {
-        toast.success("Check-out berhasil ditambahkan", {
+        toast.success("Check-out berhasil diubah", {
           id: `check-out-${reservation.id}`,
         });
         onClose();
       },
       onError: (error) => {
-        toast.error("Check-out gagal ditambahkan", {
+        toast.error("Check-out gagal diubah", {
           id: `check-out-${reservation.id}`,
           description: error.message,
         });
@@ -126,31 +109,22 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Check Out Reservasi</DialogTitle>
-        {canCheckOut ? (
-          <>
-            <div className="mt-2 text-sm">
-              <DataList
-                data={dataList.slice(0, -1)}
-                className="gap-y-1.5"
-              />
-              <Separator className="my-2" />
-              <DataList
-                data={dataList.slice(-1)}
-                className="gap-x-[65px]"
-              />
-              <Separator className="mt-2 mb-1" />
-            </div>
-          </>
-        ) : (
-          <Alert>
-            <AlertTitle>Belum Waktu Check Out</AlertTitle>
-            <AlertDescription>Check-in dahulu sebelum dapat melakukan check-out.</AlertDescription>
-          </Alert>
-        )}
+        <DialogTitle>Edit Check Out</DialogTitle>
+        <div className="mt-2 text-sm">
+          <DataList
+            data={dataList.slice(0, -1)}
+            className="gap-y-1.5"
+          />
+          <Separator className="my-2" />
+          <DataList
+            data={dataList.slice(-1)}
+            className="gap-x-[65px]"
+          />
+          <Separator className="mt-2 mb-1" />
+        </div>
       </DialogHeader>
       <form
-        onSubmit={handleCheckOut}
+        onSubmit={handleUpdateCheckOut}
         className="grid max-w-lg grid-cols-2 gap-4"
       >
         {/* date */}
@@ -247,7 +221,7 @@ export default function CheckOut(props: { data: Reservation.Default; employee: E
             type="submit"
             disabled={processing}
           >
-            Submit Check Out
+            Simpan Perubahan
           </Button>
         </div>
       </form>

@@ -2,18 +2,17 @@
 
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getHours, getMinutes } from "date-fns";
 
-export function InputTime({ className, initialValue, ...props }: React.ComponentProps<"input"> & {
+export function InputTime({
+  className,
+  initialValue,
+  ...props
+}: React.ComponentProps<"input"> & {
   initialValue?: {
     hours: number;
     minutes: number;
   };
 }) {
-  const now = new Date();
-  const hours = initialValue?.hours || getHours(now);
-  const minutes = initialValue?.minutes || getMinutes(now);
-
   return (
     <Input
       id="time"

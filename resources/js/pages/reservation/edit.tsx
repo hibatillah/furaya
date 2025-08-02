@@ -163,7 +163,7 @@ export default function ReservationsEdit(props: {
       try {
         toast.loading("Mencari data tamu tersedia...", { id: "get-guest" });
 
-        const response = await fetch(`/admin/reservasi/tamu?nik_passport=${value}`);
+        const response = await fetch(`/admin/reservasi/tamu?phone=${encodeURIComponent(value)}`);
         const data = await response.json();
         const guest = data.guest as Guest.Default;
 
@@ -194,7 +194,7 @@ export default function ReservationsEdit(props: {
         } else {
           toast.warning("Tamu tidak ditemukan", {
             id: "get-guest",
-            description: "Buat data tamu baru",
+            description: `Tamu dengan no. hp ${value} tidak ditemukan`,
           });
         }
       } catch (error) {
@@ -204,7 +204,7 @@ export default function ReservationsEdit(props: {
         });
       }
     },
-    [data.nik_passport],
+    [data.phone],
   );
 
   /**
@@ -381,10 +381,7 @@ export default function ReservationsEdit(props: {
         value: (
           <Badge
             variant="outline"
-            className={cn(
-              "capitalize",
-              transactionStatusBadgeColor[reservation.transaction_status as keyof typeof transactionStatusBadgeColor],
-            )}
+            className={cn("capitalize", transactionStatusBadgeColor[reservation.transaction_status as keyof typeof transactionStatusBadgeColor])}
           >
             {reservation.transaction_status}
           </Badge>
@@ -745,14 +742,16 @@ export default function ReservationsEdit(props: {
 
             {/* room type */}
             <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="room_type"
-                className="flex items-center gap-1"
-                required
-              >
-                <span>Tipe Kamar</span>
+              <span className="flex items-center gap-1">
+                <Label
+                  htmlFor="room_type"
+                  className="flex items-center gap-1"
+                  required
+                >
+                  Tipe Kamar
+                </Label>
                 <InfoTooltip>Opsi hanya menampilkan tipe kamar yang tersedia sesuai tanggal reservasi.</InfoTooltip>
-              </Label>
+              </span>
               <Select
                 value={selectedRoomType}
                 onValueChange={(value) => {
@@ -1048,12 +1047,15 @@ export default function ReservationsEdit(props: {
           <CardContent>
             {/* phone */}
             <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="phone"
-                required
-              >
-                No. HP
-              </Label>
+              <span className="flex items-center gap-1">
+                <Label
+                  htmlFor="phone"
+                  required
+                >
+                  No. HP
+                </Label>
+                <InfoTooltip className="w-64">Isi data manual jika tamu belum tersedia.</InfoTooltip>
+              </span>
               <div className="relative">
                 <Input
                   type="tel"
@@ -1071,13 +1073,12 @@ export default function ReservationsEdit(props: {
                       onClick={() => getCustomer(data.phone || "")}
                     >
                       <UserSearchIcon className="h-4 w-4" />
-                      <span className="sr-only">Cari Customer</span>
+                      <span className="sr-only">Cari Tamu</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Cek Customer</TooltipContent>
+                  <TooltipContent>Cek Ketersediaan Tamu</TooltipContent>
                 </Tooltip>
               </div>
-              <p className="text-muted-foreground text-sm text-pretty">Isi data manual jika tamu belum tersedia.</p>
               <InputError message={errors.phone} />
             </div>
 
@@ -1390,12 +1391,17 @@ export default function ReservationsEdit(props: {
 
             {/* payment method */}
             <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="payment_method"
-                required
-              >
-                Metode Pembayaran
-              </Label>
+              <span className="flex items-center gap-1">
+                <Label
+                  htmlFor="payment_method"
+                  required
+                >
+                  Metode Pembayaran
+                </Label>
+                <InfoTooltip>
+                  Di set sebagai <span className="underline">other</span> jika pembayaran dilakukan melalui payment gateway
+                </InfoTooltip>
+              </span>
               <Select
                 value={data.payment_method}
                 onValueChange={(value) => setData("payment_method", value as Enum.Payment)}
