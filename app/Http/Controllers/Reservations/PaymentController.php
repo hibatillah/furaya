@@ -38,7 +38,9 @@ class PaymentController extends Controller
                     'email' => $reservation->reservationGuest->guest->user->email,
                 ],
                 'callbacks' => [
-                    'finish' => route('public.reservation.history'),
+                    'finish' => route('public.reservation.history', [
+                        'search' => $reservation->booking_number,
+                    ]),
                 ],
             ];
 

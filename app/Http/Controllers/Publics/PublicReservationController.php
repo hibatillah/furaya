@@ -275,6 +275,7 @@ class PublicReservationController extends Controller
 
             return redirect()->back()->with("data", [
                 "reservation_id" => $reservation->id,
+                "booking_number" => $reservation->booking_number,
             ]);
         } catch (ValidationException $e) {
             report($e);
@@ -319,6 +320,7 @@ class PublicReservationController extends Controller
             "reservations" => $reservations,
             "sort" => $sort,
             "status" => $reservationStatus,
+            "search" => $search,
         ]);
     }
 

@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 
 export default function PublicReservationIndex(props: { roomTypes: RoomType.Default[]; startDate: string; endDate: string }) {
   const { roomTypes, startDate, endDate } = props;
-  console.log(roomTypes);
 
   const formatStartDate = format(new Date(startDate), "dd MMMM yyyy", dateConfig);
   const formatEndDate = format(new Date(endDate), "dd MMMM yyyy", dateConfig);
@@ -63,7 +62,7 @@ export default function PublicReservationIndex(props: { roomTypes: RoomType.Defa
   return (
     <GuestLayout>
       <Head title="Kamar Tersedia" />
-      <div className="container mx-auto space-y-5 pb-10 lg:px-5">
+      <div className="container mx-auto space-y-5 pb-10 lg:px-20">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Kamar Tersedia</h1>
           <p className="text-muted-foreground max-md:text-balance">

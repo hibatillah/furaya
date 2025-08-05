@@ -27,13 +27,13 @@ export default function Welcome() {
               delay: 5000,
             }),
           ]}
-          className="w-full"
+          className="relative mx-auto w-full max-w-7xl overflow-hidden rounded-lg"
         >
           <CarouselContent>
             {images.map((image, index) => (
               <CarouselItem
                 key={index}
-                className="overflow-hidden rounded-md"
+                className="overflow-hidden rounded-lg"
               >
                 <Card className="h-[72vh] overflow-hidden !p-0">
                   <ImageContainer
@@ -46,6 +46,14 @@ export default function Welcome() {
               </CarouselItem>
             ))}
           </CarouselContent>
+
+          {/* overlay */}
+          <div className="bg-background/20 dark:bg-background/50 absolute inset-0 z-10 flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-zinc-800 dark:text-foreground text-3xl font-black uppercase">Furaya Hotel</h1>
+              <p className="text-zinc-800 dark:text-foreground text-xl">Pekanbaru, Indonesia</p>
+            </div>
+          </div>
         </Carousel>
 
         <div className="py-16">
@@ -108,7 +116,7 @@ export default function Welcome() {
           </Card>
         </div>
 
-        <div className="space-y-8 py-12">
+        <div className="space-y-8 pt-12">
           <h2 className="text-center text-4xl font-semibold">Akomodasi</h2>
           <div className="grid h-96 grid-cols-1 lg:grid-cols-3">
             {images.map((image, index) => (
@@ -121,16 +129,6 @@ export default function Welcome() {
               />
             ))}
           </div>
-        </div>
-
-        <div className="space-y-4 py-12 md:px-20 lg:px-52">
-          <h2 className="text-2xl font-semibold">Tentang Hotel Furaya</h2>
-          <p className="text-muted-foreground">
-            Untuk perjalanan bisnis, akhir pekan, atau singgah di Pekanbaru, Hotel Furaya adalah pilihan tepat tanpa menguras kantong. Hotel Furaya
-            menawarkan beragam fasilitas mulai dari kedai kopi 24 jam, minimarket 24 jam, lounge, spa dan pusat kebugaran, karaoke di ruang pribadi,
-            layanan laundry, fasilitas bisnis dan perjamuan, agen perjalanan, serta restoran yang menyajikan perpaduan lezat masakan Indonesia,
-            internasional, dan Cina.
-          </p>
         </div>
       </div>
     </GuestLayout>

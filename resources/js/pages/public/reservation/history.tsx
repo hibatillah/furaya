@@ -1,27 +1,29 @@
 import { ImageContainer } from "@/components/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import GuestLayout from "@/layouts/guest-layout";
 import { cn, formatCurrency } from "@/lib/utils";
 import { reservationStatusBadgeColor, transactionStatusBadgeColor } from "@/static/reservation";
 import { Head, router } from "@inertiajs/react";
-import { CalendarX2Icon, MoveDownIcon, MoveUpIcon, SearchIcon } from "lucide-react";
+import { BedSingleIcon, CalendarRangeIcon, CalendarX2Icon, MoveDownIcon, MoveUpIcon, SearchIcon, Settings2Icon } from "lucide-react";
 import { useState } from "react";
 
 export default function ReservationHistory({
   reservations,
   sort,
   status,
+  search,
 }: {
   reservations: Reservation.Default[];
   sort: "asc" | "desc";
   status: Enum.ReservationStatus[];
+  search: string;
 }) {
   const [selectedStatus, setSelectedStatus] = useState<Enum.ReservationStatus>("all" as Enum.ReservationStatus);
-  const [search, setSearch] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>(search ?? "");
 
   function handleReservationFilter({ status, sort, search }: { status: Enum.ReservationStatus; sort: "asc" | "desc"; search: string }) {
     setSelectedStatus(status);
@@ -59,7 +61,7 @@ export default function ReservationHistory({
                 handleReservationFilter({
                   status: value as Enum.ReservationStatus,
                   sort,
-                  search,
+                  search: searchValue,
                 });
               }}
             >
@@ -90,7 +92,7 @@ export default function ReservationHistory({
                 handleReservationFilter({
                   status: selectedStatus,
                   sort: sort === "asc" ? "desc" : "asc",
-                  search,
+                  search: searchValue,
                 });
               }}
             >
@@ -104,7 +106,10 @@ export default function ReservationHistory({
                 type="search"
                 placeholder="Cari booking number reservasi"
                 className="w-full pe-8 not-dark:bg-white lg:w-64"
+                value={searchValue}
                 onChange={(e) => {
+                  setSearchValue(e.target.value);
+
                   handleReservationFilter({
                     status: selectedStatus,
                     sort,
@@ -124,15 +129,17 @@ export default function ReservationHistory({
             reservations.map((reservation) => (
               <Card
                 key={reservation.id}
-                className="grid items-center gap-8 lg:grid-cols-[1fr_auto]"
+                className="grid items-center gap-5 xl:grid-cols-[1fr_auto]"
               >
                 <div className="relative flex flex-col gap-5">
                   <CardHeader className="flex flex-col gap-3">
-                    <CardTitle className="text-card-foreground/90 font-normal max-lg:text-lg">
-                      <span className="text-muted-foreground me-2 text-sm">No. Booking</span>
-                      {reservation.booking_number}
+                    <CardTitle className="text-card-foreground/90 font-normal max-lg:text-lg flex">
+                      <div className="text-muted-foreground me-2 text-sm">Booking Number</div>
+                      <div className="select-all">{reservation.booking_number}</div>
                     </CardTitle>
+                  </CardHeader>
 
+                  <CardContent className="space-y-3">
                     <div className="flex items-center gap-2">
                       <Badge
                         variant="outline"
@@ -160,37 +167,44 @@ export default function ReservationHistory({
                         </Badge>
                       )}
                     </div>
-                  </CardHeader>
 
-                  <CardContent className="grid items-end gap-2">
-                    <div>
-                      <div>
-                        {reservation.formatted_start_date} - {reservation.formatted_end_date}
-                      </div>
-                      <div className="text-muted-foreground">
-                        {reservation.length_of_stay} malam • {reservation.adults} dewasa, {reservation.children} anak
-                      </div>
-                    </div>
-
-                    <div>
-                      <div>
-                        {reservation.reservation_room?.room_number ? `No. ${reservation.reservation_room?.room_number} - ` : ""}
-                        {reservation.reservation_room?.room_type_name}{" "}
-                        {reservation.reservation_room?.bed_type ? ` - ${reservation.reservation_room?.bed_type}` : ""}
-                      </div>
-                      <div className="text-muted-foreground capitalize">
-                        {reservation.smoking_type} • {reservation.include_breakfast ? "Termasuk Sarapan" : "Tanpa Sarapan"}
-                      </div>
-                    </div>
-
-                    <div className="text-xl font-semibold">{formatCurrency(Number(reservation.total_price))}</div>
+                    <dl className="**:[svg]:text-primary! **:data-[slot=separator]:text-muted-foreground/80 relative space-y-2 **:data-[slot=separator]:mx-2 *:[dd]:flex *:[dd]:items-start *:[dd]:gap-3 *:[dd]:lg:items-center **:[svg]:size-4 **:[svg]:max-lg:mt-[5px]">
+                      <dd>
+                        <CalendarRangeIcon />
+                        <div>
+                          {reservation.formatted_start_date} - {reservation.formatted_end_date}
+                          <span data-slot="separator">|</span>
+                          {reservation.length_of_stay} malam
+                        </div>
+                      </dd>
+                      <dd>
+                        <BedSingleIcon />
+                        <div>
+                          Kamar {reservation.reservation_room?.room_type_name}
+                          <span data-slot="separator">|</span>
+                          {reservation.adults} dewasa, {reservation.children} anak
+                        </div>
+                      </dd>
+                      <dd>
+                        <Settings2Icon />
+                        <div className="capitalize">
+                          {reservation.smoking_type}
+                          <span data-slot="separator">|</span>
+                          {reservation.include_breakfast ? "Termasuk Sarapan" : "Tanpa Sarapan"}
+                        </div>
+                      </dd>
+                    </dl>
                   </CardContent>
+
+                  <CardFooter>
+                    <span className="text-xl font-semibold">{formatCurrency(Number(reservation.total_price))}</span>
+                  </CardFooter>
                 </div>
 
                 <ImageContainer
                   src={reservation.reservation_room?.room_type?.formatted_images?.[0] ?? ""}
                   alt={reservation.reservation_room?.room_type_name ?? ""}
-                  className="max-lg:mx-auto max-lg:mb-2 max-lg:h-40 max-lg:w-72 lg:me-8 lg:size-44"
+                  className="max-lg:mx-auto max-lg:mb-2 max-lg:h-40 max-lg:w-72 lg:mx-auto lg:h-44 lg:w-[90%] xl:me-6 xl:size-52"
                 />
               </Card>
             ))

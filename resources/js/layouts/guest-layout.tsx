@@ -225,6 +225,7 @@ function BookCard({ className }: { className?: string }) {
 function Profile({ className }: { className?: string }) {
   const { auth } = usePage<SharedData>().props;
   const isLoggedIn = auth.user !== null;
+  const isGuest = auth.user?.role === "guest";
 
   const [loginDialog, setLoginDialog] = useState(false);
   const [registerDialog, setRegisterDialog] = useState(false);
@@ -234,6 +235,8 @@ function Profile({ className }: { className?: string }) {
   const handleLogout = () => {
     cleanup();
     router.flushAll();
+
+    toast.success("Berhasil logout");
   };
 
   return (
@@ -256,10 +259,28 @@ function Profile({ className }: { className?: string }) {
           {isLoggedIn ? (
             <>
               <DropdownMenuItem asChild>
-                <Link href={route("public.profile.edit")}>Profile</Link>
+                <Link
+                  href={route("public.profile.edit")}
+                  className={cn(!isGuest && "hidden")}
+                >
+                  Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={route("public.reservation.history")}>Reservasi</Link>
+                <Link
+                  href={route("public.reservation.history")}
+                  className={cn(!isGuest && "hidden")}
+                >
+                  Reservasi
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href={route("dashboard")}
+                  className={cn(isGuest && "hidden")}
+                >
+                  Dashboard
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
