@@ -116,7 +116,7 @@ export default function Welcome() {
           </Card>
         </div>
 
-        <div className="space-y-8 pt-12">
+        <div className="space-y-8 w-full max-w-7xl mx-auto mb-10">
           <h2 className="text-center text-4xl font-semibold">Akomodasi</h2>
           <div className="grid h-96 grid-cols-1 lg:grid-cols-3">
             {images.map((image, index) => (

@@ -351,6 +351,66 @@ function Header() {
   );
 }
 
+function Footer() {
+  return (
+    <footer className="bg-card border-border z-10 w-full border-t">
+      <div className="container mx-auto grid grid-cols-1 gap-y-4 px-4 py-10 md:grid-cols-2 md:gap-x-10 md:gap-y-6 xl:grid-cols-5">
+        <div className="xl:col-span-2">
+          <Link
+            href={route("home")}
+            className="text-foreground me-auto flex items-center gap-2"
+          >
+            <img
+              src="/favicon.svg"
+              alt="Furaya Hotel"
+              className="size-10 object-contain text-current"
+            />
+            <div className="ml-1 flex-1 text-left">
+              <span className="truncate leading-none text-lg font-semibold tracking-wide uppercase">Furaya Hotel</span>
+              <p className="text-foreground/80 truncate text-sm leading-none font-light">Pekanbaru, Indonesia</p>
+            </div>
+          </Link>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-foreground font-medium uppercase text-sm">Rooms</h3>
+          <ul className="space-y-1.5 *:text-sm *:text-muted-foreground *:hover:text-foreground/80">
+            <li>Furaya Suite</li>
+            <li>Junior Suite</li>
+            <li>Business</li>
+            <li>Executive</li>
+            <li>Deluxe</li>
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-foreground font-medium uppercase text-sm">Events</h3>
+          <ul className="space-y-1.5 *:text-sm *:text-muted-foreground *:hover:text-foreground/80">
+            <li>Grand Ballroom</li>
+            <li>Meeting Room</li>
+            <li>Wedding</li>
+            <li>Pastry Corner</li>
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-foreground font-medium uppercase text-sm">Facilities</h3>
+          <ul className="space-y-1.5 *:text-sm *:text-muted-foreground *:hover:text-foreground/80">
+            <li>Senapelan Coffee Shop</li>
+            <li>New Sago KTV</li>
+            <li>Tan Palace Oriental Restaurant</li>
+            <li>Natural Spa & Sauna</li>
+            <li>Laundry</li>
+            <li>Business Center</li>
+            <li>FuMart</li>
+            <li>eF Lounge</li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 interface GuestLayoutProps {
   bookCard?: boolean;
   children: ReactNode;
@@ -378,6 +438,7 @@ export default ({ children, className, bookCard = true }: GuestLayoutProps) => {
         {bookCard && <BookCard className="mb-10" />}
         {children}
       </main>
+      <Footer />
       <Toaster />
     </>
   );
