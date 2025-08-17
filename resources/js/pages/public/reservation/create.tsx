@@ -745,7 +745,7 @@ export default function PublicReservationsCreate(props: PublicReservationCreateP
               {!user && (
                 <div
                   id="overlay"
-                  className="bg-background/5 absolute inset-x-0 -inset-y-6 flex flex-col items-center justify-center gap-5 backdrop-blur-[2px]"
+                  className="bg-background/5 absolute inset-x-0 -inset-y-6 flex flex-col items-center justify-center gap-5 backdrop-blur-[2px] z-100"
                 >
                   <Alert
                     variant="destructive"
